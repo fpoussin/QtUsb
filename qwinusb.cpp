@@ -3,8 +3,6 @@
 QUsb::QUsb(QBaseUsb *parent) :
     QBaseUsb(parent)
 {
-    this->mGuidDeviceInterface = OSR_DEVICE_INTERFACE; //in the INF file
-
     this->mDevHandle = INVALID_HANDLE_VALUE;
     this->mUsbHandle = INVALID_HANDLE_VALUE;
     this->mDevSpeed = 0;
@@ -53,7 +51,6 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     bResult = WinUsb_ReadPipe(this->mUsbHandle, this->mReadEp, buffer, bytes, &cbRead, 0);
     // we clear the buffer.
     buf->clear();
-    QString data, s;
 
     if (!bResult) {
         PrintUsbError("WinUsb_ReadPipe");
@@ -61,12 +58,15 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
         return -1;
     }
 
-   else if (cbRead > 0) {
-        for (quint32 i = 0; i < cbRead; i++) {
-            buf->append(buffer[i]);
-            if (this->mDebug) data.append(s.sprintf("%02X",buffer[i])+":");
-        }
+    else if (cbRead > 0){
+
+        buf->append((const char *)buffer, cbRead);
+
         if (this->mDebug) {
+            QString data, s;
+            for (quint32 i = 0; i < cbRead; i++) {
+                data.append(s.sprintf("%02X",buffer[i])+":");
+            }
             data.remove(data.size()-1, 1); //remove last colon
             qDebug() << "Received" << cbRead << "of" << bytes << "Bytes:" << data;
         }
@@ -84,17 +84,17 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
         return -1;
     }
 
-    if (this->mDebug) {
-        QString cmd, s;
-        for (int i = 0; i < buf->size(); i++) {
-            cmd.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
-        }
-        cmd.remove(cmd.size()-1, 1); //remove last colon
-    }
-
     ulong cbSent = 0;
     bool bResult = WinUsb_WritePipe(this->mUsbHandle, this->mWriteEp, (uchar*)buf->data(), bytes, &cbSent, 0);
-    if (this->mDebug) qDebug() << "Sent" << cbSent << "/" << buf->size() << "bytes:" << cmd;
+
+    if (this->mDebug) {
+        QString data, s;
+        for (int i = 0; i < buf->size(); i++) {
+            data.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
+        }
+        data.remove(data.size()-1, 1); //remove last colon
+        qDebug() << "Sent" << cbSent << "/" << buf->size() << "bytes:" << data;
+    }
     if (!bResult) {
         PrintUsbError("WinUsb_WritePipe");
         return -1;
@@ -115,11 +115,11 @@ bool QUsb::setGuid(QString guid)
             cleaned.mid(16, 17).toInt(&check[3], 16),
             cleaned.mid(18, 19).toInt(&check[4], 16),
             cleaned.mid(20, 21).toInt(&check[5], 16),
-            cleaned.mid(22, 23).toInt(&check[6], 16),,
-            cleaned.mid(24, 25).toInt(&check[7], 16),,
-            cleaned.mid(26, 27).toInt(&check[8], 16),,
-            cleaned.mid(29, 29).toInt(&check[9], 16),,
-            cleaned.mid(30, 31).toInt(&check[10], 16),
+            cleaned.mid(22, 23).toInt(&check[6], 16),
+            cleaned.mid(24, 25).toInt(&check[7], 16),
+            cleaned.mid(26, 27).toInt(&check[8], 16),
+            cleaned.mid(29, 29).toInt(&check[9], 16),
+            cleaned.mid(30, 31).toInt(&check[10], 16)
         }
     };
 

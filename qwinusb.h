@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QDebug>
-#include <qbaseusb.h>
-#include <compat.h>
+#include "compat.h"
+#include "qbaseusb.h"
 
 // Include Windows headers
 #include <windows.h>
