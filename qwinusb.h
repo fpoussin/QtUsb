@@ -27,8 +27,8 @@ class QUsb : public QBaseUsb
 
     struct PIPE_ID
     {
-        uchar  PipeInId;
-        uchar  PipeOutId;
+        uchar  pipeInId;
+        uchar  pipeOutId;
     };
 public:
     explicit QUsb(QBaseUsb *parent = 0);
@@ -42,11 +42,11 @@ public slots:
     bool setGuid(QString guid);
 
 private:
-    bool GetDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle);
-    bool GetWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle);
-    bool GetUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDeviceSpeed);
-    bool QueryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, PIPE_ID* pipeid);
-    void PrintUsbError(const QString& func);
+    bool getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle);
+    bool getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle);
+    bool getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDeviceSpeed);
+    bool queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, PIPE_ID* pipeId);
+    void printUsbError(const QString& func);
 
     GUID mGuidDeviceInterface;
     HANDLE mDevHandle;
