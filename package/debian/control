@@ -1,0 +1,13 @@
+Source: libqt4-usb
+Section: devel
+Priority: extra
+Maintainer: Fabien Poussin <fabien.poussin@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), cdbs, libqt4-dev, qt4-qmake, libusb-1.0-0-dev
+Standards-Version: 3.9.3
+Homepage: https://github.com/mobyfab/QtUsb
+
+Package: libqt4-usb
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqt4-core, libusb-1.0-0
+Description: USB library for QT
+ A convenient way to use libusb 1.0 with your QT applications.

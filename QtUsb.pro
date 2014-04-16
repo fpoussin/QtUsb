@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+VERSION = 0.1
+
 QT      -= gui
 
 TARGET   = QtUsb
@@ -17,19 +19,10 @@ SOURCES += \
     qbaseusb.cpp
 
 HEADERS +=  \
-            qusb_global.h \
-            compat.h \
+    qusb_global.h \
+    compat.h \
     qbaseusb.h \
     qusb.h
-
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
-    INSTALLS += target
-}
 
 win32 {
     message(Building with WinUSB support.)
@@ -48,4 +41,17 @@ else:unix {
 
 else {
     error("Platform not supported!")
+}
+
+headers_install.files = $$HEADERS
+
+unix:!symbian {
+    maemo5 {
+        target.path = /opt/usr/lib
+        headers_install.path = /opt/usr/include/qt4/QtUsb
+    } else {
+        target.path = /usr/lib
+        headers_install.path = /usr/include/qt4/QtUsb
+    }
+    INSTALLS += target headers_install
 }
