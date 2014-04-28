@@ -1,6 +1,9 @@
 
+DEFINES += QUSB_LIBRARY
+
 DEPENDPATH += QtUsb
 INCLUDEPATH += QtUsb
+VPATH += QtUsb
 
 SOURCES += \
     qbaseusb.cpp

@@ -29,7 +29,9 @@ This file is part of QSTLink2.
 #endif
 
 #ifdef WIN32
-    #define usleep(num) Sleep(num/1000)
+    #define _usleep(num) Sleep(num/1000)
+#else
+    #define _usleep(num) usleep(num)
 #endif
 
 #define PrintError() qWarning ("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)

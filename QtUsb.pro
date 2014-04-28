@@ -11,8 +11,6 @@ QT      -= gui
 TARGET   = QtUsb
 TEMPLATE = lib
 
-DEFINES += QUSB_LIBRARY
-
 CONFIG  += static_and_shared
 
 include(QtUsb.pri)
