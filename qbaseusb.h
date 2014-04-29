@@ -37,7 +37,7 @@ protected slots:
     void setDefaults(void);
 
 protected:
-    quint16 mTimeout;
+    ulong mTimeout;
     quint16 mPid;
     quint16 mVid;
     QString mGuid;

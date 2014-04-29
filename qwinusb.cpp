@@ -21,9 +21,9 @@ qint32 QUsb::open()
     else if (!getUSBDeviceSpeed(mUsbHandle, &mDevSpeed)) return -3;
     else if (!queryDeviceEndpoints(mUsbHandle, &mPipeId)) return -4;
 
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mReadEp, PIPE_TRANSFER_TIMEOUT, sizeof(ulong), &mTimeout)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mReadEp, PIPE_TRANSFER_TIMEOUT, sizeof(mTimeout), &mTimeout)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -5; }
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mWriteEp, PIPE_TRANSFER_TIMEOUT, sizeof(ulong), &mTimeout)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mWriteEp, PIPE_TRANSFER_TIMEOUT, sizeof(mTimeout), &mTimeout)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -6; }
 
     bool enable = true;
