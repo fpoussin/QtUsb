@@ -3,6 +3,7 @@
 QUsb::QUsb(QBaseUsb *parent) :
     QBaseUsb(parent)
 {
+    this->dev_handle = NULL;
     int r = libusb_init(&this->ctx); //initialize the library for the session we just declared
     if(r < 0) {
         qWarning() << "Init Error " << r; //there was an error
