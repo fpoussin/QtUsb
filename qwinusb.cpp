@@ -34,8 +34,10 @@ qint32 QUsb::open()
 
 void QUsb::close()
 {
-    CloseHandle(this->mDevHandle);
-    WinUsb_Free(this->mUsbHandle);
+    if (this->mDevHandle != INVALID_HANDLE_VALUE)
+        CloseHandle(this->mDevHandle);
+    if (this->mUsbHandle != INVALID_HANDLE_VALUE)
+        WinUsb_Free(this->mUsbHandle);
 }
 
 qint32 QUsb::read(QByteArray *buf, quint32 bytes)
@@ -102,31 +104,32 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
     return cbSent;
 }
 
-bool QUsb::setGuid(QString guid)
+bool QUsb::setGuid(QString &guid)
 {
     bool check[11];
-    QString cleaned = guid.remove('-');
+    QString cleaned(guid);
+    cleaned.remove('-');
     GUID tmp =
     {
-        cleaned.mid(0, 7).toInt(&check[0], 16),
-        cleaned.mid(8, 11).toInt(&check[1], 16),
-        cleaned.mid(12, 15).toInt(&check[2], 16),
+        cleaned.mid(0, 8).toULong(&check[0], 16),
+        cleaned.mid(8, 4).toUInt(&check[1], 16),
+        cleaned.mid(12, 4).toUInt(&check[2], 16),
         {
-            cleaned.mid(16, 17).toInt(&check[3], 16),
-            cleaned.mid(18, 19).toInt(&check[4], 16),
-            cleaned.mid(20, 21).toInt(&check[5], 16),
-            cleaned.mid(22, 23).toInt(&check[6], 16),
-            cleaned.mid(24, 25).toInt(&check[7], 16),
-            cleaned.mid(26, 27).toInt(&check[8], 16),
-            cleaned.mid(29, 29).toInt(&check[9], 16),
-            cleaned.mid(30, 31).toInt(&check[10], 16)
+            cleaned.mid(16, 2).toUInt(&check[3], 16),
+            cleaned.mid(18, 2).toUInt(&check[4], 16),
+            cleaned.mid(20, 2).toUInt(&check[5], 16),
+            cleaned.mid(22, 2).toUInt(&check[6], 16),
+            cleaned.mid(24, 2).toUInt(&check[7], 16),
+            cleaned.mid(26, 2).toUInt(&check[8], 16),
+            cleaned.mid(29, 2).toUInt(&check[9], 16),
+            cleaned.mid(30, 2).toUInt(&check[10], 16)
         }
     };
 
     for (quint8 i = 0; i < sizeof(check); i++) {
 
         if (!check[i]) {
-            qWarning() << "Failed to set Device GUID!";
+            qWarning() << "Failed to set Device GUID" << guid << "at" << i;
             return false;
         }
     }

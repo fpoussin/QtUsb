@@ -39,7 +39,7 @@ public slots:
     void close();
     qint32 read(QByteArray *buf, quint32 bytes);
     qint32 write(QByteArray *buf, quint32 bytes);
-    bool setGuid(QString guid);
+    bool setGuid(QString &guid);
 
 private:
     bool getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle);
