@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QDebug>
 #include "qusb_global.h"
 
 const quint16 DEFAULT_TIMEOUT_MSEC = 250;
@@ -26,9 +27,11 @@ public slots:
     void setTimeout(quint16 timeout);
     void setEndPoints(quint8 in, quint8 out);
     void setDeviceIds(quint16 pid, quint16 vid);
-    bool setGuid(QString guid);
+    bool setGuid(const QString &guid);
     void setConfiguration(quint8 config);
     void setInterface(quint8 interface);
+
+    void showSettings(void);
 
 protected slots:
     void setDefaults(void);

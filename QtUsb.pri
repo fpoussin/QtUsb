@@ -15,14 +15,14 @@ HEADERS +=  \
     qusb.h
 
 win32 {
-    message(Building with WinUSB support.)
+    message(Building QtUsb with WinUSB support.)
     DEFINES += QWINUSB
     SOURCES += qwinusb.cpp
     HEADERS += qwinusb.h
 }
 
 else:unix {
-    message(Building with LibUsb 1.0 support.)
+    message(Building QtUsb with LibUsb 1.0 support.)
     DEFINES += QLIBUSB
     SOURCES += qlibusb.cpp
     HEADERS += qlibusb.h

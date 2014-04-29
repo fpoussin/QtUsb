@@ -26,30 +26,30 @@ qint32 QUsb::open()
         return 1;
     }
 
-    this->dev_handle = libusb_open_device_with_vid_pid(this->ctx, this->mVid, this->mPid); // These are vendorID and productID I found for my usb device
+    this->dev_handle = libusb_open_device_with_vid_pid(this->ctx, mVid, mPid); // These are vendorID and productID I found for my usb device
     if(this->dev_handle == NULL)
         qWarning() << "Cannot open device";
     else
-        if (this->mDebug) qDebug() << "Device Opened";
+        if (mDebug) qDebug() << "Device Opened";
     libusb_free_device_list(this->devs, 1); // free the list, unref the devices in it
 
     if(libusb_kernel_driver_active(this->dev_handle, 0) == 1) { // find out if kernel driver is attached
-        if (this->mDebug) qDebug() << "Kernel Driver Active";
+        if (mDebug) qDebug() << "Kernel Driver Active";
         if(libusb_detach_kernel_driver(this->dev_handle, 0) == 0) // detach it
-            if (this->mDebug) qDebug() << "Kernel Driver Detached!";
+            if (mDebug) qDebug() << "Kernel Driver Detached!";
     }
 
     int conf;
     libusb_get_configuration(this->dev_handle, &conf);
 
-    if (conf != this->mConfig) {
-        r = libusb_set_configuration(this->dev_handle, this->mConfig);
+    if (conf != mConfig) {
+        r = libusb_set_configuration(this->dev_handle, mConfig);
         if(r != 0) {
             qWarning() << "Cannot Set Configuration";
             return 1;
         }
     }
-    r = libusb_claim_interface(this->dev_handle, this->mInterface);
+    r = libusb_claim_interface(this->dev_handle, mInterface);
     if(r != 0) {
         qWarning() << "Cannot Claim Interface";
         return 1;
@@ -86,8 +86,8 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     uchar *buffer = new uchar[bytes];
 
     timer.start();
-    while (timer.elapsed() < this->mTimeout && bytes-actual > 0) {
-        rc = libusb_bulk_transfer(this->dev_handle, (this->mReadEp), buffer+actual, bytes-actual, &actual_tmp, this->mTimeout);
+    while (timer.elapsed() < mTimeout && bytes-actual > 0) {
+        rc = libusb_bulk_transfer(this->dev_handle, (mReadEp), buffer+actual, bytes-actual, &actual_tmp, mTimeout);
         actual += actual_tmp;
         if (rc != 0) break;
     }
@@ -97,9 +97,9 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
 
     for (qint32 i = 0; i < actual; i++) {
         buf->append(buffer[i]);
-        if (this->mDebug) data.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
+        if (mDebug) data.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
     }
-    if (this->mDebug) {
+    if (mDebug) {
         data.remove(data.size()-1, 1); //remove last colon
         qDebug() << "Received: " << data;
     }
@@ -125,7 +125,7 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
     // check it isn't closed
     if (!this->dev_handle) return -1;
 
-    if (this->mDebug) {
+    if (mDebug) {
         QString cmd, s;
         for (int i=0; i<buf->size(); i++) {
             cmd.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
@@ -138,8 +138,8 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
     actual_tmp = 0;
 
     timer.start();
-    while (timer.elapsed() < this->mTimeout && bytes-actual > 0) {
-        rc = libusb_bulk_transfer(this->dev_handle, (this->mWriteEp), (uchar*)buf->constData(), bytes, &actual, this->mTimeout);
+    while (timer.elapsed() < mTimeout && bytes-actual > 0) {
+        rc = libusb_bulk_transfer(this->dev_handle, (mWriteEp), (uchar*)buf->constData(), bytes, &actual, mTimeout);
         actual += actual_tmp;
         if (rc != 0) break;
     }

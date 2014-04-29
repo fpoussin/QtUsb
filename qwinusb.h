@@ -39,7 +39,8 @@ public slots:
     void close();
     qint32 read(QByteArray *buf, quint32 bytes);
     qint32 write(QByteArray *buf, quint32 bytes);
-    bool setGuid(QString &guid);
+    bool setGuid(const QString &guid);
+    bool setGuid(const GUID &guid);
 
 private:
     bool getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle);
@@ -53,7 +54,6 @@ private:
     WINUSB_INTERFACE_HANDLE mUsbHandle;
     uchar mDevSpeed;
     PIPE_ID mPipeId;
-    GUID mGuid;
 };
 
 #endif // QWINUSB_H
