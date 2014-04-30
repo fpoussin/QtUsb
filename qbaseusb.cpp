@@ -79,4 +79,5 @@ void QBaseUsb::setDefaults()
     mWriteEp = 0x01;
     mConfig = 0;
     mInterface = 0;
+    mAlternate = 0;
 }

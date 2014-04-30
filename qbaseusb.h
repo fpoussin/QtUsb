@@ -46,6 +46,7 @@ protected:
     quint8 mWriteEp;
     int mConfig;
     int mInterface;
+    int mAlternate;
 };
 
 #endif // QBASEUSB_H

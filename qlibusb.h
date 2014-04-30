@@ -25,12 +25,12 @@ public slots:
     qint32 write(QByteArray *buf, quint32 bytes);
     void setDebug(bool enable);
 
+private slots:
+    void printUsbError(int error_code);
+
 private:
     libusb_device **mDevs;
     libusb_device_handle *mDevHandle;
     libusb_context *mCtx;
-
-    quint8 mInterface;
-    quint8 mAlternate;
 };
 #endif // QLIBUSB_H

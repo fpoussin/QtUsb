@@ -44,15 +44,18 @@ qint32 QUsb::open()
     libusb_get_configuration(mDevHandle, &conf);
 
     if (conf != mConfig) {
+        if (mDebug) qDebug() << "Configuration needs to be changed";
         r = libusb_set_configuration(mDevHandle, mConfig);
         if(r != 0) {
             qWarning() << "Cannot Set Configuration";
+            this->printUsbError(r);
             return -3;
         }
     }
     r = libusb_claim_interface(mDevHandle, mInterface);
     if(r != 0) {
         qWarning() << "Cannot Claim Interface";
+        this->printUsbError(r);
         return -4;
     }
 
@@ -110,8 +113,10 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     {
         if (rc == -110)
             qWarning() << "libusb_bulk_transfer Timeout";
-        else
+        else {
             qWarning() << "libusb_bulk_transfer Error reading: " << rc;
+            this->printUsbError(rc);
+        }
         return rc;
     }
 
@@ -151,8 +156,10 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
             qWarning() << "libusb_bulk_transfer Timeout";
         else if (rc == -2)
             qWarning() << "EndPoint not found";
-        else
+        else {
             qWarning() << "libusb_bulk_transfer Error Writing: "<< rc;
+            this->printUsbError(rc);
+        }
     }
 
     return actual;
@@ -165,4 +172,56 @@ void QUsb::setDebug(bool enable)
         libusb_set_debug(mCtx, 3);
     else
         libusb_set_debug(mCtx, 0);
+}
+
+void QUsb::printUsbError(int error_code)
+{
+    switch (error_code) {
+
+        case LIBUSB_SUCCESS:
+            qWarning() << "LIBUSB_SUCCESS";
+            break;
+        case LIBUSB_ERROR_IO:
+            qWarning() << "LIBUSB_ERROR_IO";
+            break;
+        case LIBUSB_ERROR_INVALID_PARAM:
+            qWarning() << "LIBUSB_ERROR_INVALID_PARAM";
+            break;
+        case LIBUSB_ERROR_ACCESS:
+            qWarning() << "LIBUSB_ERROR_ACCESS";
+            break;
+        case LIBUSB_ERROR_NO_DEVICE:
+            qWarning() << "LIBUSB_ERROR_NO_DEVICE";
+            break;
+        case LIBUSB_ERROR_NOT_FOUND:
+            qWarning() << "LIBUSB_ERROR_NOT_FOUND";
+            break;
+        case LIBUSB_ERROR_BUSY:
+            qWarning() << "LIBUSB_ERROR_BUSY";
+            break;
+        case LIBUSB_ERROR_TIMEOUT:
+            qWarning() << "LIBUSB_ERROR_TIMEOUT";
+            break;
+        case LIBUSB_ERROR_OVERFLOW:
+            qWarning() << "LIBUSB_ERROR_OVERFLOW";
+            break;
+        case LIBUSB_ERROR_PIPE:
+            qWarning() << "LIBUSB_ERROR_PIPE";
+            break;
+        case LIBUSB_ERROR_INTERRUPTED:
+            qWarning() << "LIBUSB_ERROR_INTERRUPTED";
+            break;
+        case LIBUSB_ERROR_NO_MEM:
+            qWarning() << "LIBUSB_ERROR_NO_MEM";
+            break;
+        case LIBUSB_ERROR_NOT_SUPPORTED:
+            qWarning() << "LIBUSB_ERROR_NOT_SUPPORTED";
+            break;
+        case LIBUSB_ERROR_OTHER:
+            qWarning() << "LIBUSB_ERROR_OTHER";
+            break;
+        default:
+            qWarning() << "Unknown libusb error code: "<< error_code;
+            break;
+    }
 }
