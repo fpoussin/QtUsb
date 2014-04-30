@@ -26,11 +26,11 @@ public slots:
     void setDebug(bool enable);
 
 private:
-    libusb_device **devs;
-    libusb_device_handle *dev_handle;
-    libusb_context *ctx;
+    libusb_device **mDevs;
+    libusb_device_handle *mDevHandle;
+    libusb_context *mCtx;
 
-    quint8 interface;
-    quint8 alternate;
+    quint8 mInterface;
+    quint8 mAlternate;
 };
 #endif // QLIBUSB_H
