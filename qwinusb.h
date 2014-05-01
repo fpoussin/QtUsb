@@ -7,7 +7,7 @@
 #include "qbaseusb.h"
 
 // Include Windows headers
-#include <windows.h>
+#include <qt_windows.h>
 #include <stdio.h>
 #include <tchar.h>
 #include <strsafe.h>
