@@ -43,7 +43,6 @@ void QBaseUsb::setDeviceIds(quint16 pid, quint16 vid)
 bool QBaseUsb::setGuid(const QString &guid)
 {
     (void)guid;
-    qWarning() << "setGuid Dummy";
     return false;
 }
 
