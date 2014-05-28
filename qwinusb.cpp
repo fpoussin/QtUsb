@@ -40,6 +40,9 @@ void QUsb::close()
         CloseHandle(mDevHandle);
     if (mUsbHandle != INVALID_HANDLE_VALUE)
         WinUsb_Free(mUsbHandle);
+
+    mDevHandle = INVALID_HANDLE_VALUE;
+    mUsbHandle = INVALID_HANDLE_VALUE;
 }
 
 qint32 QUsb::read(QByteArray *buf, quint32 bytes)
