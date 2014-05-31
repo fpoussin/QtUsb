@@ -35,6 +35,6 @@ This file is part of QSTLink2.
 #endif
 
 #define PrintError() qWarning ("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define PrintFuncName() if (this->mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define PrintFuncName() if (mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 #endif // COMPAT_H
