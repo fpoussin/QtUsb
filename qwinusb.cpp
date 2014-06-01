@@ -444,16 +444,22 @@ bool QUsb::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsb::PIP
 void QUsb::printUsbError(const QString &func)
 {
     const quint32 err = GetLastError();
-    switch (err) {
-
-    case 121:
-        qWarning() << func << "ERROR_SEM_TIMEOUT" << err;
-        break;
-    case 997:
-        qWarning() << func << "ERROR_IO_PENDING" << err;
-        break;
-    default:
-        qWarning() << func << "Error id:" << err;
-        break;
+    switch (err)
+    {
+        case ERROR_INVALID_HANDLE:
+            qWarning() << func << "ERROR_INVALID_HANDLE" << err;
+            break;
+        case ERROR_SEM_TIMEOUT:
+            qWarning() << func << "ERROR_SEM_TIMEOUT" << err;
+            break;
+        case ERROR_IO_PENDING:
+            qWarning() << func << "ERROR_IO_PENDING" << err;
+            break;
+        case ERROR_NOT_ENOUGH_MEMORY:
+            qWarning() << func << "ERROR_NOT_ENOUGH_MEMORY" << err;
+            break;
+        default:
+            qWarning() << func << "Error id:" << err;
+            break;
     }
 }
