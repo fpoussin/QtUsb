@@ -42,6 +42,7 @@ protected:
     quint16 mVid;
     QString mGuid;
     bool mDebug;
+    bool mConnected;
     quint8 mReadEp;
     quint8 mWriteEp;
     int mConfig;

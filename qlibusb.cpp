@@ -17,6 +17,9 @@ QUsb::~QUsb()
 
 qint32 QUsb::open()
 {
+    if (mConnected)
+        return -1;
+
     int r; // for return values
     ssize_t cnt; // holding number of devices in list
 
@@ -59,12 +62,14 @@ qint32 QUsb::open()
         return -4;
     }
 
+    mConnected = true;
+
     return 0;
 }
 
 void QUsb::close()
 {
-    if (mDevHandle) {
+    if (mDevHandle && mConnected) {
         // stop any further write attempts whilst we close down
         qDebug() << "Closing USB connection...";
 
@@ -72,6 +77,8 @@ void QUsb::close()
         libusb_close(mDevHandle); //close the device we opened
         libusb_exit(mCtx); //needs to be called to end the
     }
+
+    mConnected = false;
 }
 
 qint32 QUsb::read(QByteArray *buf, quint32 bytes)
@@ -80,7 +87,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     QElapsedTimer timer;
 
     // check it isn't closed already
-    if (!mDevHandle) return -1;
+    if (!mDevHandle || !mConnected) return -1;
 
     if (bytes == 0)
         return 0;
@@ -129,7 +136,7 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
     QElapsedTimer timer;
 
     // check it isn't closed
-    if (!mDevHandle) return -1;
+    if (!mDevHandle || !mConnected) return -1;
 
     if (mDebug) {
         QString cmd, s;

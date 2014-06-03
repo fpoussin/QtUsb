@@ -15,6 +15,8 @@ QUsb::~QUsb()
 
 qint32 QUsb::open()
 {
+    if (mConnected)
+        return -1;
 
     if (!getDeviceHandle(mGuidDeviceInterface, &mDevHandle)) return -1;
     else if (!getWinUSBHandle(mDevHandle, &mUsbHandle)) return -2;
@@ -31,11 +33,16 @@ qint32 QUsb::open()
     if (!WinUsb_SetPipePolicy(mUsbHandle, mReadEp, IGNORE_SHORT_PACKETS, sizeof(enable), &enable)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -7; }
 
+    mConnected = true;
+
     return 0;
 }
 
 void QUsb::close()
 {
+    if (!mConnected)
+        return;
+
     if (mDevHandle != INVALID_HANDLE_VALUE)
         CloseHandle(mDevHandle);
     if (mUsbHandle != INVALID_HANDLE_VALUE)
@@ -43,12 +50,17 @@ void QUsb::close()
 
     mDevHandle = INVALID_HANDLE_VALUE;
     mUsbHandle = INVALID_HANDLE_VALUE;
+
+    mConnected = false;
 }
 
 qint32 QUsb::read(QByteArray *buf, quint32 bytes)
 {
     PrintFuncName();
-    if (mUsbHandle == INVALID_HANDLE_VALUE || !mReadEp)
+
+    if (mUsbHandle == INVALID_HANDLE_VALUE
+            || !mReadEp
+            || !mConnected)
     {
         return -1;
     }
@@ -86,7 +98,9 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
 qint32 QUsb::write(QByteArray *buf, quint32 bytes)
 {
     PrintFuncName();
-    if (mUsbHandle==INVALID_HANDLE_VALUE || !mWriteEp)
+    if (mUsbHandle==INVALID_HANDLE_VALUE
+            || !mWriteEp
+            || !mConnected)
     {
         return -1;
     }

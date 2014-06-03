@@ -4,7 +4,6 @@
 QBaseUsb::QBaseUsb(QObject *parent) :
     QObject(parent)
 {
-
     this->setDefaults();
 }
 
@@ -72,6 +71,7 @@ void QBaseUsb::showSettings()
 
 void QBaseUsb::setDefaults()
 {
+    mConnected = false;
     mDebug = false;
     mTimeout = DEFAULT_TIMEOUT_MSEC;
     mReadEp = 0x81;
