@@ -18,6 +18,12 @@ public:
     quint16 getTimeout(void);
     void setDebug(bool enable);
 
+    quint16 getPid(void) { return mPid; }
+    quint16 getVid(void) { return mVid; }
+    QString getGuid(void) { return mGuid; }
+    quint8 getReadEp(void) { return mReadEp; }
+    quint8 getWriteEp(void) { return mWriteEp; }
+
 public slots:
     virtual qint32 open() = 0;
     virtual void close() = 0;
