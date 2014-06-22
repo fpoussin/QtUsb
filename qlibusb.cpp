@@ -76,7 +76,6 @@ void QUsb::close()
 
         libusb_release_interface(mDevHandle, 0); //release the claimed interface
         libusb_close(mDevHandle); //close the device we opened
-        libusb_exit(mCtx); //needs to be called to end the
     }
 
     mConnected = false;
