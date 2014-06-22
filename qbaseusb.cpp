@@ -76,7 +76,7 @@ void QBaseUsb::setDefaults()
     mTimeout = DEFAULT_TIMEOUT_MSEC;
     mReadEp = 0x81;
     mWriteEp = 0x01;
-    mConfig = 0;
-    mInterface = 0;
-    mAlternate = 0;
+    mConfig = 0x01;
+    mInterface = 0x00;
+    mAlternate = 0x00;
 }

@@ -25,7 +25,7 @@ qint32 QUsb::open()
 
     cnt = libusb_get_device_list(mCtx, &mDevs); // get the list of devices
     if(cnt < 0) {
-        qWarning() << "Get Device Error";
+        qWarning() << "Get Device List Error";
         return -1;
     }
 
@@ -34,6 +34,7 @@ qint32 QUsb::open()
         qWarning() << "Cannot open device";
         return -2;
     }
+
     if (mDebug) qDebug() << "Device Opened";
     libusb_free_device_list(mDevs, 1); // free the list, unref the devices in it
 
