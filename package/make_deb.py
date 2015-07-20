@@ -114,9 +114,11 @@ if __name__ == "__main__":
         if args.bin:
             makeBin(folder_name)
 
-        print check_output(["rm -rf " + folder_name], shell=True)
     except CalledProcessError as e:
         print e.output
     except OSError as e:
         print e.filename, e
         print print_exc()
+    finally:
+        check_output(["rm -rf " + folder_name], shell=True)
+        check_output(["schroot -e --all-sessions"], shell=True)
