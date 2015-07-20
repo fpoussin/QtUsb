@@ -58,7 +58,7 @@ def makeBin(dest):
 
 
 def sendSrc(ver):
-    print check_output(["dput ppa:mobyfab/qt " + ver + "_source.changes"], shell=True)
+    print check_output(["dput ppa:fpoussin/ppa " + ver + "_source.changes"], shell=True)
 
 
 if __name__ == "__main__":
