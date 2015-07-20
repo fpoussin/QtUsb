@@ -32,7 +32,7 @@ def makeChangelog(release, dest, rev):
     pass
 
 
-def copySrc(dest, rev):
+def copySrc(dest, rev, release):
     check_output(["rm -rf " + dest], shell=True)
     print check_output(["mkdir -v " + dest], shell=True)
 
@@ -43,7 +43,8 @@ def copySrc(dest, rev):
     check_output(["cd {0}; echo '' | dh_make -n --single -e fabien.poussin@gmail.com -c gpl3".format(dest)],
                        shell=True)
 
-    print check_output(["cp -v debian/* {0}/debian/".format(dest)], shell=True)
+    print check_output(["cp -v debian/control_{0} {1}/debian/control".format(release, dest)], shell=True)
+    print check_output(["cp -v debian/copyright debian/README debian/rules {0}/debian/".format(dest)], shell=True)
     check_output(["rm -f {0}/debian/*.ex {0}/debian/*.EX {0}/debian/ex.*".format(dest)], shell=True)
 
     f = open(dest + "/debian/changelog", "r")
@@ -98,7 +99,7 @@ if __name__ == "__main__":
 
     print "Package version:", folder_name
 
-    copySrc(folder_name, ver)
+    copySrc(folder_name, ver, args.release)
     makeChangelog(args.release, folder_name, ver)
 
     try:
