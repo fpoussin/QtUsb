@@ -65,7 +65,7 @@ def makeSrc(dest):
 
 def makeSBuild(dest):
     print "Building binary package (sbuild)"
-    run_cmd(["sbuild -vd {0} {1}".format(args.release, dest)])
+    run_cmd(["sbuild -vd {0} -c {0}-amd64-shm -j4 {1}".format(args.release, dest)])
 
 def makeBin(dest):
     print "Building binary package"

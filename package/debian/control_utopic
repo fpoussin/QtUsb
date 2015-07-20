@@ -2,7 +2,7 @@ Source: libqt5usb5
 Section: devel
 Priority: extra
 Maintainer: Fabien Poussin <fabien.poussin@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), cdbs, qtbase5-dev, qt5-qmake, libusb-1.0-0-dev
+Build-Depends: debhelper (>= 8.0.0), cdbs, qtbase5-dev, qt5-qmake, qt5-default, libusb-1.0-0-dev
 Standards-Version: 3.9.3
 Homepage: https://github.com/fpoussin/QtUsb
 
