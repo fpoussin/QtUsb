@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, os, re, argparse, iso8601, shutil
+import sys, os, re, argparse, iso8601, shutil, time
 from subprocess import call, check_output, Popen, CalledProcessError, STDOUT, PIPE
 from xml.etree import ElementTree as ET
 from traceback import print_exc
@@ -77,6 +77,7 @@ def sendSrc(ver):
 if __name__ == "__main__":
 
     args = parser.parse_args()
+    now = time.strftime("%Y%m%d%H%M%S", time.gmtime())
 
     if not args.release:
         parser.print_help()
@@ -92,7 +93,8 @@ if __name__ == "__main__":
 
     print "Last version:", ver
 
-    folder_name = 'libqt5usb5-{0}~{1}'.format(ver, args.release)
+    folder_name = 'libqt5usb5-{0}~{1}~{2}'.format(ver, now, args.release)
+    dsc_name = 'libqt5usb5_{0}~{1}~{2}'.format(ver, now, args.release)
 
     print "Package version:", folder_name
 
@@ -103,7 +105,7 @@ if __name__ == "__main__":
         if args.source:
             makeSrc(folder_name)
             if args.ppa:
-                sendSrc(folder_name)
+                sendSrc(dsc_name)
         if args.sbuild:
             if not args.source:  # Need to make sources first
                 makeSrc(folder_name)
