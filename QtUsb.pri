@@ -1,9 +1,9 @@
 
 DEFINES += QUSB_LIBRARY
 
-DEPENDPATH += QtUsb
-INCLUDEPATH += QtUsb
-VPATH += QtUsb
+DEPENDPATH += $$PWD
+INCLUDEPATH += $$PWD
+VPATH += $$PWD
 
 SOURCES += \
     qbaseusb.cpp
