@@ -24,13 +24,13 @@ qint32 QUsb::open()
     else if (!queryDeviceEndpoints(mUsbHandle, &mPipeId)) return -4;
 
     ulong timeout = mTimeout; /* SetPipePolicy requires an unsigned long */
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mReadEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mDevice.readEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -5; }
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mWriteEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mDevice.writeEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -6; }
 
     bool enable = true;
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mReadEp, IGNORE_SHORT_PACKETS, sizeof(enable), &enable)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mDevice.readEp, IGNORE_SHORT_PACKETS, sizeof(enable), &enable)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -7; }
 
     mConnected = true;

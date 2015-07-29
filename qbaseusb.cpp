@@ -5,8 +5,8 @@ QBaseUsb::QBaseUsb(QObject *parent) :
     QThread(parent)
 {
     this->setDefaults();
-    this->mSpd = QUSB::unknownSpeed;
-    this->mStop = false;
+    mSpd = QUSB::unknownSpeed;
+    mStop = false;
 
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
     this->start();
@@ -14,7 +14,8 @@ QBaseUsb::QBaseUsb(QObject *parent) :
 
 QBaseUsb::~QBaseUsb()
 {
-
+    mStop = true;
+    this->wait();
 }
 
 quint16 QBaseUsb::getTimeout(void)
@@ -25,6 +26,45 @@ quint16 QBaseUsb::getTimeout(void)
 void QBaseUsb::setDebug(bool enable)
 {
     mDebug = enable;
+}
+
+bool QBaseUsb::addDevice(const QUSB::device& dev)
+{
+    if (this->findDevice(dev) == -1)
+    {
+        mDeviceList.append(dev);
+        return true;
+    }
+    return false;
+}
+
+bool QBaseUsb::removeDevice(const QUSB::device &dev)
+{
+    const int pos = this->findDevice(dev);
+    if (pos > 0)
+    {
+        mDeviceList.remove(pos);
+        return true;
+    }
+    return true;
+}
+
+int QBaseUsb::findDevice(const QUSB::device &filter, QUSB::device* dev)
+{
+    for (int i = 0; i <= mDeviceList.length(); i++)
+    {
+       QUSB::device* d = &mDeviceList[i];
+
+       if((d->guid == filter.guid) ||
+               (d->pid == filter.pid && d->vid == filter.vid))
+       {
+           if (dev != NULL)
+              *dev = *d;
+           return i;
+       }
+    }
+
+    return -1;
 }
 
 void QBaseUsb::setTimeout(quint16 timeout)

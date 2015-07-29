@@ -56,6 +56,10 @@ public slots:
     virtual qint32 read(QByteArray *buf, quint32 bytes) = 0;
     virtual qint32 write(QByteArray *buf, quint32 bytes) = 0;
 
+    bool addDevice(const QUSB::device& dev);
+    bool removeDevice(const QUSB::device& dev);
+    int findDevice(const QUSB::device &filter, QUSB::device* dev = NULL);
+
     void setTimeout(quint16 timeout);
     void setEndPoints(quint8 in, quint8 out);
     void setDeviceIds(quint16 pid, quint16 vid);
