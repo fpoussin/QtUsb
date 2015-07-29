@@ -59,7 +59,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     PrintFuncName();
 
     if (mUsbHandle == INVALID_HANDLE_VALUE
-            || !mReadEp
+            || !mDevice.readEp
             || !mConnected)
     {
         return -1;
@@ -67,7 +67,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     bool bResult = true;
     ulong cbRead = 0;
     uchar *buffer = new uchar[bytes];
-    bResult = WinUsb_ReadPipe(mUsbHandle, mReadEp, buffer, bytes, &cbRead, 0);
+    bResult = WinUsb_ReadPipe(mUsbHandle, mDevice.readEp, buffer, bytes, &cbRead, 0);
     // we clear the buffer.
     buf->clear();
 
@@ -99,14 +99,14 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
 {
     PrintFuncName();
     if (mUsbHandle==INVALID_HANDLE_VALUE
-            || !mWriteEp
+            || !mDevice.writeEp
             || !mConnected)
     {
         return -1;
     }
 
     ulong cbSent = 0;
-    bool bResult = WinUsb_WritePipe(mUsbHandle, mWriteEp, (uchar*)buf->data(), bytes, &cbSent, 0);
+    bool bResult = WinUsb_WritePipe(mUsbHandle, mDevice.writeEp, (uchar*)buf->data(), bytes, &cbSent, 0);
 
     if (mDebug) {
         QString data, s;

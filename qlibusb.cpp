@@ -29,7 +29,7 @@ qint32 QUsb::open()
         return -1;
     }
 
-    mDevHandle = libusb_open_device_with_vid_pid(mCtx, mVid, mPid); // Open device
+    mDevHandle = libusb_open_device_with_vid_pid(mCtx, mDevice.vid, mDevice.pid); // Open device
     if(mDevHandle == NULL) {
         qWarning() << "Cannot open device";
         return -2;
@@ -38,9 +38,9 @@ qint32 QUsb::open()
     if (mDebug) qDebug() << "Device Opened";
     libusb_free_device_list(mDevs, 1); // free the list, unref the devices in it
 
-    if(libusb_kernel_driver_active(mDevHandle, mInterface) == 1) { // find out if kernel driver is attached
+    if(libusb_kernel_driver_active(mDevHandle, mDevice.interface) == 1) { // find out if kernel driver is attached
         if (mDebug) qDebug() << "Kernel Driver Active";
-        if(libusb_detach_kernel_driver(mDevHandle, mInterface) == 0) // detach it
+        if(libusb_detach_kernel_driver(mDevHandle, mDevice.interface) == 0) // detach it
             if (mDebug) qDebug() << "Kernel Driver Detached!";
     }
 
@@ -56,7 +56,7 @@ qint32 QUsb::open()
             return -3;
         }
     }
-    r = libusb_claim_interface(mDevHandle, mInterface);
+    r = libusb_claim_interface(mDevHandle, mDevice.interface);
     if(r != 0) {
         qWarning() << "Cannot Claim Interface";
         this->printUsbError(r);
@@ -123,7 +123,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
 
     timer.start();
     while (timer.elapsed() < mTimeout && bytes-actual > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, (mReadEp), buffer+actual, bytes-actual, &actual_tmp, mTimeout);
+        rc = libusb_bulk_transfer(mDevHandle, (mDevice.readEp), buffer+actual, bytes-actual, &actual_tmp, mTimeout);
         actual += actual_tmp;
         if (rc != 0) break;
     }
@@ -177,7 +177,7 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
 
     timer.start();
     while (timer.elapsed() < mTimeout && bytes-actual > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, (mWriteEp), (uchar*)buf->constData(), bytes, &actual, mTimeout);
+        rc = libusb_bulk_transfer(mDevHandle, (mDevice.writeEp), (uchar*)buf->constData(), bytes, &actual, mTimeout);
         actual += actual_tmp;
         if (rc != 0) break;
     }
