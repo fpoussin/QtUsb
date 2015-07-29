@@ -63,6 +63,31 @@ qint32 QUsb::open()
         return -4;
     }
 
+    libusb_device* dev = libusb_get_device(mDevHandle);
+
+    switch  (libusb_get_device_speed(dev))
+    {
+        case LIBUSB_SPEED_LOW:
+            this->mSpd = QUSB::lowSpeed;
+            break;
+
+        case LIBUSB_SPEED_FULL:
+            this->mSpd = QUSB::fullSpeed;
+            break;
+
+        case LIBUSB_SPEED_HIGH:
+            this->mSpd = QUSB::highSpeed;
+            break;
+
+        case LIBUSB_SPEED_SUPER:
+            this->mSpd = QUSB::superSpeed;
+            break;
+
+        default:
+            this->mSpd = QUSB::unknownSpeed;
+            break;
+    }
+
     mConnected = true;
 
     return 0;

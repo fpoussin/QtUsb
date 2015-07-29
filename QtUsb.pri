@@ -12,7 +12,8 @@ HEADERS +=  \
     qusb_global.h \
     compat.h \
     qbaseusb.h \
-    qusb.h
+    qusb.h \
+    QUsb
 
 win32 {
     message(Building QtUsb with WinUSB support.)

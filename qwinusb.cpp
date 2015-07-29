@@ -374,19 +374,23 @@ bool QUsb::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDev
     if(*pDeviceSpeed == LowSpeed)
     {
         if (mDebug) qDebug("Device speed: %d (Low speed).\n", *pDeviceSpeed);
+        this->mSpd = QUSB::lowSpeed;
         return true;
     }
     else if(*pDeviceSpeed == FullSpeed)
     {
         if (mDebug) qDebug("Device speed: %d (Full speed).\n", *pDeviceSpeed);
+        this->mSpd = QUSB::fullSpeed;
         return true;
     }
     else if(*pDeviceSpeed == HighSpeed)
     {
         if (mDebug) qDebug("Device speed: %d (High speed).\n", *pDeviceSpeed);
+        this->mSpd = QUSB::highSpeed;
         return true;
     }
     return false;
+
 }
 
 bool QUsb::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsb::PIPE_ID *pipeId)

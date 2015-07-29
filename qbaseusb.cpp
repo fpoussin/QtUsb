@@ -5,6 +5,7 @@ QBaseUsb::QBaseUsb(QObject *parent) :
     QObject(parent)
 {
     this->setDefaults();
+    this->mSpd = QUSB::unknownSpeed;
 }
 
 QBaseUsb::~QBaseUsb()
@@ -73,7 +74,7 @@ void QBaseUsb::setDefaults()
 {
     mConnected = false;
     mDebug = false;
-    mTimeout = DEFAULT_TIMEOUT_MSEC;
+    mTimeout = QUSB::DEFAULT_TIMEOUT_MSEC;
     mReadEp = 0x81;
     mWriteEp = 0x01;
     mConfig = 0x01;

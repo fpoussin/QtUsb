@@ -6,7 +6,13 @@
 #include <QDebug>
 #include "qusb_global.h"
 
-const quint16 DEFAULT_TIMEOUT_MSEC = 250;
+namespace QUSB {
+
+    const quint16 DEFAULT_TIMEOUT_MSEC = 250;
+
+    enum SPEED {unknownSpeed = -1, lowSpeed = 0, fullSpeed, highSpeed, superSpeed};
+
+}
 
 class QUSBSHARED_EXPORT QBaseUsb : public QObject
 {
@@ -23,6 +29,7 @@ public:
     QString getGuid(void) { return mGuid; }
     quint8 getReadEp(void) { return mReadEp; }
     quint8 getWriteEp(void) { return mWriteEp; }
+    QUSB::SPEED getSpeed(void) { return mSpd; }
 
 public slots:
     virtual qint32 open() = 0;
@@ -54,6 +61,7 @@ protected:
     int mConfig;
     int mInterface;
     int mAlternate;
+    QUSB::SPEED mSpd;
 };
 
 #endif // QBASEUSB_H
