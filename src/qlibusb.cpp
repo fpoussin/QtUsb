@@ -1,7 +1,7 @@
 #include "qlibusb.h"
 
-QUsb::QUsb(QBaseUsb *parent) :
-    QBaseUsb(parent)
+QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
+    QBaseUsbDevice(parent)
 {
     mDevHandle = NULL;
     int r = libusb_init(&mCtx); //initialize the library for the session we just declared
@@ -10,12 +10,57 @@ QUsb::QUsb(QBaseUsb *parent) :
     }
 }
 
-QUsb::~QUsb()
+QtUsb::UsbFilterList QUsbDevice::getAvailableDevices()
 {
-    this->close();
+    QtUsb::UsbFilterList list;
+
+    ssize_t cnt; // holding number of devices in list
+
+    libusb_device **devs;
+    libusb_context *ctx;
+
+    libusb_init(&ctx);
+    cnt = libusb_get_device_list(ctx, &devs); // get the list of devices
+    if(cnt < 0) {
+        qWarning() << "Get Device List Error";
+        libusb_free_device_list(devs, 1);
+        return list;
+    }
+
+    for (int i=0; i< cnt; i++)
+    {
+        libusb_device* dev = devs[i];
+        libusb_device_descriptor desc;
+
+        if (libusb_get_device_descriptor(dev, &desc) == 0)
+        {
+            QtUsb::UsbDeviceFilter filter;
+            filter.pid = desc.idProduct;
+            filter.vid = desc.idVendor;
+            filter.guid = "";
+
+            list.append(filter);
+        }
+    }
+
+    libusb_free_device_list(devs, 1);
+    libusb_exit(ctx);
+    return list;
 }
 
-qint32 QUsb::open()
+QUsbDevice::~QUsbDevice()
+{
+    this->close();
+    libusb_exit(mCtx);
+}
+
+bool QUsbDevice::open(QIODevice::OpenMode mode)
+{
+    (void) mode;
+    return this->open() == 0;
+}
+
+qint32 QUsbDevice::open()
 {
     if (mConnected)
         return -1;
@@ -29,7 +74,7 @@ qint32 QUsb::open()
         return -1;
     }
 
-    mDevHandle = libusb_open_device_with_vid_pid(mCtx, mDevice.vid, mDevice.pid); // Open device
+    mDevHandle = libusb_open_device_with_vid_pid(mCtx, mFilter.vid, mFilter.pid); // Open device
     if(mDevHandle == NULL) {
         qWarning() << "Cannot open device";
         return -2;
@@ -38,25 +83,25 @@ qint32 QUsb::open()
     if (mDebug) qDebug() << "Device Opened";
     libusb_free_device_list(mDevs, 1); // free the list, unref the devices in it
 
-    if(libusb_kernel_driver_active(mDevHandle, mDevice.interface) == 1) { // find out if kernel driver is attached
+    if(libusb_kernel_driver_active(mDevHandle, mConfig.interface) == 1) { // find out if kernel driver is attached
         if (mDebug) qDebug() << "Kernel Driver Active";
-        if(libusb_detach_kernel_driver(mDevHandle, mDevice.interface) == 0) // detach it
+        if(libusb_detach_kernel_driver(mDevHandle, mConfig.interface) == 0) // detach it
             if (mDebug) qDebug() << "Kernel Driver Detached!";
     }
 
     int conf;
     libusb_get_configuration(mDevHandle, &conf);
 
-    if (conf != mConfig) {
+    if (conf != mConfig.config) {
         if (mDebug) qDebug() << "Configuration needs to be changed";
-        r = libusb_set_configuration(mDevHandle, mConfig);
+        r = libusb_set_configuration(mDevHandle, mConfig.config);
         if(r != 0) {
             qWarning() << "Cannot Set Configuration";
             this->printUsbError(r);
             return -3;
         }
     }
-    r = libusb_claim_interface(mDevHandle, mDevice.interface);
+    r = libusb_claim_interface(mDevHandle, mConfig.interface);
     if(r != 0) {
         qWarning() << "Cannot Claim Interface";
         this->printUsbError(r);
@@ -68,23 +113,23 @@ qint32 QUsb::open()
     switch  (libusb_get_device_speed(dev))
     {
         case LIBUSB_SPEED_LOW:
-            this->mSpd = QUSB::lowSpeed;
+            this->mSpd = QtUsb::lowSpeed;
             break;
 
         case LIBUSB_SPEED_FULL:
-            this->mSpd = QUSB::fullSpeed;
+            this->mSpd = QtUsb::fullSpeed;
             break;
 
         case LIBUSB_SPEED_HIGH:
-            this->mSpd = QUSB::highSpeed;
+            this->mSpd = QtUsb::highSpeed;
             break;
 
         case LIBUSB_SPEED_SUPER:
-            this->mSpd = QUSB::superSpeed;
+            this->mSpd = QtUsb::superSpeed;
             break;
 
         default:
-            this->mSpd = QUSB::unknownSpeed;
+            this->mSpd = QtUsb::unknownSpeed;
             break;
     }
 
@@ -93,7 +138,7 @@ qint32 QUsb::open()
     return 0;
 }
 
-void QUsb::close()
+void QUsbDevice::close()
 {
     if (mDevHandle && mConnected) {
         // stop any further write attempts whilst we close down
@@ -106,7 +151,7 @@ void QUsb::close()
     mConnected = false;
 }
 
-qint32 QUsb::read(QByteArray *buf, quint32 bytes)
+qint32 QUsbDevice::read(QByteArray *buf, quint32 bytes)
 {
     qint32 rc, actual, actual_tmp;
     QElapsedTimer timer;
@@ -123,7 +168,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
 
     timer.start();
     while (timer.elapsed() < mTimeout && bytes-actual > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, (mDevice.readEp), buffer+actual, bytes-actual, &actual_tmp, mTimeout);
+        rc = libusb_bulk_transfer(mDevHandle, (mConfig.readEp), buffer+actual, bytes-actual, &actual_tmp, mTimeout);
         actual += actual_tmp;
         if (rc != 0) break;
     }
@@ -155,7 +200,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     return actual;
 }
 
-qint32 QUsb::write(QByteArray *buf, quint32 bytes)
+qint32 QUsbDevice::write(QByteArray *buf, quint32 bytes)
 {
     qint32 rc, actual, actual_tmp;
     QElapsedTimer timer;
@@ -177,7 +222,7 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
 
     timer.start();
     while (timer.elapsed() < mTimeout && bytes-actual > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, (mDevice.writeEp), (uchar*)buf->constData(), bytes, &actual, mTimeout);
+        rc = libusb_bulk_transfer(mDevHandle, (mConfig.writeEp), (uchar*)buf->constData(), bytes, &actual, mTimeout);
         actual += actual_tmp;
         if (rc != 0) break;
     }
@@ -197,16 +242,16 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
     return actual;
 }
 
-void QUsb::setDebug(bool enable)
+void QUsbDevice::setDebug(bool enable)
 {
-    QBaseUsb::setDebug(enable);
+    QBaseUsbDevice::setDebug(enable);
     if (enable)
         libusb_set_debug(mCtx, 3);
     else
         libusb_set_debug(mCtx, 0);
 }
 
-void QUsb::printUsbError(int error_code)
+void QUsbDevice::printUsbError(int error_code)
 {
     switch (error_code) {
 
@@ -256,4 +301,14 @@ void QUsb::printUsbError(int error_code)
             qWarning() << "Unknown libusb error code: "<< error_code;
             break;
     }
+}
+
+qint64 QUsbDevice::readData(char *data, qint64 maxSize)
+{
+
+}
+
+qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
+{
+
 }

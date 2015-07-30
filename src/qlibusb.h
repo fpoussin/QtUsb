@@ -10,15 +10,17 @@
 #include <compat.h>
 #include <libusb-1.0/libusb.h>
 
-class QUsb : public QBaseUsb
+class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
 {
     Q_OBJECT
 
 public:
-    explicit QUsb(QBaseUsb *parent = 0);
-    ~QUsb();
+    explicit QUsbDevice(QBaseUsbDevice *parent = 0);
+    static QtUsb::UsbFilterList getAvailableDevices(void);
+    ~QUsbDevice();
 
 public slots:
+    bool open(OpenMode mode);
     qint32 open();
     void close();
     qint32 read(QByteArray *buf, quint32 bytes);
@@ -27,6 +29,8 @@ public slots:
 
 private slots:
     void printUsbError(int error_code);
+    qint64 readData(char * data, qint64 maxSize);
+    qint64 writeData(const char * data, qint64 maxSize);
 
 private:
     libusb_device **mDevs;

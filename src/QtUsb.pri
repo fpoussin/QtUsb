@@ -6,14 +6,17 @@ INCLUDEPATH += $$PWD
 VPATH += $$PWD
 
 SOURCES += \
-    qbaseusb.cpp
+    qbaseusb.cpp \
+    qusbmanager.cpp
 
 HEADERS +=  \
     qusb_global.h \
     compat.h \
     qbaseusb.h \
     qusb.h \
-    QUsb
+    QUsb \
+    qusbmanager.h \
+    qusbtypes.h
 
 win32 {
     message(Building QtUsb with WinUSB support.)

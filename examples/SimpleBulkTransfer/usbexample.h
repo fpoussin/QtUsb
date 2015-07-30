@@ -2,7 +2,7 @@
 #define USBEXAMPLE_H
 
 #include <QObject>
-#include "QUsb"
+#include <QUsb>
 
 const quint8 USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
 const quint8 USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
@@ -25,7 +25,8 @@ signals:
 public slots:
 
 private:
-    QUsb mUsb;
+    QUsbManager mUsbManager;
+    QUsbDevice mUsbDev;
 
 };
 

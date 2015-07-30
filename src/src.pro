@@ -4,14 +4,14 @@
 #
 #-------------------------------------------------
 
-VERSION = 0.1
+VERSION = 0.2
 QT -= gui
 TEMPLATE = lib
 CONFIG  += static_and_shared
 
 include(QtUsb.pri)
 
-headers_install.files = $$HEADERS QUsb
+headers_install.files = $$HEADERS
 
 contains(QT_MAJOR_VERSION, 5) { 
     TARGET   = Qt5Usb

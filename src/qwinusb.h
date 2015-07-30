@@ -1,7 +1,6 @@
 #ifndef QWINUSB_H
 #define QWINUSB_H
 
-#include <QObject>
 #include <QDebug>
 #include "compat.h"
 #include "qbaseusb.h"
@@ -21,7 +20,7 @@
 #pragma comment (lib , "setupapi.lib" )
 #pragma comment (lib , "winusb.lib" )
 
-class QUsb : public QBaseUsb
+class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
 {
     Q_OBJECT
 
@@ -31,16 +30,21 @@ class QUsb : public QBaseUsb
         uchar  pipeOutId;
     };
 public:
-    explicit QUsb(QBaseUsb *parent = 0);
-    ~QUsb();
+    explicit QUsbDevice(QBaseUsbDevice *parent = 0);
+    static QList<QtUsb::UsbDeviceFilter> getAvailableDevices(void);
+    ~QUsbDevice();
     
 public slots:
+    bool open(OpenMode mode);
     qint32 open();
     void close();
     qint32 read(QByteArray *buf, quint32 bytes);
     qint32 write(QByteArray *buf, quint32 bytes);
     bool setGuid(const QString &guid);
     bool setGuid(const GUID &guid);
+
+    qint64 readData(char * data, qint64 maxSize);
+    qint64 writeData(const char * data, qint64 maxSize);
 
 private:
     bool getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle);

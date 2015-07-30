@@ -1,19 +1,32 @@
 #include "qwinusb.h"
 
-QUsb::QUsb(QBaseUsb *parent) :
-    QBaseUsb(parent)
+QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
+    QBaseUsbDevice(parent)
 {
     mDevHandle = INVALID_HANDLE_VALUE;
     mUsbHandle = INVALID_HANDLE_VALUE;
     mDevSpeed = 0;
 }
 
-QUsb::~QUsb()
+QList<QtUsb::UsbDeviceFilter> QUsbDevice::getAvailableDevices()
+{
+    QList<QtUsb::UsbDeviceFilter> list;
+
+    return list;
+}
+
+QUsbDevice::~QUsbDevice()
 {
     this->close();
 }
 
-qint32 QUsb::open()
+bool QUsbDevice::open(QIODevice::OpenMode mode)
+{
+    (void) mode;
+    return this->open() == 0;
+}
+
+qint32 QUsbDevice::open()
 {
     if (mConnected)
         return -1;
@@ -24,13 +37,13 @@ qint32 QUsb::open()
     else if (!queryDeviceEndpoints(mUsbHandle, &mPipeId)) return -4;
 
     ulong timeout = mTimeout; /* SetPipePolicy requires an unsigned long */
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mDevice.readEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mConfig.readEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -5; }
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mDevice.writeEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mConfig.writeEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -6; }
 
     bool enable = true;
-    if (!WinUsb_SetPipePolicy(mUsbHandle, mDevice.readEp, IGNORE_SHORT_PACKETS, sizeof(enable), &enable)) {
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mConfig.readEp, IGNORE_SHORT_PACKETS, sizeof(enable), &enable)) {
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -7; }
 
     mConnected = true;
@@ -38,7 +51,7 @@ qint32 QUsb::open()
     return 0;
 }
 
-void QUsb::close()
+void QUsbDevice::close()
 {
     if (!mConnected)
         return;
@@ -54,12 +67,12 @@ void QUsb::close()
     mConnected = false;
 }
 
-qint32 QUsb::read(QByteArray *buf, quint32 bytes)
+qint32 QUsbDevice::read(QByteArray *buf, quint32 bytes)
 {
     PrintFuncName();
 
     if (mUsbHandle == INVALID_HANDLE_VALUE
-            || !mDevice.readEp
+            || !mConfig.readEp
             || !mConnected)
     {
         return -1;
@@ -67,7 +80,7 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     bool bResult = true;
     ulong cbRead = 0;
     uchar *buffer = new uchar[bytes];
-    bResult = WinUsb_ReadPipe(mUsbHandle, mDevice.readEp, buffer, bytes, &cbRead, 0);
+    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, buffer, bytes, &cbRead, 0);
     // we clear the buffer.
     buf->clear();
 
@@ -95,18 +108,18 @@ qint32 QUsb::read(QByteArray *buf, quint32 bytes)
     return cbRead;
 }
 
-qint32 QUsb::write(QByteArray *buf, quint32 bytes)
+qint32 QUsbDevice::write(QByteArray *buf, quint32 bytes)
 {
     PrintFuncName();
     if (mUsbHandle==INVALID_HANDLE_VALUE
-            || !mDevice.writeEp
+            || !mConfig.writeEp
             || !mConnected)
     {
         return -1;
     }
 
     ulong cbSent = 0;
-    bool bResult = WinUsb_WritePipe(mUsbHandle, mDevice.writeEp, (uchar*)buf->data(), bytes, &cbSent, 0);
+    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)buf->data(), bytes, &cbSent, 0);
 
     if (mDebug) {
         QString data, s;
@@ -123,7 +136,7 @@ qint32 QUsb::write(QByteArray *buf, quint32 bytes)
     return cbSent;
 }
 
-bool QUsb::setGuid(const QString &guid)
+bool QUsbDevice::setGuid(const QString &guid)
 {
     bool check[11];
     QString cleaned(guid);
@@ -157,13 +170,13 @@ bool QUsb::setGuid(const QString &guid)
     return true;
 }
 
-bool QUsb::setGuid(const GUID &guid)
+bool QUsbDevice::setGuid(const GUID &guid)
 {
     mGuidDeviceInterface = guid;
     return true;
 }
 
-bool QUsb::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle)
+bool QUsbDevice::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle)
 {
     PrintFuncName();
     if (guidDeviceInterface == GUID_NULL)
@@ -336,7 +349,7 @@ bool QUsb::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle)
     return bResult;
 }
 
-bool QUsb::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle)
+bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle)
 {
     PrintFuncName();
     if (hDeviceHandle == INVALID_HANDLE_VALUE)
@@ -355,7 +368,7 @@ bool QUsb::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinU
     return true;
 }
 
-bool QUsb::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDeviceSpeed)
+bool QUsbDevice::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDeviceSpeed)
 {
     PrintFuncName();
     if (!pDeviceSpeed || hWinUSBHandle==INVALID_HANDLE_VALUE)
@@ -374,26 +387,26 @@ bool QUsb::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDev
     if(*pDeviceSpeed == LowSpeed)
     {
         if (mDebug) qDebug("Device speed: %d (Low speed).\n", *pDeviceSpeed);
-        this->mSpd = QUSB::lowSpeed;
+        this->mSpd = QtUsb::lowSpeed;
         return true;
     }
     else if(*pDeviceSpeed == FullSpeed)
     {
         if (mDebug) qDebug("Device speed: %d (Full speed).\n", *pDeviceSpeed);
-        this->mSpd = QUSB::fullSpeed;
+        this->mSpd = QtUsb::fullSpeed;
         return true;
     }
     else if(*pDeviceSpeed == HighSpeed)
     {
         if (mDebug) qDebug("Device speed: %d (High speed).\n", *pDeviceSpeed);
-        this->mSpd = QUSB::highSpeed;
+        this->mSpd = QtUsb::highSpeed;
         return true;
     }
     return false;
 
 }
 
-bool QUsb::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsb::PIPE_ID *pipeId)
+bool QUsbDevice::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsbDevice::PIPE_ID *pipeId)
 {
     PrintFuncName();
     if (hWinUSBHandle==INVALID_HANDLE_VALUE)
@@ -459,7 +472,7 @@ bool QUsb::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsb::PIP
     return true;
 }
 
-void QUsb::printUsbError(const QString &func)
+void QUsbDevice::printUsbError(const QString &func)
 {
     const quint32 err = GetLastError();
     switch (err)
@@ -480,4 +493,14 @@ void QUsb::printUsbError(const QString &func)
             qWarning() << func << "Error id:" << err;
             break;
     }
+}
+
+qint64 QUsbDevice::readData(char *data, qint64 maxSize)
+{
+
+}
+
+qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
+{
+
 }

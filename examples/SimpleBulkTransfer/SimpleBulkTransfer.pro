@@ -14,8 +14,7 @@ win32:CONFIG += winusb
 
 TEMPLATE = app
 
-include(../../QtUsb.pri)
-
+include(../../src/QtUsb.pri)
 
 SOURCES += main.cpp \
     usbexample.cpp
