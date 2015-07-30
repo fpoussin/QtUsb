@@ -111,6 +111,8 @@ void QUsbManager::monitorDevices(QtUsb::UsbFilterList& list)
 void QUsbManager::run()
 {
     QtUsb::UsbFilterList list;
+    mSystemList = QUsbDevice::getAvailableDevices();
+
     while (!mStop)
     {
         list = QUsbDevice::getAvailableDevices();
