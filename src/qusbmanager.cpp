@@ -15,7 +15,7 @@ QUsbManager::~QUsbManager()
     this->wait();
 }
 
-bool QUsbManager::addDevice(const QtUsb::UsbDeviceFilter &filter)
+bool QUsbManager::addDevice(const QtUsb::DeviceFilter &filter)
 {
     if (this->findDevice(filter, mFilterList) == -1)
     {
@@ -25,7 +25,7 @@ bool QUsbManager::addDevice(const QtUsb::UsbDeviceFilter &filter)
     return false;
 }
 
-bool QUsbManager::removeDevice(const QtUsb::UsbDeviceFilter &filter)
+bool QUsbManager::removeDevice(const QtUsb::DeviceFilter &filter)
 {
     const int pos = this->findDevice(filter, mFilterList);
     if (pos > 0)
@@ -36,11 +36,11 @@ bool QUsbManager::removeDevice(const QtUsb::UsbDeviceFilter &filter)
     return true;
 }
 
-int QUsbManager::findDevice(const QtUsb::UsbDeviceFilter& filter, QtUsb::UsbFilterList& list)
+int QUsbManager::findDevice(const QtUsb::DeviceFilter& filter, const QtUsb::FilterList& list)
 {
     for (int i = 0; i <= list.length(); i++)
     {
-       QtUsb::UsbDeviceFilter* d = &list[i];
+       const QtUsb::DeviceFilter* d = &list[i];
 
        if((d->guid == filter.guid) ||
                (d->pid == filter.pid && d->vid == filter.vid))
@@ -51,7 +51,7 @@ int QUsbManager::findDevice(const QtUsb::UsbDeviceFilter& filter, QtUsb::UsbFilt
     return -1;
 }
 
-QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev, const QtUsb::UsbDeviceFilter &filter, const QtUsb::UsbDeviceConfig &config)
+QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev, const QtUsb::DeviceFilter &filter, const QtUsb::DeviceConfig &config)
 {
     dev = new QUsbDevice();
     dev->setConfig(config);
@@ -74,10 +74,10 @@ QtUsb::DeviceStatus QUsbManager::closeDevice(QUsbDevice *dev)
     return QtUsb::deviceNotFound;
 }
 
-void QUsbManager::monitorDevices(QtUsb::UsbFilterList& list)
+void QUsbManager::monitorDevices(const QtUsb::FilterList& list)
 {
-    QtUsb::UsbFilterList inserted, removed;
-    QtUsb::UsbDeviceFilter filter;
+    QtUsb::FilterList inserted, removed;
+    QtUsb::DeviceFilter filter;
 
     for (int i = 0; i <= list.length(); i++)
     {
@@ -110,7 +110,7 @@ void QUsbManager::monitorDevices(QtUsb::UsbFilterList& list)
 
 void QUsbManager::run()
 {
-    QtUsb::UsbFilterList list;
+    QtUsb::FilterList list;
     mSystemList = QUsbDevice::getAvailableDevices();
 
     while (!mStop)

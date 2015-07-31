@@ -20,11 +20,11 @@ public:
 
     bool isSequential() const { return true;  }
 
-    void setFilter(const QtUsb::UsbDeviceFilter& filter) { mFilter = filter; }
-    void setConfig(const QtUsb::UsbDeviceConfig& config) { mConfig = config; }
+    void setFilter(const QtUsb::DeviceFilter& filter) { mFilter = filter; }
+    void setConfig(const QtUsb::DeviceConfig& config) { mConfig = config; }
 
-    QtUsb::UsbDeviceFilter getFilter(void) { return mFilter; }
-    QtUsb::UsbDeviceConfig getConfig(void) { return mConfig; }
+    QtUsb::DeviceFilter getFilter(void) { return mFilter; }
+    QtUsb::DeviceConfig getConfig(void) { return mConfig; }
 
     quint16 getPid(void) { return mFilter.pid; }
     quint16 getVid(void) { return mFilter.vid; }
@@ -32,16 +32,14 @@ public:
     quint8 getReadEp(void) { return mConfig.readEp; }
     quint8 getWriteEp(void) { return mConfig.writeEp; }
 
-    QtUsb::Speed getSpeed(void) { return mSpd; }
+    QtUsb::DeviceSpeed getSpeed(void) { return mSpd; }
 
-    static QtUsb::UsbFilterList getAvailableDevices(void);
+    static QtUsb::FilterList getAvailableDevices(void);
 
 public slots:
     virtual bool open(OpenMode mode) = 0;
     virtual qint32 open() = 0;
     virtual void close() = 0;
-    virtual qint32 read(QByteArray *buf, quint32 bytes) = 0;
-    virtual qint32 write(QByteArray *buf, quint32 bytes) = 0;
 
     void setTimeout(quint16 timeout);
     void showSettings(void);
@@ -53,12 +51,12 @@ protected slots:
     virtual qint64 writeData(const char * data, qint64 maxSize) = 0;
 
 protected:
-    QtUsb::UsbDeviceFilter mFilter;
-    QtUsb::UsbDeviceConfig mConfig;
+    QtUsb::DeviceFilter mFilter;
+    QtUsb::DeviceConfig mConfig;
     quint16 mTimeout;
     bool mDebug;
     bool mConnected;
-    QtUsb::Speed mSpd;
+    QtUsb::DeviceSpeed mSpd;
 };
 
 #endif // QBASEUSB_H

@@ -8,9 +8,9 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
     mDevSpeed = 0;
 }
 
-QList<QtUsb::UsbDeviceFilter> QUsbDevice::getAvailableDevices()
+QList<QtUsb::DeviceFilter> QUsbDevice::getAvailableDevices()
 {
-    QList<QtUsb::UsbDeviceFilter> list;
+    QList<QtUsb::DeviceFilter> list;
 
     return list;
 }
@@ -65,75 +65,6 @@ void QUsbDevice::close()
     mUsbHandle = INVALID_HANDLE_VALUE;
 
     mConnected = false;
-}
-
-qint32 QUsbDevice::read(QByteArray *buf, quint32 bytes)
-{
-    PrintFuncName();
-
-    if (mUsbHandle == INVALID_HANDLE_VALUE
-            || !mConfig.readEp
-            || !mConnected)
-    {
-        return -1;
-    }
-    bool bResult = true;
-    ulong cbRead = 0;
-    uchar *buffer = new uchar[bytes];
-    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, buffer, bytes, &cbRead, 0);
-    // we clear the buffer.
-    buf->clear();
-
-    if (!bResult) {
-        printUsbError("WinUsb_ReadPipe");
-        delete buffer;
-        return -1;
-    }
-
-    else if (cbRead > 0){
-
-        buf->append((const char *)buffer, cbRead);
-
-        if (mDebug) {
-            QString data, s;
-            for (quint32 i = 0; i < cbRead; i++) {
-                data.append(s.sprintf("%02X",buffer[i])+":");
-            }
-            data.remove(data.size()-1, 1); //remove last colon
-            qDebug() << "Received" << cbRead << "of" << bytes << "Bytes:" << data;
-        }
-    }
-    delete buffer;
-
-    return cbRead;
-}
-
-qint32 QUsbDevice::write(QByteArray *buf, quint32 bytes)
-{
-    PrintFuncName();
-    if (mUsbHandle==INVALID_HANDLE_VALUE
-            || !mConfig.writeEp
-            || !mConnected)
-    {
-        return -1;
-    }
-
-    ulong cbSent = 0;
-    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)buf->data(), bytes, &cbSent, 0);
-
-    if (mDebug) {
-        QString data, s;
-        for (int i = 0; i < buf->size(); i++) {
-            data.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
-        }
-        data.remove(data.size()-1, 1); //remove last colon
-        qDebug() << "Sent" << cbSent << "/" << buf->size() << "bytes:" << data;
-    }
-    if (!bResult) {
-        printUsbError("WinUsb_WritePipe");
-        return -1;
-    }
-    return cbSent;
 }
 
 bool QUsbDevice::setGuid(const QString &guid)
@@ -497,10 +428,69 @@ void QUsbDevice::printUsbError(const QString &func)
 
 qint64 QUsbDevice::readData(char *data, qint64 maxSize)
 {
+    PrintFuncName();
 
+    if (mUsbHandle == INVALID_HANDLE_VALUE
+            || !mConfig.readEp
+            || !mConnected)
+    {
+        return -1;
+    }
+    bool bResult = true;
+    ulong cbRead = 0;
+    uchar *buffer = new uchar[bytes];
+    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, buffer, bytes, &cbRead, 0);
+    // we clear the buffer.
+    buf->clear();
+
+    if (!bResult) {
+        printUsbError("WinUsb_ReadPipe");
+        delete buffer;
+        return -1;
+    }
+
+    else if (cbRead > 0){
+
+        buf->append((const char *)buffer, cbRead);
+
+        if (mDebug) {
+            QString data, s;
+            for (quint32 i = 0; i < cbRead; i++) {
+                data.append(s.sprintf("%02X",buffer[i])+":");
+            }
+            data.remove(data.size()-1, 1); //remove last colon
+            qDebug() << "Received" << cbRead << "of" << bytes << "Bytes:" << data;
+        }
+    }
+    delete buffer;
+
+    return cbRead;
 }
 
 qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
 {
+    PrintFuncName();
+    if (mUsbHandle==INVALID_HANDLE_VALUE
+            || !mConfig.writeEp
+            || !mConnected)
+    {
+        return -1;
+    }
 
+    ulong cbSent = 0;
+    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)buf->data(), bytes, &cbSent, 0);
+
+    if (mDebug) {
+        QString data, s;
+        for (int i = 0; i < buf->size(); i++) {
+            data.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
+        }
+        data.remove(data.size()-1, 1); //remove last colon
+        qDebug() << "Sent" << cbSent << "/" << buf->size() << "bytes:" << data;
+    }
+    if (!bResult) {
+        printUsbError("WinUsb_WritePipe");
+        return -1;
+    }
+    return cbSent;
 }

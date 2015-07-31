@@ -15,27 +15,27 @@ public:
     ~QUsbManager(void);
 
 signals:
-    void deviceInserted(QtUsb::UsbFilterList filters);
-    void deviceRemoved(QtUsb::UsbFilterList filters);
+    void deviceInserted(QtUsb::FilterList filters);
+    void deviceRemoved(QtUsb::FilterList filters);
 
 public slots:
-    bool addDevice(const QtUsb::UsbDeviceFilter &filter);
-    bool removeDevice(const QtUsb::UsbDeviceFilter &filter);
-    int findDevice(const QtUsb::UsbDeviceFilter &filter, QtUsb::UsbFilterList &list);
+    bool addDevice(const QtUsb::DeviceFilter &filter);
+    bool removeDevice(const QtUsb::DeviceFilter &filter);
+    int findDevice(const QtUsb::DeviceFilter &filter, const QtUsb::FilterList &list);
 
-    QtUsb::DeviceStatus openDevice(QUsbDevice* dev, const QtUsb::UsbDeviceFilter &filter, const QtUsb::UsbDeviceConfig &config);
+    QtUsb::DeviceStatus openDevice(QUsbDevice* dev, const QtUsb::DeviceFilter &filter, const QtUsb::DeviceConfig &config);
     QtUsb::DeviceStatus closeDevice(QUsbDevice* dev);
 
 
 protected slots:
-    void monitorDevices(QtUsb::UsbFilterList& list);
+    void monitorDevices(const QtUsb::FilterList &list);
     void run(void);
 
 protected:
     bool mStop;
     QList<QUsbDevice*> mUsedDeviceList;
-    QList<QtUsb::UsbDeviceFilter> mFilterList;
-    QList<QtUsb::UsbDeviceFilter> mSystemList;
+    QList<QtUsb::DeviceFilter> mFilterList;
+    QList<QtUsb::DeviceFilter> mSystemList;
 
 };
 
