@@ -17,7 +17,7 @@
 #include <Setupapi.h>
 
 namespace QtUsb {
-    const QString WINUSB_GUID = "DBCE1CD9-A320-4b51-A365-A0C3F3C5FB29";
+    const GUID WINUSB_DEV_GUID = {0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED};
 }
 
 class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice

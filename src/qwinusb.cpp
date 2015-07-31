@@ -11,8 +11,6 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
 QtUsb::FilterList QUsbDevice::getAvailableDevices()
 {
     QList<QtUsb::DeviceFilter> list;
-    GUID usbGuid;
-    guidFromString(QtUsb::WINUSB_GUID, &usbGuid);
 
     HDEVINFO                         hDevInfo;
     SP_DEVICE_INTERFACE_DATA         devIntfData;
@@ -22,7 +20,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
     DWORD dwSize, dwMemberIdx;
 
     hDevInfo = SetupDiGetClassDevs(
-            &usbGuid, NULL, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
+            &QtUsb::WINUSB_DEV_GUID, NULL, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
 
 
     if (hDevInfo != INVALID_HANDLE_VALUE)
@@ -30,7 +28,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
             devIntfData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
             dwMemberIdx = 0;
 
-            SetupDiEnumDeviceInterfaces(hDevInfo, NULL, &usbGuid,
+            SetupDiEnumDeviceInterfaces(hDevInfo, NULL, &QtUsb::WINUSB_DEV_GUID,
                 dwMemberIdx, &devIntfData);
 
             while(GetLastError() != ERROR_NO_MORE_ITEMS)
@@ -45,7 +43,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
                 if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &devIntfData,
                     devIntfDetailData, dwSize, &dwSize, &devData))
                 {
-                    QString pathStr(*devIntfDetailData->DevicePath);
+                    QString pathStr = QString::fromWCharArray(devIntfDetailData->DevicePath);
                     QtUsb::DeviceFilter filter;
 
                     int vidFrom = pathStr.indexOf("vid_")+4;
@@ -70,7 +68,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
 
                 // Continue looping
                 SetupDiEnumDeviceInterfaces(
-                    hDevInfo, NULL, &usbGuid, ++dwMemberIdx, &devIntfData);
+                    hDevInfo, NULL, &QtUsb::WINUSB_DEV_GUID, ++dwMemberIdx, &devIntfData);
             }
 
             SetupDiDestroyDeviceInfoList(hDevInfo);
