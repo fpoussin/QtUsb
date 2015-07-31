@@ -19,6 +19,7 @@ QList<QtUsb::DeviceFilter> QUsbDevice::getAvailableDevices()
     PSP_DEVICE_INTERFACE_DETAIL_DATA devIntfDetailData;
     SP_DEVINFO_DATA                  devData;
 
+    DWORD dwSize, dwMemberIdx;
 
     hDevInfo = SetupDiGetClassDevs(
             &usbGuid, NULL, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
