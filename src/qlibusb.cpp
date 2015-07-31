@@ -146,6 +146,8 @@ void QUsbDevice::close()
         // stop any further write attempts whilst we close down
         qDebug() << "Closing USB connection...";
 
+        QIODevice::close();
+
         libusb_release_interface(mDevHandle, 0); //release the claimed interface
         libusb_close(mDevHandle); //close the device we opened
     }

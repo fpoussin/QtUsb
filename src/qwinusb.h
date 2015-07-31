@@ -16,10 +16,6 @@
 #include <Usb100.h>
 #include <Setupapi.h>
 
-// Linked libraries
-#pragma comment (lib , "setupapi.lib" )
-#pragma comment (lib , "winusb.lib" )
-
 namespace QtUsb {
     const QString WINUSB_GUID = "DBCE1CD9-A320-4b51-A365-A0C3F3C5FB29";
 }
@@ -35,7 +31,7 @@ class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
     };
 public:
     explicit QUsbDevice(QBaseUsbDevice *parent = 0);
-    static QList<QtUsb::DeviceFilter> getAvailableDevices(void);
+    static QtUsb::FilterList getAvailableDevices(void);
     static bool guidFromString(const QString &str, GUID* guid);
     ~QUsbDevice();
     

@@ -23,6 +23,7 @@ win32 {
     DEFINES += QWINUSB
     SOURCES += qwinusb.cpp
     HEADERS += qwinusb.h
+    LIBS += setupapi.lib winusb.lib
 }
 
 else:unix {

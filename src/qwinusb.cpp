@@ -8,7 +8,7 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
     mDevSpeed = 0;
 }
 
-QList<QtUsb::DeviceFilter> QUsbDevice::getAvailableDevices()
+QtUsb::FilterList QUsbDevice::getAvailableDevices()
 {
     QList<QtUsb::DeviceFilter> list;
     GUID usbGuid;
@@ -153,6 +153,8 @@ void QUsbDevice::close()
 {
     if (!mConnected)
         return;
+
+    QIODevice::close();
 
     if (mDevHandle != INVALID_HANDLE_VALUE)
         CloseHandle(mDevHandle);
