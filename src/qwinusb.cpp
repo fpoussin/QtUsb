@@ -11,8 +11,105 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
 QList<QtUsb::DeviceFilter> QUsbDevice::getAvailableDevices()
 {
     QList<QtUsb::DeviceFilter> list;
+    GUID usbGuid;
+    this->guidFromString(QtUsb::WINUSB_GUID, &usbGuid);
+
+    HDEVINFO                         hDevInfo;
+    SP_DEVICE_INTERFACE_DATA         devIntfData;
+    PSP_DEVICE_INTERFACE_DETAIL_DATA devIntfDetailData;
+    SP_DEVINFO_DATA                  devData;
+
+
+    hDevInfo = SetupDiGetClassDevs(
+            &usbGuid, NULL, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
+
+
+    if (hDevInfo != INVALID_HANDLE_VALUE)
+        {
+            devIntfData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+            dwMemberIdx = 0;
+
+            SetupDiEnumDeviceInterfaces(hDevInfo, NULL, &usbGuid,
+                dwMemberIdx, &devIntfData);
+
+            while(GetLastError() != ERROR_NO_MORE_ITEMS)
+            {
+                devData.cbSize = sizeof(devData);
+                SetupDiGetDeviceInterfaceDetail(
+                      hDevInfo, &devIntfData, NULL, 0, &dwSize, NULL);
+
+                devIntfDetailData = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwSize);
+                devIntfDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+
+                if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &devIntfData,
+                    devIntfDetailData, dwSize, &dwSize, &devData))
+                {
+                    QString pathStr(devIntfDetailData);
+                    QtUsb::DeviceFilter filter;
+
+                    int vidFrom = pathStr.indexOf("vid_")+4;
+                    QString vidStr = pathStr.mid(vidFrom, 4);
+
+                    int pidFrom = pathStr.indexOf("pid_")+4;
+                    QString pidStr = pathStr.mid(pidFrom, 4);
+
+                    bool ok[2];
+                    uint vid = vidStr.toUInt(ok[1], 16);
+                    uint pid = pidStr.toUInt(ok[2], 16);
+
+                    if (ok[1] && ok[2])
+                    {
+                        filter.pid = pid;
+                        filter.vid = vid;
+                        list.append(filter);
+                    }
+                }
+
+                HeapFree(GetProcessHeap(), 0, devIntfDetailData);
+
+                // Continue looping
+                SetupDiEnumDeviceInterfaces(
+                    hDevInfo, NULL, &usbGuid, ++dwMemberIdx, &devIntfData);
+            }
+
+            SetupDiDestroyDeviceInfoList(hDevInfo);
+        }
 
     return list;
+}
+
+bool QUsbDevice::guidFromString(const QString& str, GUID *guid)
+{
+    bool check[11];
+    QString cleaned(str);
+    cleaned.remove('-');
+    GUID tmp =
+    {
+        cleaned.mid(0, 8).toULong(&check[0], 16),
+        cleaned.mid(8, 4).toUInt(&check[1], 16)&0xFFFF,
+        cleaned.mid(12, 4).toUInt(&check[2], 16)&0xFFFF,
+        {
+            cleaned.mid(16, 2).toUInt(&check[3], 16)&0xFF,
+            cleaned.mid(18, 2).toUInt(&check[4], 16)&0xFF,
+            cleaned.mid(20, 2).toUInt(&check[5], 16)&0xFF,
+            cleaned.mid(22, 2).toUInt(&check[6], 16)&0xFF,
+            cleaned.mid(24, 2).toUInt(&check[7], 16)&0xFF,
+            cleaned.mid(26, 2).toUInt(&check[8], 16)&0xFF,
+            cleaned.mid(28, 2).toUInt(&check[9], 16)&0xFF,
+            cleaned.mid(30, 2).toUInt(&check[10], 16)&0xFF
+        }
+    };
+
+    for (quint8 i = 0; i < sizeof(check); i++) {
+
+        if (!check[i]) {
+            qWarning() << "Failed to set Device GUID" << guid << "at" << i;
+            return false;
+        }
+    }
+
+    guid = tmp;
+    return true;
 }
 
 QUsbDevice::~QUsbDevice()
@@ -69,36 +166,7 @@ void QUsbDevice::close()
 
 bool QUsbDevice::setGuid(const QString &guid)
 {
-    bool check[11];
-    QString cleaned(guid);
-    cleaned.remove('-');
-    GUID tmp =
-    {
-        cleaned.mid(0, 8).toULong(&check[0], 16),
-        cleaned.mid(8, 4).toUInt(&check[1], 16)&0xFFFF,
-        cleaned.mid(12, 4).toUInt(&check[2], 16)&0xFFFF,
-        {
-            cleaned.mid(16, 2).toUInt(&check[3], 16)&0xFF,
-            cleaned.mid(18, 2).toUInt(&check[4], 16)&0xFF,
-            cleaned.mid(20, 2).toUInt(&check[5], 16)&0xFF,
-            cleaned.mid(22, 2).toUInt(&check[6], 16)&0xFF,
-            cleaned.mid(24, 2).toUInt(&check[7], 16)&0xFF,
-            cleaned.mid(26, 2).toUInt(&check[8], 16)&0xFF,
-            cleaned.mid(28, 2).toUInt(&check[9], 16)&0xFF,
-            cleaned.mid(30, 2).toUInt(&check[10], 16)&0xFF
-        }
-    };
-
-    for (quint8 i = 0; i < sizeof(check); i++) {
-
-        if (!check[i]) {
-            qWarning() << "Failed to set Device GUID" << guid << "at" << i;
-            return false;
-        }
-    }
-
-    mGuidDeviceInterface = tmp;
-    return true;
+    return this->guidFromString(guid, &mGuidDeviceInterface);
 }
 
 bool QUsbDevice::setGuid(const GUID &guid)
@@ -438,31 +506,24 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     }
     bool bResult = true;
     ulong cbRead = 0;
-    uchar *buffer = new uchar[bytes];
-    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, buffer, bytes, &cbRead, 0);
-    // we clear the buffer.
-    buf->clear();
+    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, data, maxSize, &cbRead, 0);
 
     if (!bResult) {
         printUsbError("WinUsb_ReadPipe");
-        delete buffer;
         return -1;
     }
 
     else if (cbRead > 0){
 
-        buf->append((const char *)buffer, cbRead);
-
         if (mDebug) {
-            QString data, s;
+            QString datastr, s;
             for (quint32 i = 0; i < cbRead; i++) {
-                data.append(s.sprintf("%02X",buffer[i])+":");
+                datastr.append(s.sprintf("%02X", data[i])+":");
             }
-            data.remove(data.size()-1, 1); //remove last colon
-            qDebug() << "Received" << cbRead << "of" << bytes << "Bytes:" << data;
+            datastr.remove(datastr.size()-1, 1); //remove last colon
+            qDebug() << "Received" << cbRead << "of" << maxSize << "Bytes:" << datastr;
         }
     }
-    delete buffer;
 
     return cbRead;
 }
@@ -478,15 +539,15 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     }
 
     ulong cbSent = 0;
-    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)buf->data(), bytes, &cbSent, 0);
+    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)data, maxSize, &cbSent, 0);
 
     if (mDebug) {
-        QString data, s;
-        for (int i = 0; i < buf->size(); i++) {
-            data.append(s.sprintf("%02X",(uchar)buf->at(i))+":");
+        QString datastr, s;
+        for (qint64 i = 0; i < maxSize; i++) {
+            datastr.append(s.sprintf("%02X", data[i])+":");
         }
-        data.remove(data.size()-1, 1); //remove last colon
-        qDebug() << "Sent" << cbSent << "/" << buf->size() << "bytes:" << data;
+        datastr.remove(datastr.size()-1, 1); //remove last colon
+        qDebug() << "Sent" << cbSent << "/" << maxSize << "bytes:" << datastr;
     }
     if (!bResult) {
         printUsbError("WinUsb_WritePipe");

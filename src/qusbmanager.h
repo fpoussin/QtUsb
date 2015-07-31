@@ -26,7 +26,6 @@ public slots:
     QtUsb::DeviceStatus openDevice(QUsbDevice* dev, const QtUsb::DeviceFilter &filter, const QtUsb::DeviceConfig &config);
     QtUsb::DeviceStatus closeDevice(QUsbDevice* dev);
 
-
 protected slots:
     void monitorDevices(const QtUsb::FilterList &list);
     void run(void);

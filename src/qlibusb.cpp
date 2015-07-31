@@ -12,7 +12,6 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
 
 QtUsb::FilterList QUsbDevice::getAvailableDevices()
 {
-    PrintFuncName();
     QtUsb::FilterList list;
 
     ssize_t cnt; // holding number of devices in list
