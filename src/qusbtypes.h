@@ -29,6 +29,14 @@ namespace QtUsb {
 
     typedef QList<DeviceFilter> FilterList;
     typedef QList<DeviceConfig> ConfigList;
+
+
 }
+
+Q_DECLARE_METATYPE(QtUsb::DeviceFilter);
+Q_DECLARE_METATYPE(QtUsb::DeviceConfig);
+
+Q_DECLARE_METATYPE(QtUsb::FilterList);
+Q_DECLARE_METATYPE(QtUsb::ConfigList);
 
 #endif // QUSBTYPES_H

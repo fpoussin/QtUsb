@@ -5,6 +5,12 @@ QUsbManager::QUsbManager(QObject *parent) :
 {
     mStop = false;
 
+    qRegisterMetaType<QtUsb::DeviceFilter>("QtUsb::DeviceFilter");
+    qRegisterMetaType<QtUsb::DeviceConfig>("QtUsb::DeviceConfig");
+
+    qRegisterMetaType<QtUsb::FilterList>("QtUsb::FilterList");
+    qRegisterMetaType<QtUsb::ConfigList>("QtUsb::ConfigList");
+
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
     this->start();
 }
@@ -38,11 +44,11 @@ bool QUsbManager::removeDevice(const QtUsb::DeviceFilter &filter)
 
 int QUsbManager::findDevice(const QtUsb::DeviceFilter& filter, const QtUsb::FilterList& list)
 {
-    for (int i = 0; i <= list.length(); i++)
+    for (int i = 0; i < list.length(); i++)
     {
-       const QtUsb::DeviceFilter* d = &list[i];
+       const QtUsb::DeviceFilter* d = &list.at(i);
 
-       if((d->guid == filter.guid) ||
+       if((!d->guid.isEmpty() && d->guid == filter.guid) ||
                (d->pid == filter.pid && d->vid == filter.vid))
        {
            return i;
@@ -79,20 +85,20 @@ void QUsbManager::monitorDevices(const QtUsb::FilterList& list)
     QtUsb::FilterList inserted, removed;
     QtUsb::DeviceFilter filter;
 
-    for (int i = 0; i <= list.length(); i++)
+    for (int i = 0; i < list.length(); i++)
     {
-        filter = list[i];
-        if (!this->findDevice(filter, mSystemList))
+        filter = list.at(i);
+        if (this->findDevice(filter, mSystemList) < 0)
         {
             // It's not in the old system list
             inserted.append(filter);
         }
     }
 
-    for (int i = 0; i <= mSystemList.length(); i++)
+    for (int i = 0; i < mSystemList.length(); i++)
     {
-        filter = mSystemList[i];
-        if (!this->findDevice(filter, list))
+        filter = mSystemList.at(i);
+        if (this->findDevice(filter, list) < 0)
         {
             // It's in the old system list but not in the current one
             removed.append(filter);
@@ -117,6 +123,6 @@ void QUsbManager::run()
     {
         list = QUsbDevice::getAvailableDevices();
         this->monitorDevices(list);
-        msleep(1000);
+        msleep(250);
     }
 }
