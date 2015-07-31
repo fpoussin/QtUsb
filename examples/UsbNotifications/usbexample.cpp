@@ -14,35 +14,23 @@ UsbExample::~UsbExample()
 
 }
 
-void UsbExample::addDevice()
-{
-    QtUsb::DeviceFilter filter;
-
-    filter.pid = 0x1234;
-    filter.vid = 0xABCD;
-
-    mUsbManager.addDevice(filter);
-}
-
 void UsbExample::onDevInserted(QtUsb::FilterList list)
 {
-    qDebug() << "devices inserted";
-    QString str;
+    qDebug("devices inserted");
     for (int i = 0; i < list.length(); i++)
     {
         QtUsb::DeviceFilter f = list.at(i);
-        qDebug(str.sprintf("%04x:%04x", f.vid, f.pid).toStdString().c_str());
+        qDebug("%04x:%04x", f.vid, f.pid);
     }
 }
 
 void UsbExample::onDevRemoved(QtUsb::FilterList list)
 {
-    qDebug() << "devices removed";
-    QString str;
+    qDebug("devices removed");
     for (int i = 0; i < list.length(); i++)
     {
         QtUsb::DeviceFilter f = list.at(i);
-        qDebug(str.sprintf("%04x:%04x", f.vid, f.pid).toStdString().c_str());
+        qDebug("%04x:%04x", f.vid, f.pid);
     }
 }
 

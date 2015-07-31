@@ -28,27 +28,24 @@ void UsbExample::setupDevice()
      * You can use both methods, only one will be taken into account.
      */
 
-    QtUsb::UsbDeviceDescription desc;
-
     // Linux
-    desc.pid = 0x1234;
-    desc.vid = 0x1234;
+    mFilter.pid = 0x1234;
+    mFilter.vid = 0xABCD;
 
     // Win (Get this id from the driver's .inf)
-    desc.guid = "";
-
-
-    mUsbManager.addDevice(desc);
-
-    mUsbDev.setEndPoints(USB_PIPE_IN, USB_PIPE_OUT);
+    mFilter.guid = "";
 }
 
 bool UsbExample::openDevice()
 {
-    qint32 open = mUsbDev.open();
-    if ((open >= 0)) {
-        // Device is open
+    qDebug("Opening");
 
+    QtUsb::DeviceStatus ds;
+    ds = mUsbManager.openDevice(&mUsbDev, mFilter, mConfig);
+
+    if (ds == QtUsb::deviceOK) {
+        // Device is open
+        mUsbDev.setConfig(mConfig);
         return true;
     }
     return false;
@@ -56,17 +53,17 @@ bool UsbExample::openDevice()
 
 bool UsbExample::closeDevice()
 {
-    mUsbDev.close();
     qDebug("Closing");
+    mUsbManager.closeDevice(&mUsbDev);
     return false;
 }
 
 void UsbExample::read(QByteArray *buf)
 {
-    mUsbDev.read(buf, 1);
+    *buf = mUsbDev.read(1);
 }
 
 void UsbExample::write(QByteArray *buf)
 {
-    mUsbDev.write(buf, buf->length());
+    mUsbDev.write(*buf);
 }

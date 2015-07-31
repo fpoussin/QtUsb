@@ -14,7 +14,6 @@ class UsbExample : public QObject
 public:
     explicit UsbExample(QObject *parent = 0);
     ~UsbExample(void);
-    void addDevice(void);
 
 signals:
 

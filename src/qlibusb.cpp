@@ -144,7 +144,7 @@ void QUsbDevice::close()
     PrintFuncName();
     if (mDevHandle && mConnected) {
         // stop any further write attempts whilst we close down
-        qDebug() << "Closing USB connection...";
+        qDebug("Closing USB connection...");
 
         QIODevice::close();
 
@@ -169,49 +169,49 @@ void QUsbDevice::printUsbError(int error_code)
     switch (error_code) {
 
         case LIBUSB_SUCCESS:
-            qWarning() << "LIBUSB_SUCCESS";
+            qWarning("LIBUSB_SUCCESS");
             break;
         case LIBUSB_ERROR_IO:
-            qWarning() << "LIBUSB_ERROR_IO";
+            qWarning("LIBUSB_ERROR_IO");
             break;
         case LIBUSB_ERROR_INVALID_PARAM:
-            qWarning() << "LIBUSB_ERROR_INVALID_PARAM";
+            qWarning("LIBUSB_ERROR_INVALID_PARAM");
             break;
         case LIBUSB_ERROR_ACCESS:
-            qWarning() << "LIBUSB_ERROR_ACCESS";
+            qWarning("LIBUSB_ERROR_ACCESS");
             break;
         case LIBUSB_ERROR_NO_DEVICE:
-            qWarning() << "LIBUSB_ERROR_NO_DEVICE";
+            qWarning("LIBUSB_ERROR_NO_DEVICE");
             break;
         case LIBUSB_ERROR_NOT_FOUND:
-            qWarning() << "LIBUSB_ERROR_NOT_FOUND";
+            qWarning("LIBUSB_ERROR_NOT_FOUND");
             break;
         case LIBUSB_ERROR_BUSY:
-            qWarning() << "LIBUSB_ERROR_BUSY";
+            qWarning("LIBUSB_ERROR_BUSY");
             break;
         case LIBUSB_ERROR_TIMEOUT:
-            qWarning() << "LIBUSB_ERROR_TIMEOUT";
+            qWarning("LIBUSB_ERROR_TIMEOUT");
             break;
         case LIBUSB_ERROR_OVERFLOW:
-            qWarning() << "LIBUSB_ERROR_OVERFLOW";
+            qWarning("LIBUSB_ERROR_OVERFLOW");
             break;
         case LIBUSB_ERROR_PIPE:
-            qWarning() << "LIBUSB_ERROR_PIPE";
+            qWarning("LIBUSB_ERROR_PIPE");
             break;
         case LIBUSB_ERROR_INTERRUPTED:
-            qWarning() << "LIBUSB_ERROR_INTERRUPTED";
+            qWarning("LIBUSB_ERROR_INTERRUPTED");
             break;
         case LIBUSB_ERROR_NO_MEM:
-            qWarning() << "LIBUSB_ERROR_NO_MEM";
+            qWarning("LIBUSB_ERROR_NO_MEM");
             break;
         case LIBUSB_ERROR_NOT_SUPPORTED:
-            qWarning() << "LIBUSB_ERROR_NOT_SUPPORTED";
+            qWarning("LIBUSB_ERROR_NOT_SUPPORTED");
             break;
         case LIBUSB_ERROR_OTHER:
-            qWarning() << "LIBUSB_ERROR_OTHER";
+            qWarning("LIBUSB_ERROR_OTHER");
             break;
         default:
-            qWarning() << "Unknown libusb error code: "<< error_code;
+            qWarning("Unknown libusb error code: %d", error_code);
             break;
     }
 }
@@ -246,17 +246,17 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     }
     if (mDebug) {
         datastr.remove(datastr.size()-1, 1); //remove last colon
-        qDebug() << "Received: " << datastr;
+        qDebug("Received: %s", datastr.toStdString().c_str());
     }
 
     if (rc != 0)
     {
         if (rc == -110)
         {
-            qWarning() << "libusb_bulk_transfer Timeout";
+            qWarning("libusb_bulk_transfer Timeout");
         }
         else {
-            qWarning() << "libusb_bulk_transfer Error reading: " << rc;
+            qWarning("libusb_bulk_transfer Error reading: %d", rc);
             this->printUsbError(rc);
             return -1;
         }
@@ -280,8 +280,9 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
         for (qint64 i=0; i<maxSize; i++) {
             cmd.append(s.sprintf("%02X", data[i])+":");
         }
-        cmd.remove(cmd.size()-1, 1); //remove last colon
+        cmd.remove(cmd.size()-1, 1); //remove last colon;
         qDebug() << "Sending" << maxSize << "bytes:" << cmd;
+        //qDebug("Sending %ll bytes: %s", maxSize, cmd.toStdString().c_str());
     }
 
     sent = 0;
@@ -298,15 +299,15 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     {
         if (rc == -110)
         {
-            qWarning() << "libusb_bulk_transfer Timeout";
+            qWarning("libusb_bulk_transfer Timeout");
         }
         else if (rc == -2)
         {
-            qWarning() << "EndPoint not found";
+            qWarning("EndPoint not found");
             return -1;
         }
         else {
-            qWarning() << "libusb_bulk_transfer Error Writing: "<< rc;
+            qWarning("libusb_bulk_transfer Error Writing: %d", rc);
             this->printUsbError(rc);
             return -1;
         }
