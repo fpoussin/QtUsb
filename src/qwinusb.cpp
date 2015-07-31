@@ -12,7 +12,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
 {
     QList<QtUsb::DeviceFilter> list;
     GUID usbGuid;
-    this->guidFromString(QtUsb::WINUSB_GUID, &usbGuid);
+    guidFromString(QtUsb::WINUSB_GUID, &usbGuid);
 
     HDEVINFO                         hDevInfo;
     SP_DEVICE_INTERFACE_DATA         devIntfData;
@@ -39,13 +39,13 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
                 SetupDiGetDeviceInterfaceDetail(
                       hDevInfo, &devIntfData, NULL, 0, &dwSize, NULL);
 
-                devIntfDetailData = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwSize);
+                devIntfDetailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwSize);
                 devIntfDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
                 if (SetupDiGetDeviceInterfaceDetail(hDevInfo, &devIntfData,
                     devIntfDetailData, dwSize, &dwSize, &devData))
                 {
-                    QString pathStr(devIntfDetailData);
+                    QString pathStr(*devIntfDetailData->DevicePath);
                     QtUsb::DeviceFilter filter;
 
                     int vidFrom = pathStr.indexOf("vid_")+4;
@@ -55,10 +55,10 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
                     QString pidStr = pathStr.mid(pidFrom, 4);
 
                     bool ok[2];
-                    uint vid = vidStr.toUInt(ok[1], 16);
-                    uint pid = pidStr.toUInt(ok[2], 16);
+                    uint vid = vidStr.toUInt(&ok[0], 16);
+                    uint pid = pidStr.toUInt(&ok[1], 16);
 
-                    if (ok[1] && ok[2])
+                    if (ok[0] && ok[1])
                     {
                         filter.pid = pid;
                         filter.vid = vid;
@@ -109,7 +109,7 @@ bool QUsbDevice::guidFromString(const QString& str, GUID *guid)
         }
     }
 
-    guid = tmp;
+    *guid = tmp;
     return true;
 }
 
@@ -509,7 +509,7 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     }
     bool bResult = true;
     ulong cbRead = 0;
-    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, data, maxSize, &cbRead, 0);
+    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, (uchar*)data, maxSize, &cbRead, 0);
 
     if (!bResult) {
         printUsbError("WinUsb_ReadPipe");
