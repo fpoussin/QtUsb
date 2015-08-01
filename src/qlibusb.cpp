@@ -57,6 +57,7 @@ QUsbDevice::~QUsbDevice()
 bool QUsbDevice::open(QIODevice::OpenMode mode)
 {
     (void) mode;
+    QIODevice::open(mode);
     return this->open() == 0;
 }
 
@@ -242,7 +243,7 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     QString datastr, s;
 
     for (qint32 i = 0; i < read; i++) {
-        if (mDebug) datastr.append(s.sprintf("%02X", (uchar)data[i])+":");
+        if (mDebug) datastr.append(s.sprintf("%02X:", (uchar)data[i]));
     }
     if (mDebug) {
         datastr.remove(datastr.size()-1, 1); //remove last colon
@@ -278,7 +279,7 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     if (mDebug) {
         QString cmd, s;
         for (qint64 i=0; i<maxSize; i++) {
-            cmd.append(s.sprintf("%02X", data[i])+":");
+            cmd.append(s.sprintf("%02X:", data[i]));
         }
         cmd.remove(cmd.size()-1, 1); //remove last colon;
         qDebug() << "Sending" << maxSize << "bytes:" << cmd;

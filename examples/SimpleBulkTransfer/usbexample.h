@@ -26,7 +26,7 @@ public slots:
 
 private:
     QUsbManager mUsbManager;
-    QUsbDevice mUsbDev;
+    QUsbDevice* mUsbDev;
 
     QtUsb::DeviceFilter mFilter;
     QtUsb::DeviceConfig mConfig;

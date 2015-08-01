@@ -119,12 +119,16 @@ QUsbDevice::~QUsbDevice()
 bool QUsbDevice::open(QIODevice::OpenMode mode)
 {
     (void) mode;
+    QIODevice::open(mode);
     return this->open() == 0;
 }
 
 qint32 QUsbDevice::open()
 {
     if (mConnected)
+        return -1;
+
+    if (!guidFromString(mFilter.guid, &mGuidDeviceInterface))
         return -1;
 
     if (!getDeviceHandle(mGuidDeviceInterface, &mDevHandle)) return -1;
@@ -313,8 +317,7 @@ bool QUsbDevice::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle
         StringCchCopy(lpDevicePath, nLength, pInterfaceDetailData->DevicePath);
         lpDevicePath[nLength-1] = 0;
 
-        if (mDebug) qDebug("Device path:  %s\n", lpDevicePath);
-
+        if (mDebug) qDebug("Device path:  %ls\n", lpDevicePath);
     }
 
     if (!lpDevicePath)
@@ -519,7 +522,7 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
         if (mDebug) {
             QString datastr, s;
             for (quint32 i = 0; i < cbRead; i++) {
-                datastr.append(s.sprintf("%02X", data[i])+":");
+                datastr.append(s.sprintf("%02X:", (uchar)data[i]));
             }
             datastr.remove(datastr.size()-1, 1); //remove last colon
             qDebug() << "Received" << cbRead << "of" << maxSize << "Bytes:" << datastr;
@@ -545,7 +548,7 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     if (mDebug) {
         QString datastr, s;
         for (qint64 i = 0; i < maxSize; i++) {
-            datastr.append(s.sprintf("%02X", data[i])+":");
+            datastr.append(s.sprintf("%02X:", (uchar)data[i]));
         }
         datastr.remove(datastr.size()-1, 1); //remove last colon
         qDebug() << "Sent" << cbSent << "/" << maxSize << "bytes:" << datastr;

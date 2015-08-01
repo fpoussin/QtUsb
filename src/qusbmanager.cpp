@@ -59,25 +59,28 @@ int QUsbManager::findDevice(const QtUsb::DeviceFilter& filter, const QtUsb::Filt
 
 QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev, const QtUsb::DeviceFilter &filter, const QtUsb::DeviceConfig &config)
 {
-    dev = new QUsbDevice();
+    if (dev == NULL)
+        return QtUsb::devicePgmError;
     dev->setConfig(config);
     dev->setFilter(filter);
 
     mUsedDeviceList.append(dev);
-    dev->open(QIODevice::ReadWrite);
-
-    return QtUsb::deviceOK;
+    if (dev->open(QIODevice::ReadWrite))
+        return QtUsb::deviceOK;
+    else
+        return QtUsb::deviceNotFound;
 }
 
 QtUsb::DeviceStatus QUsbManager::closeDevice(QUsbDevice *dev)
 {
     if (dev != NULL)
     {
+        int pos = mUsedDeviceList.indexOf(dev);
+        mUsedDeviceList.removeAt(pos);
         dev->close();
-        delete dev;
         return QtUsb::deviceOK;
     }
-    return QtUsb::deviceNotFound;
+    return QtUsb::devicePgmError;
 }
 
 void QUsbManager::monitorDevices(const QtUsb::FilterList& list)

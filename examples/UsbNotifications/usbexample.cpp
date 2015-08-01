@@ -6,7 +6,8 @@ UsbExample::UsbExample(QObject *parent) :
     QObject::connect(&mUsbManager, SIGNAL(deviceInserted(QtUsb::FilterList)), this, SLOT(onDevInserted(QtUsb::FilterList)));
     QObject::connect(&mUsbManager, SIGNAL(deviceRemoved(QtUsb::FilterList)), this, SLOT(onDevRemoved(QtUsb::FilterList)));
 
-    qDebug("Starting");
+    qDebug("Starting...");
+    qDebug("Press CTRL+C to close.");
 }
 
 UsbExample::~UsbExample()
@@ -20,7 +21,7 @@ void UsbExample::onDevInserted(QtUsb::FilterList list)
     for (int i = 0; i < list.length(); i++)
     {
         QtUsb::DeviceFilter f = list.at(i);
-        qDebug("%04x:%04x", f.vid, f.pid);
+        qDebug("V%04x:P%04x", f.vid, f.pid);
     }
 }
 
@@ -30,7 +31,7 @@ void UsbExample::onDevRemoved(QtUsb::FilterList list)
     for (int i = 0; i < list.length(); i++)
     {
         QtUsb::DeviceFilter f = list.at(i);
-        qDebug("%04x:%04x", f.vid, f.pid);
+        qDebug("V%04x:P%04x", f.vid, f.pid);
     }
 }
 
