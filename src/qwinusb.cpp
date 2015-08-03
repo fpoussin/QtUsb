@@ -156,7 +156,7 @@ void QUsbDevice::close()
     if (!mConnected)
         return;
 
-    QIODevice::close();
+    QBaseUsbDevice::close();
 
     if (mDevHandle != INVALID_HANDLE_VALUE)
         CloseHandle(mDevHandle);

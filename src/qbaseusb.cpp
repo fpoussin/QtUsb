@@ -23,6 +23,11 @@ void QBaseUsbDevice::setDebug(bool enable)
     mDebug = enable;
 }
 
+void QBaseUsbDevice::close()
+{
+    QIODevice::close();
+}
+
 void QBaseUsbDevice::setTimeout(quint16 timeout)
 {
     mTimeout = timeout;

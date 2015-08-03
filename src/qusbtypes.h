@@ -1,6 +1,8 @@
 #ifndef QUSBTYPES_H
 #define QUSBTYPES_H
 
+#include <QMetaType>
+
 namespace QtUsb {
 
     const quint16 DefaultTimeout = 250;
@@ -33,10 +35,10 @@ namespace QtUsb {
 
 }
 
-Q_DECLARE_METATYPE(QtUsb::DeviceFilter);
-Q_DECLARE_METATYPE(QtUsb::DeviceConfig);
+Q_DECLARE_METATYPE(QtUsb::DeviceFilter)
+Q_DECLARE_METATYPE(QtUsb::DeviceConfig)
 
-Q_DECLARE_METATYPE(QtUsb::FilterList);
-Q_DECLARE_METATYPE(QtUsb::ConfigList);
+Q_DECLARE_METATYPE(QtUsb::FilterList)
+Q_DECLARE_METATYPE(QtUsb::ConfigList)
 
 #endif // QUSBTYPES_H

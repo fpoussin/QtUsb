@@ -7,7 +7,7 @@
 QT       += core
 QT       -= gui
 
-TARGET = SimpleBulkTransfer
+TARGET = UsbNotifications
 CONFIG   += console
 CONFIG   -= app_bundle
 win32:CONFIG += winusb

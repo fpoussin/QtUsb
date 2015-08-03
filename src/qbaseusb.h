@@ -39,7 +39,7 @@ public:
 public slots:
     virtual bool open(OpenMode mode) = 0;
     virtual qint32 open() = 0;
-    virtual void close() = 0;
+    virtual void close();
 
     void setTimeout(quint16 timeout);
     void showSettings(void);
