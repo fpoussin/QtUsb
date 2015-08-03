@@ -23,7 +23,6 @@ UsbExample::UsbExample(QObject *parent) :
 
 UsbExample::~UsbExample()
 {
-    this->closeDevice();
     delete mUsbDev;
 }
 
