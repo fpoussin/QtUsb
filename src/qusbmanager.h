@@ -14,6 +14,9 @@ public:
     explicit QUsbManager(QObject *parent = 0);
     ~QUsbManager(void);
 
+    QtUsb::FilterList getPresentDevices(void);
+    bool isPresent(const QtUsb::DeviceFilter &filter);
+
 signals:
     void deviceInserted(QtUsb::FilterList filters);
     void deviceRemoved(QtUsb::FilterList filters);

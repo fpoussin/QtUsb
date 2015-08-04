@@ -21,6 +21,28 @@ QUsbManager::~QUsbManager()
     this->wait();
 }
 
+QtUsb::FilterList QUsbManager::getPresentDevices()
+{
+    QtUsb::FilterList list;
+    QtUsb::DeviceFilter filter;
+
+    for (int i = 0; i < mFilterList.length(); i++)
+    {
+        filter = mFilterList.at(i);
+        if (this->findDevice(filter, mSystemList) < 0)
+        {
+            // It's not in the old system list
+            list.append(filter);
+        }
+    }
+    return list;
+}
+
+bool QUsbManager::isPresent(const QtUsb::DeviceFilter &filter)
+{
+    return this->findDevice(filter, mSystemList) >= 0;
+}
+
 bool QUsbManager::addDevice(const QtUsb::DeviceFilter &filter)
 {
     if (this->findDevice(filter, mFilterList) == -1)
