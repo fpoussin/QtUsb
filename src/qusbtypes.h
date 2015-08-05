@@ -13,14 +13,6 @@ namespace QtUsb {
 
     typedef struct
     {
-        quint16 pid;
-        quint16 vid;
-        QString guid;
-
-    } DeviceFilter;
-
-    typedef struct
-    {
         quint8 readEp;
         quint8 writeEp;
         quint8 config;
@@ -28,6 +20,15 @@ namespace QtUsb {
         quint8 alternate;
 
     } DeviceConfig;
+
+    typedef struct
+    {
+        quint16 pid;
+        quint16 vid;
+        QString guid;
+        DeviceConfig cfg;
+
+    } DeviceFilter;
 
     typedef QList<DeviceFilter> FilterList;
     typedef QList<DeviceConfig> ConfigList;
