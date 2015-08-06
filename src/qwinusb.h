@@ -2,7 +2,7 @@
 #define QWINUSB_H
 
 #include <QDebug>
-#include "compat.h"
+#include "qusb_compat.h"
 #include "qbaseusb.h"
 
 // Include Windows headers

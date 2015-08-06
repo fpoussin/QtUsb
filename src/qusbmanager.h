@@ -3,9 +3,7 @@
 
 #include <QThread>
 #include <QList>
-#include "qusb_global.h"
-#include "qusbtypes.h"
-#include "qusb.h"
+#include <QUsb>
 
 class QUSBSHARED_EXPORT QUsbManager : public QThread
 {
@@ -36,9 +34,8 @@ protected slots:
 protected:
     bool mStop;
     QList<QUsbDevice*> mUsedDeviceList;
-    QList<QtUsb::DeviceFilter> mFilterList;
-    QList<QtUsb::DeviceFilter> mSystemList;
-
+    QtUsb::FilterList mFilterList;
+    QtUsb::FilterList mSystemList;
 };
 
 #endif // QUSBMANAGER_H

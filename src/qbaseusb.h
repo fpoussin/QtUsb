@@ -6,7 +6,7 @@
 #include <QList>
 #include <QIODevice>
 #include "qusb_global.h"
-#include "qusbtypes.h"
+#include "qusb_types.h"
 
 class QUSBSHARED_EXPORT QBaseUsbDevice : public QIODevice
 {

@@ -5,10 +5,9 @@
 #include <QDebug>
 #include <QByteArray>
 #include <QtEndian>
-
-#include <qbaseusb.h>
-#include <compat.h>
 #include <libusb-1.0/libusb.h>
+#include "qbaseusb.h"
+#include "qusb_compat.h"
 
 class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
 {

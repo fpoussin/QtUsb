@@ -32,8 +32,6 @@ namespace QtUsb {
 
     typedef QList<DeviceFilter> FilterList;
     typedef QList<DeviceConfig> ConfigList;
-
-
 }
 
 Q_DECLARE_METATYPE(QtUsb::DeviceFilter)

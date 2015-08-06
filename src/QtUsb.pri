@@ -11,12 +11,12 @@ SOURCES += \
 
 HEADERS +=  \
     qusb_global.h \
-    compat.h \
+    qusb_compat.h \
     qbaseusb.h \
     qusb.h \
     QUsb \
     qusbmanager.h \
-    qusbtypes.h
+    qusb_types.h
 
 win32 {
     message(Building QtUsb with WinUSB support.)
