@@ -148,6 +148,6 @@ void QUsbManager::run()
     {
         list = QUsbDevice::getAvailableDevices();
         this->monitorDevices(list);
-        msleep(250);
+        this->msleep(250);
     }
 }

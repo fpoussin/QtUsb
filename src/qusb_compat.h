@@ -28,10 +28,6 @@ This file is part of QSTLink2.
     #define QElapsedTimer QTime
 #endif
 
-#ifdef WIN32
-    #define usleep(num) Sleep(num/1000)
-#endif
-
 #define UsbPrintError() qWarning ("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define UsbPrintFuncName() if (mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
