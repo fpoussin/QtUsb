@@ -14,8 +14,8 @@ This file is part of QSTLink2.
     You should have received a copy of the GNU General Public License
     along with QSTLink2.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef COMPAT_H
-#define COMPAT_H
+#ifndef QUSB_COMPAT_H
+#define QUSB_COMPAT_H
 #include <stdio.h>
 
 #if QT_VERSION >= 0x040700
@@ -35,4 +35,4 @@ This file is part of QSTLink2.
 #define PrintError() qWarning ("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define PrintFuncName() if (mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
-#endif // COMPAT_H
+#endif // QUSB_COMPAT_H

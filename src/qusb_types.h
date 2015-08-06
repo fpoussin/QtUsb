@@ -1,5 +1,5 @@
-#ifndef QUSBTYPES_H
-#define QUSBTYPES_H
+#ifndef QUSB_TYPES_H
+#define QUSB_TYPES_H
 
 #include <QMetaType>
 
@@ -40,4 +40,4 @@ Q_DECLARE_METATYPE(QtUsb::DeviceConfig)
 Q_DECLARE_METATYPE(QtUsb::FilterList)
 Q_DECLARE_METATYPE(QtUsb::ConfigList)
 
-#endif // QUSBTYPES_H
+#endif // QUSB_TYPES_H
