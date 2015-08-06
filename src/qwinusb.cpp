@@ -182,7 +182,7 @@ bool QUsbDevice::setGuid(const GUID &guid)
 
 bool QUsbDevice::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (guidDeviceInterface == GUID_NULL)
     {
         printUsbError("GUID_NULL");
@@ -354,7 +354,7 @@ bool QUsbDevice::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle
 
 bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (hDeviceHandle == INVALID_HANDLE_VALUE)
     {
         printUsbError("INVALID_HANDLE_VALUE");
@@ -373,7 +373,7 @@ bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE 
 
 bool QUsbDevice::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8 *pDeviceSpeed)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (!pDeviceSpeed || hWinUSBHandle==INVALID_HANDLE_VALUE)
     {
         return false;
@@ -411,7 +411,7 @@ bool QUsbDevice::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8
 
 bool QUsbDevice::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsbDevice::PIPE_ID *pipeId)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (hWinUSBHandle==INVALID_HANDLE_VALUE)
     {
         return false;
@@ -500,7 +500,7 @@ void QUsbDevice::printUsbError(const QString &func)
 
 qint64 QUsbDevice::readData(char *data, qint64 maxSize)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
 
     if (mUsbHandle == INVALID_HANDLE_VALUE
             || !mConfig.readEp
@@ -534,7 +534,7 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
 
 qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (mUsbHandle==INVALID_HANDLE_VALUE
             || !mConfig.writeEp
             || !mConnected)

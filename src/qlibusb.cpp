@@ -63,7 +63,7 @@ bool QUsbDevice::open(QIODevice::OpenMode mode)
 
 qint32 QUsbDevice::open()
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (mConnected)
         return -1;
 
@@ -142,7 +142,7 @@ qint32 QUsbDevice::open()
 
 void QUsbDevice::close()
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     if (mDevHandle && mConnected) {
         // stop any further write attempts whilst we close down
         qDebug("Closing USB connection...");
@@ -219,7 +219,7 @@ void QUsbDevice::printUsbError(int error_code)
 
 qint64 QUsbDevice::readData(char *data, qint64 maxSize)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     qint32 rc, read_tmp;
     qint64 read;
     QElapsedTimer timer;
@@ -268,7 +268,7 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
 
 qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
 {
-    PrintFuncName();
+    UsbPrintFuncName();
     qint32 rc, sent_tmp;
     qint64 sent;
     QElapsedTimer timer;

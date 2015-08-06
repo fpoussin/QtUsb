@@ -32,7 +32,7 @@ This file is part of QSTLink2.
     #define usleep(num) Sleep(num/1000)
 #endif
 
-#define PrintError() qWarning ("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define PrintFuncName() if (mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define UsbPrintError() qWarning ("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define UsbPrintFuncName() if (mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 #endif // QUSB_COMPAT_H
