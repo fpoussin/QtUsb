@@ -10,6 +10,12 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
     }
 }
 
+QUsbDevice::~QUsbDevice()
+{
+    this->close();
+    libusb_exit(mCtx);
+}
+
 QtUsb::FilterList QUsbDevice::getAvailableDevices()
 {
     QtUsb::FilterList list;
@@ -46,19 +52,6 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
     libusb_free_device_list(devs, 1);
     libusb_exit(ctx);
     return list;
-}
-
-QUsbDevice::~QUsbDevice()
-{
-    this->close();
-    libusb_exit(mCtx);
-}
-
-bool QUsbDevice::open(QIODevice::OpenMode mode)
-{
-    (void) mode;
-    QIODevice::open(mode);
-    return this->open() == 0;
 }
 
 qint32 QUsbDevice::open()
@@ -117,19 +110,15 @@ qint32 QUsbDevice::open()
         case LIBUSB_SPEED_LOW:
             this->mSpd = QtUsb::lowSpeed;
             break;
-
         case LIBUSB_SPEED_FULL:
             this->mSpd = QtUsb::fullSpeed;
             break;
-
         case LIBUSB_SPEED_HIGH:
             this->mSpd = QtUsb::highSpeed;
             break;
-
         case LIBUSB_SPEED_SUPER:
             this->mSpd = QtUsb::superSpeed;
             break;
-
         default:
             this->mSpd = QtUsb::unknownSpeed;
             break;
@@ -217,11 +206,21 @@ void QUsbDevice::printUsbError(int error_code)
     }
 }
 
-qint64 QUsbDevice::readData(char *data, qint64 maxSize)
+void QUsbDevice::flush()
+{
+    QByteArray buf;
+    qint32 read_bytes;
+
+    buf.resize(4096);
+    libusb_bulk_transfer(mDevHandle, mConfig.readEp, (uchar*)(buf.data()+read), 4096, &read_bytes, 25);
+}
+
+qint64 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
 {
     UsbPrintFuncName();
-    qint32 rc, read_tmp;
-    qint64 read;
+    Q_CHECK_PTR(buf);
+    qint32 rc, read_bytes;
+    qint64 read_total;
     QElapsedTimer timer;
 
     // check it isn't closed already
@@ -230,20 +229,24 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     if (maxSize == 0)
         return 0;
 
-    read = 0;
-    read_tmp = 0;
+    read_total = 0;
+    read_bytes = 0;
+
+    buf->resize(maxSize);
 
     timer.start();
-    while (timer.elapsed() < mTimeout && maxSize-read > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, (mConfig.readEp), (uchar*)(data+read), maxSize-read, &read_tmp, mTimeout);
-        read += read_tmp;
+    while (timer.elapsed() < mTimeout && maxSize-read_total > 0) {
+        rc = libusb_bulk_transfer(mDevHandle, mConfig.readEp, (uchar*)(buf->data()+read_total), maxSize-read_total, &read_bytes, mTimeout);
+        read_total += read_bytes;
         if (rc != 0) break;
     }
-    // we clear the buffer.
+    // we resize the buffer.
+    buf->resize(read_total);
+
     QString datastr, s;
 
-    for (qint32 i = 0; i < read; i++) {
-        if (mDebug) datastr.append(s.sprintf("%02X:", (uchar)data[i]));
+    for (qint32 i = 0; i < read_total; i++) {
+        if (mDebug) datastr.append(s.sprintf("%02X:", (uchar)buf->at(i)));
     }
     if (mDebug) {
         datastr.remove(datastr.size()-1, 1); //remove last colon
@@ -263,12 +266,13 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
         }
     }
 
-    return read;
+    return read_total;
 }
 
-qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
+qint64 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
 {
     UsbPrintFuncName();
+    Q_CHECK_PTR(buf);
     qint32 rc, sent_tmp;
     qint64 sent;
     QElapsedTimer timer;
@@ -279,7 +283,7 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     if (mDebug) {
         QString cmd, s;
         for (qint64 i=0; i<maxSize; i++) {
-            cmd.append(s.sprintf("%02X:", data[i]));
+            cmd.append(s.sprintf("%02X:", buf->at(i)));
         }
         cmd.remove(cmd.size()-1, 1); //remove last colon;
         qDebug() << "Sending" << maxSize << "bytes:" << cmd;
@@ -291,7 +295,7 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
 
     timer.start();
     while (timer.elapsed() < mTimeout && maxSize-sent > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, (mConfig.writeEp), (uchar*)data, maxSize, &sent_tmp, mTimeout);
+        rc = libusb_bulk_transfer(mDevHandle, (mConfig.writeEp), (uchar*)buf->data(), maxSize, &sent_tmp, mTimeout);
         sent += sent_tmp;
         if (rc != 0) break;
     }

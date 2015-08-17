@@ -15,21 +15,24 @@ class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
 
 public:
     explicit QUsbDevice(QBaseUsbDevice *parent = 0);
-    static QtUsb::FilterList getAvailableDevices(void);
     ~QUsbDevice();
 
+    static QtUsb::FilterList getAvailableDevices(void);
+
 public slots:
-    bool open(OpenMode mode);
     qint32 open();
     void close();
+
+    void flush();
+    qint32 read(QByteArray* buf, quint32 maxSize);
+    qint32 write(const QByteArray* buf, quint32 maxSize);
+
     void setDebug(bool enable);
 
-private slots:
-    void printUsbError(int error_code);
-    qint64 readData(char * data, qint64 maxSize);
-    qint64 writeData(const char * data, qint64 maxSize);
+private slots:    
 
 private:
+    void printUsbError(int error_code);
     libusb_device **mDevs;
     libusb_device_handle *mDevHandle;
     libusb_context *mCtx;

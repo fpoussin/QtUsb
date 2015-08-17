@@ -116,12 +116,6 @@ QUsbDevice::~QUsbDevice()
     this->close();
 }
 
-bool QUsbDevice::open(QIODevice::OpenMode mode)
-{
-    (void) mode;
-    return this->open() == 0;
-}
-
 qint32 QUsbDevice::open()
 {
     if (mConnected)
@@ -146,7 +140,6 @@ qint32 QUsbDevice::open()
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -7; }
 
     mConnected = true;
-    QIODevice::open(QIODevice::ReadWrite);
 
     return 0;
 }
@@ -167,8 +160,31 @@ void QUsbDevice::close()
     mUsbHandle = INVALID_HANDLE_VALUE;
 
     mConnected = false;
+}
 
-    QIODevice::close();
+void QUsbDevice::flush()
+{
+    UsbPrintFuncName();
+
+    if (mUsbHandle == INVALID_HANDLE_VALUE
+            || !mConfig.readEp
+            || !mConnected)
+    {
+        return;
+    }
+    ulong cbRead;
+    uchar* data = new uchar[4096];
+    ulong timeout = 25;
+
+    WinUsb_SetPipePolicy(mUsbHandle, mConfig.readEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout);
+    WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, data, 4096, &cbRead, NULL);
+
+    timeout = mTimeout;
+    WinUsb_SetPipePolicy(mUsbHandle, mConfig.readEp, PIPE_TRANSFER_TIMEOUT, sizeof(timeout), &timeout);
+
+    if (mDebug) qDebug("Flushed %d bytes from endpoint 0x%x", cbRead, (uint)mConfig.readEp);
+
+    delete [] data;
 }
 
 bool QUsbDevice::setGuid(const QString &guid)
@@ -490,16 +506,16 @@ void QUsbDevice::printUsbError(const QString &func)
     switch (err)
     {
         case ERROR_INVALID_HANDLE:
-            qWarning() << func << "ERROR_INVALID_HANDLE" << err;
+            qWarning() << func << "ERROR_INVALID_HANDLE";
             break;
         case ERROR_SEM_TIMEOUT:
-            qWarning() << func << "ERROR_SEM_TIMEOUT" << err;
+            qWarning() << func << "ERROR_SEM_TIMEOUT" << mTimeout;
             break;
         case ERROR_IO_PENDING:
-            qWarning() << func << "ERROR_IO_PENDING" << err;
+            qWarning() << func << "ERROR_IO_PENDING";
             break;
         case ERROR_NOT_ENOUGH_MEMORY:
-            qWarning() << func << "ERROR_NOT_ENOUGH_MEMORY" << err;
+            qWarning() << func << "ERROR_NOT_ENOUGH_MEMORY";
             break;
         default:
             qWarning() << func << "Error id:" << err;
@@ -507,9 +523,10 @@ void QUsbDevice::printUsbError(const QString &func)
     }
 }
 
-qint64 QUsbDevice::readData(char *data, qint64 maxSize)
+qint32 QUsbDevice::read(QByteArray *buf, quint32 maxSize)
 {
     UsbPrintFuncName();
+    Q_CHECK_PTR(buf);
 
     if (mUsbHandle == INVALID_HANDLE_VALUE
             || !mConfig.readEp
@@ -519,7 +536,10 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     }
     bool bResult = true;
     ulong cbRead = 0;
-    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, (uchar*)data, maxSize, &cbRead, NULL);
+    uchar* data = new uchar[maxSize];
+
+    if (mDebug) qDebug("Reading %d bytes from endpoint 0x%02x", maxSize, (uint)mConfig.readEp);
+    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, data, maxSize, &cbRead, NULL);
 
     if (!bResult) {
         printUsbError("WinUsb_ReadPipe");
@@ -531,19 +551,23 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
         if (mDebug) {
             QString datastr, s;
             for (quint32 i = 0; i < cbRead; i++) {
-                datastr.append(s.sprintf("%02X:", (uchar)data[i]));
+                datastr.append(s.sprintf("%02X:", data[i]));
             }
             datastr.remove(datastr.size()-1, 1); //remove last colon
             qDebug() << "Received" << cbRead << "of" << maxSize << "Bytes:" << datastr;
         }
     }
 
+    *buf->append((char*)data, cbRead);
+    delete [] data;
+
     return cbRead;
 }
 
-qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
+qint32 QUsbDevice::write(const QByteArray *buf, quint32 maxSize)
 {
     UsbPrintFuncName();
+    Q_CHECK_PTR(buf);
     if (mUsbHandle==INVALID_HANDLE_VALUE
             || !mConfig.writeEp
             || !mConnected)
@@ -552,12 +576,13 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     }
 
     ulong cbSent = 0;
-    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)data, maxSize, &cbSent, NULL);
+    if (mDebug) qDebug("Writing %d bytes to endpoint 0x%02x", maxSize,(uint)mConfig.writeEp);
+    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)buf->data(), maxSize, &cbSent, NULL);
 
     if (mDebug) {
         QString datastr, s;
         for (qint64 i = 0; i < maxSize; i++) {
-            datastr.append(s.sprintf("%02X:", (uchar)data[i]));
+            datastr.append(s.sprintf("%02X:", (uchar)buf->at(i)));
         }
         datastr.remove(datastr.size()-1, 1); //remove last colon
         qDebug() << "Sent" << cbSent << "/" << maxSize << "bytes:" << datastr;
@@ -567,4 +592,23 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
         return -1;
     }
     return cbSent;
+}
+
+void QUsbDevice::setTimeout(quint16 timeout)
+{
+    UsbPrintFuncName();
+    if (mUsbHandle==INVALID_HANDLE_VALUE
+            || !mConfig.writeEp
+            || !mConfig.readEp)
+    {
+        return;
+    }
+
+    mTimeout = timeout;
+    ulong _timeout = mTimeout; /* SetPipePolicy requires an unsigned long */
+
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mConfig.readEp, PIPE_TRANSFER_TIMEOUT, sizeof(_timeout), &_timeout)) {
+        qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return; }
+    if (!WinUsb_SetPipePolicy(mUsbHandle, mConfig.writeEp, PIPE_TRANSFER_TIMEOUT, sizeof(_timeout), &_timeout)) {
+        qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return; }
 }

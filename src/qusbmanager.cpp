@@ -87,7 +87,7 @@ QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev, const QtUsb::Device
     dev->setFilter(filter);
 
     mUsedDeviceList.append(dev);
-    if (dev->open(QIODevice::ReadWrite))
+    if (dev->open() == 0)
         return QtUsb::deviceOK;
     else
         return QtUsb::deviceNotFound;

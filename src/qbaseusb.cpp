@@ -2,7 +2,7 @@
 
 
 QBaseUsbDevice::QBaseUsbDevice(QObject *parent) :
-    QIODevice(parent)
+    QObject(parent)
 {
     this->setDefaults();
     mSpd = QtUsb::unknownSpeed;
@@ -13,26 +13,43 @@ QBaseUsbDevice::~QBaseUsbDevice()
 
 }
 
-quint16 QBaseUsbDevice::getTimeout(void)
+qint32 QBaseUsbDevice::write(const QByteArray &buf)
 {
-    return mTimeout;
+    return this->write(&buf, buf.size());
 }
 
-void QBaseUsbDevice::setDebug(bool enable)
+qint32 QBaseUsbDevice::read(QByteArray *buf)
 {
-    mDebug = enable;
+    return this->read(buf, 4096);
+}
+
+bool QBaseUsbDevice::write(char c)
+{
+    QByteArray buf(1, c);
+    return this->write(buf) > 0;
+}
+
+bool QBaseUsbDevice::read(char *c)
+{
+    QByteArray buf;
+    Q_CHECK_PTR(c);
+    if (this->read(&buf, 1) > 0)
+    {
+        *c = buf.at(0);
+        return true;
+    }
+    return false;
 }
 
 void QBaseUsbDevice::close()
 {
-    QIODevice::close();
+
 }
 
 void QBaseUsbDevice::setTimeout(quint16 timeout)
 {
     mTimeout = timeout;
 }
-
 
 void QBaseUsbDevice::showSettings()
 {

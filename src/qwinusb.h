@@ -37,17 +37,18 @@ public:
     explicit QUsbDevice(QBaseUsbDevice *parent = 0);
     static QtUsb::FilterList getAvailableDevices(void);
     static bool guidFromString(const QString &str, GUID* guid);
+    bool setGuid(const QString &guid);
+    bool setGuid(const GUID &guid);
     ~QUsbDevice();
     
 public slots:
-    bool open(OpenMode mode);
     qint32 open();
     void close();
-    bool setGuid(const QString &guid);
-    bool setGuid(const GUID &guid);
+    void flush();
+    qint32 read(QByteArray* buf, quint32 maxSize);
+    qint32 write(const QByteArray* buf, quint32 maxSize);
 
-    qint64 readData(char * data, qint64 maxSize);
-    qint64 writeData(const char * data, qint64 maxSize);
+    void setTimeout(quint16 timeout);
 
 private:
     bool getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle);
