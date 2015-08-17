@@ -7,7 +7,7 @@ UsbExample::UsbExample(QObject *parent) :
 
     QByteArray send, recv;
 
-    send.append(0xAB);
+    send.append((char)0xAB);
 
     #ifdef interface
     #undef interface
@@ -44,7 +44,7 @@ void UsbExample::setupDevice()
 
     //
     mConfig.alternate = 0;
-    mConfig.config = 1;
+    mConfig.config = 0;
     mConfig.interface = 1;
     mConfig.readEp = 0x81;
     mConfig.writeEp = 0x02;
@@ -73,10 +73,10 @@ bool UsbExample::closeDevice()
 
 void UsbExample::read(QByteArray *buf)
 {
-    *buf = mUsbDev->read(1);
+    mUsbDev->read(buf, 1);
 }
 
 void UsbExample::write(QByteArray *buf)
 {
-    mUsbDev->write(*buf);
+    mUsbDev->write(buf, buf->size());
 }
