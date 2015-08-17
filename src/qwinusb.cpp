@@ -119,7 +119,6 @@ QUsbDevice::~QUsbDevice()
 bool QUsbDevice::open(QIODevice::OpenMode mode)
 {
     (void) mode;
-    QIODevice::open(mode);
     return this->open() == 0;
 }
 
@@ -128,10 +127,10 @@ qint32 QUsbDevice::open()
     if (mConnected)
         return -1;
 
-    if (!guidFromString(mFilter.guid, &mGuidDeviceInterface))
+    if (!guidFromString(mFilter.guid, &mGuid))
         return -1;
 
-    if (!getDeviceHandle(mGuidDeviceInterface, &mDevHandle)) return -1;
+    if (!getDeviceHandle(mGuid, &mDevHandle)) return -1;
     else if (!getWinUSBHandle(mDevHandle, &mUsbHandle)) return -2;
     else if (!getUSBDeviceSpeed(mUsbHandle, &mDevSpeed)) return -3;
     else if (!queryDeviceEndpoints(mUsbHandle, &mPipeId)) return -4;
@@ -147,6 +146,7 @@ qint32 QUsbDevice::open()
         qWarning("Error WinUsb_SetPipePolicy: %d.\n", GetLastError()); return -7; }
 
     mConnected = true;
+    QIODevice::open(QIODevice::ReadWrite);
 
     return 0;
 }
@@ -167,16 +167,18 @@ void QUsbDevice::close()
     mUsbHandle = INVALID_HANDLE_VALUE;
 
     mConnected = false;
+
+    QIODevice::close();
 }
 
 bool QUsbDevice::setGuid(const QString &guid)
 {
-    return this->guidFromString(guid, &mGuidDeviceInterface);
+    return this->guidFromString(guid, &mGuid);
 }
 
 bool QUsbDevice::setGuid(const GUID &guid)
 {
-    mGuidDeviceInterface = guid;
+    mGuid = guid;
     return true;
 }
 
@@ -317,7 +319,7 @@ bool QUsbDevice::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle
         StringCchCopy(lpDevicePath, nLength, pInterfaceDetailData->DevicePath);
         lpDevicePath[nLength-1] = 0;
 
-        if (mDebug) qDebug("Device path:  %ls\n", lpDevicePath);
+        if (mDebug) qDebug("Device path:  %ls", lpDevicePath);
     }
 
     if (!lpDevicePath)
@@ -389,19 +391,19 @@ bool QUsbDevice::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8
 
     if(*pDeviceSpeed == LowSpeed)
     {
-        if (mDebug) qDebug("Device speed: %d (Low speed).\n", *pDeviceSpeed);
+        if (mDebug) qDebug("Device speed: %d (Low speed).", *pDeviceSpeed);
         this->mSpd = QtUsb::lowSpeed;
         return true;
     }
     else if(*pDeviceSpeed == FullSpeed)
     {
-        if (mDebug) qDebug("Device speed: %d (Full speed).\n", *pDeviceSpeed);
+        if (mDebug) qDebug("Device speed: %d (Full speed).", *pDeviceSpeed);
         this->mSpd = QtUsb::fullSpeed;
         return true;
     }
     else if(*pDeviceSpeed == HighSpeed)
     {
-        if (mDebug) qDebug("Device speed: %d (High speed).\n", *pDeviceSpeed);
+        if (mDebug) qDebug("Device speed: %d (High speed).", *pDeviceSpeed);
         this->mSpd = QtUsb::highSpeed;
         return true;
     }
@@ -419,47 +421,54 @@ bool QUsbDevice::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUs
 
     bool bResult = true;
 
+    if (!WinUsb_SetCurrentAlternateSetting(hWinUSBHandle, mConfig.alternate))
+    {
+        return false;
+    }
+
+    if (mDebug) qDebug("Alternate setting: %d.", mConfig.alternate);
+
     USB_INTERFACE_DESCRIPTOR InterfaceDescriptor;
     ZeroMemory(&InterfaceDescriptor, sizeof(USB_INTERFACE_DESCRIPTOR));
 
     WINUSB_PIPE_INFORMATION  pipe;
     ZeroMemory(&pipe, sizeof(WINUSB_PIPE_INFORMATION));
 
-    bResult = WinUsb_QueryInterfaceSettings(hWinUSBHandle, 0, &InterfaceDescriptor);
+    bResult = WinUsb_QueryInterfaceSettings(hWinUSBHandle, mConfig.interface, &InterfaceDescriptor);
 
     if (bResult)
     {
         for (int index = 0; index < InterfaceDescriptor.bNumEndpoints; index++)
         {
-            bResult = WinUsb_QueryPipe(hWinUSBHandle, 0, index, &pipe);
+            bResult = WinUsb_QueryPipe(hWinUSBHandle, mConfig.interface, index, &pipe);
 
             if (bResult)
             {
                 if (pipe.PipeType == UsbdPipeTypeControl)
                 {
-                    if (mDebug) qDebug("Endpoint index: %d Pipe type: Control Pipe ID: 0x%02x.\n", index, pipe.PipeId);
+                    if (mDebug) qDebug("Endpoint index: %d Pipe type: Control Pipe ID: 0x%02x.", index, pipe.PipeId);
                 }
                 if (pipe.PipeType == UsbdPipeTypeIsochronous)
                 {
-                    if (mDebug) qDebug("Endpoint index: %d Pipe type: Isochronous Pipe ID: 0x%02x.\n", index, pipe.PipeId);
+                    if (mDebug) qDebug("Endpoint index: %d Pipe type: Isochronous Pipe ID: 0x%02x.", index, pipe.PipeId);
                 }
                 if (pipe.PipeType == UsbdPipeTypeBulk)
                 {
                     if (USB_ENDPOINT_DIRECTION_IN(pipe.PipeId))
                     {
-                        if (mDebug) qDebug("Bulk IN Endpoint index: %d Pipe type: Bulk Pipe ID: 0x%02x.\n", index, pipe.PipeId);
+                        if (mDebug) qDebug("Bulk IN Endpoint index: %d Pipe type: Bulk Pipe ID: 0x%02x.", index, pipe.PipeId);
                         pipeId->pipeInId = pipe.PipeId;
                     }
                     if (USB_ENDPOINT_DIRECTION_OUT(pipe.PipeId))
                     {
-                        if (mDebug) qDebug("Bulk OUT Endpoint index: %d Pipe type: Bulk Pipe ID: 0x%02x.\n", index, pipe.PipeId);
+                        if (mDebug) qDebug("Bulk OUT Endpoint index: %d Pipe type: Bulk Pipe ID: 0x%02x.", index, pipe.PipeId);
                         pipeId->pipeOutId = pipe.PipeId;
                     }
 
                 }
                 if (pipe.PipeType == UsbdPipeTypeInterrupt)
                 {
-                    if (mDebug) qDebug("Endpoint index: %d Pipe type: Interrupt Pipe ID: 0x%02x.\n", index, pipe.PipeId);
+                    if (mDebug) qDebug("Endpoint index: %d Pipe type: Interrupt Pipe ID: 0x%02x.", index, pipe.PipeId);
                 }
             }
             else
@@ -510,7 +519,7 @@ qint64 QUsbDevice::readData(char *data, qint64 maxSize)
     }
     bool bResult = true;
     ulong cbRead = 0;
-    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, (uchar*)data, maxSize, &cbRead, 0);
+    bResult = WinUsb_ReadPipe(mUsbHandle, mConfig.readEp, (uchar*)data, maxSize, &cbRead, NULL);
 
     if (!bResult) {
         printUsbError("WinUsb_ReadPipe");
@@ -543,7 +552,7 @@ qint64 QUsbDevice::writeData(const char *data, qint64 maxSize)
     }
 
     ulong cbSent = 0;
-    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)data, maxSize, &cbSent, 0);
+    bool bResult = WinUsb_WritePipe(mUsbHandle, mConfig.writeEp, (uchar*)data, maxSize, &cbSent, NULL);
 
     if (mDebug) {
         QString datastr, s;
