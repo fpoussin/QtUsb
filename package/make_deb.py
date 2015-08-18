@@ -87,7 +87,7 @@ if __name__ == "__main__":
         print "Invalid Ubuntu release, please chose among:", releases
         exit(1)
 
-    ver = check_output(["grep \"VERSION =\" ../QtUsb.pro | awk '{ print $3 }' "], shell=True).replace('\n', '')
+    ver = check_output(["grep \"VERSION =\" ../src/src.pro | awk '{ print $3 }' "], shell=True).replace('\n', '')
     if not ver:
         print "Could not fetch last version"
         exit(1)
