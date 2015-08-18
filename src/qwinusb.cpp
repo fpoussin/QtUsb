@@ -523,7 +523,7 @@ void QUsbDevice::printUsbError(const QString &func)
     }
 }
 
-qint32 QUsbDevice::read(QByteArray *buf, quint32 maxSize)
+qint32 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
 {
     UsbPrintFuncName();
     Q_CHECK_PTR(buf);
@@ -564,7 +564,7 @@ qint32 QUsbDevice::read(QByteArray *buf, quint32 maxSize)
     return cbRead;
 }
 
-qint32 QUsbDevice::write(const QByteArray *buf, quint32 maxSize)
+qint32 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
 {
     UsbPrintFuncName();
     Q_CHECK_PTR(buf);

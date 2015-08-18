@@ -212,10 +212,10 @@ void QUsbDevice::flush()
     qint32 read_bytes;
 
     buf.resize(4096);
-    libusb_bulk_transfer(mDevHandle, mConfig.readEp, (uchar*)(buf.data()+read), 4096, &read_bytes, 25);
+    libusb_bulk_transfer(mDevHandle, mConfig.readEp, (uchar*)(buf.data()), 4096, &read_bytes, 25);
 }
 
-qint64 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
+qint32 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
 {
     UsbPrintFuncName();
     Q_CHECK_PTR(buf);
@@ -269,7 +269,7 @@ qint64 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
     return read_total;
 }
 
-qint64 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
+qint32 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
 {
     UsbPrintFuncName();
     Q_CHECK_PTR(buf);
