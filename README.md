@@ -7,6 +7,8 @@ Relies on WinUSB and libusb-1.0.
 **Features**
 
 - Bulk transfer
+- Device insertion/removal detection
+- Device search
 
 **TODO**
 
