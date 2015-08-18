@@ -5,7 +5,7 @@ from subprocess import call, check_output, Popen, CalledProcessError, STDOUT, PI
 from xml.etree import ElementTree as ET
 from traceback import print_exc
 
-releases = ["trusty", "vivid", "utopic"]
+releases = ["trusty", "vivid", "wily"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', '--release', help='The Ubuntu release')
