@@ -1,5 +1,7 @@
 **QtUsb**
 ==
+[![GitHub version](https://badge.fury.io/gh/fpoussin%2Fqtusb.svg)](https://badge.fury.io/gh/fpoussin%2Fqtusb)
+[![Build Status](http://vps2.ntx.so/jenkins/buildStatus/icon?job=QtUsb)](http://vps2.ntx.so/jenkins/job/QtUsb)
 
 A Multi-platform USB Library for Qt.
 Relies on WinUSB and libusb-1.0.
