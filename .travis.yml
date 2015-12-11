@@ -1,0 +1,11 @@
+sudo: required
+dist: trusty
+language: cpp
+compiler: gcc
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get -qq install qtbase5-dev qt5-qmake qt5-default libusb-1.0-0-dev
+
+script:
+  - qmake
+  - make -j2
