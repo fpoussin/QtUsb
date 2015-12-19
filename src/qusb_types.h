@@ -6,9 +6,7 @@
 namespace QtUsb {
 
     const quint16 DefaultTimeout = 250;
-
     enum DeviceSpeed {unknownSpeed = -1, lowSpeed = 0, fullSpeed, highSpeed, superSpeed};
-
     enum DeviceStatus {deviceOK = 0, deviceBusy = -1, deviceNotFound = -2, devicePgmError = -3};
 
     typedef struct

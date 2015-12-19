@@ -30,6 +30,7 @@ public:
     quint16 getTimeout(void) { return mTimeout; }
 
     QtUsb::DeviceSpeed getSpeed(void) { return mSpd; }
+    QString getSpeedString(void);
 
     static QtUsb::FilterList getAvailableDevices(void);
 

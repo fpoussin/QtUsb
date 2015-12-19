@@ -1,5 +1,11 @@
 #include "qwinusb.h"
 
+#if WIN32
+    #ifndef SuperSpeed
+    #define SuperSpeed 0x04
+    #endif
+#endif
+
 QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
     QBaseUsbDevice(parent)
 {
@@ -10,7 +16,7 @@ QUsbDevice::QUsbDevice(QBaseUsbDevice *parent) :
 
 QtUsb::FilterList QUsbDevice::getAvailableDevices()
 {
-    QList<QtUsb::DeviceFilter> list;
+    QtUsb::FilterList list;
 
     HDEVINFO                         hDevInfo;
     SP_DEVICE_INTERFACE_DATA         devIntfData;
@@ -405,26 +411,29 @@ bool QUsbDevice::getUSBDeviceSpeed(WINUSB_INTERFACE_HANDLE hWinUSBHandle, quint8
         return false;
     }
 
-    if(*pDeviceSpeed == LowSpeed)
+    /**
+    * https://msdn.microsoft.com/en-us/library/windows/hardware/ff540290(v=vs.85).aspx
+    *
+    * If InformationType is DEVICE_SPEED, on successful return, Buffer indicates the operating speed of the device.
+    * 0x03 indicates high-speed or higher; 0x01 indicates full-speed or lower.
+    *
+    * In other words: this sucks.
+    **/
+
+    if(*pDeviceSpeed == 0x01)
     {
-        if (mDebug) qDebug("Device speed: %d (Low speed).", *pDeviceSpeed);
-        this->mSpd = QtUsb::lowSpeed;
-        return true;
-    }
-    else if(*pDeviceSpeed == FullSpeed)
-    {
-        if (mDebug) qDebug("Device speed: %d (Full speed).", *pDeviceSpeed);
+        if (mDebug) qDebug("Device speed: %d (Low/Full speed).", *pDeviceSpeed);
         this->mSpd = QtUsb::fullSpeed;
         return true;
     }
-    else if(*pDeviceSpeed == HighSpeed)
+    else if(*pDeviceSpeed == 0x03)
     {
-        if (mDebug) qDebug("Device speed: %d (High speed).", *pDeviceSpeed);
+        if (mDebug) qDebug("Device speed: %d (High/Super speed).", *pDeviceSpeed);
         this->mSpd = QtUsb::highSpeed;
         return true;
     }
-    return false;
 
+    return false;
 }
 
 bool QUsbDevice::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUsbDevice::PIPE_ID *pipeId)

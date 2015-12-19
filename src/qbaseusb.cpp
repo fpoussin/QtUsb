@@ -13,6 +13,25 @@ QBaseUsbDevice::~QBaseUsbDevice()
 
 }
 
+QString QBaseUsbDevice::getSpeedString()
+{
+    switch (mSpd)
+    {
+        case QtUsb::unknownSpeed:
+            return "Unknown speed";
+        case QtUsb::lowSpeed:
+            return "Low speed";
+        case QtUsb::fullSpeed:
+            return "Full speed";
+        case QtUsb::highSpeed:
+            return "High speed";
+        case QtUsb::superSpeed:
+            return "Super speed";
+    }
+
+    return "Error";
+}
+
 qint32 QBaseUsbDevice::write(const QByteArray &buf)
 {
     return this->write(&buf, buf.size());
@@ -76,4 +95,3 @@ void QBaseUsbDevice::setDefaults()
     mConfig.interface = 0x00;
     mConfig.alternate = 0x00;
 }
-
