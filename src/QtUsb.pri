@@ -18,7 +18,9 @@ HEADERS +=  \
     qusbmanager.h \
     qusb_types.h
 
-win32 {
+win32-msvc2015:message("MSVC2015 has some performance issues on Win7; stick to 2013 or earlier.")
+
+msvc {
     message(Building QtUsb with WinUSB support.)
     DEFINES += QWINUSB
     SOURCES += qwinusb.cpp
