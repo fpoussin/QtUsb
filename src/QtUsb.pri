@@ -28,12 +28,26 @@ msvc {
     LIBS += setupapi.lib winusb.lib
 }
 
-else:unix {
-    message(Building QtUsb with LibUsb 1.0 support.)
-    DEFINES += QLIBUSB
-    SOURCES += qlibusb.cpp
-    HEADERS += qlibusb.h
-    LIBS    += -lusb-1.0
+else:linux {
+    packagesExist(libusb-1.0) {
+        message(Building QtUsb with LibUsb 1.0 support.)
+        DEFINES += QLIBUSB
+        SOURCES += qlibusb.cpp
+        HEADERS += qlibusb.h
+        LIBS    += -lusb-1.0
+    }
+    else:error("Could not find libusb-1.0")
+}
+
+else:osx {
+        message(Building QtUsb with OS X I/O KIT support.)
+        DEFINES += QOSXUSB
+        SOURCES += qiousb.cpp
+        HEADERS += qiousb.h
+        INCLUDEPATH += -F$(HOME)/Library/Frameworks
+        QMAKE_LFLAGS += -F$(HOME)/Library/Frameworks
+        LIBS += -framework IOKit
+        LIBS += -framework CoreFoundation
 }
 
 else {
