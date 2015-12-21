@@ -23,6 +23,7 @@ Relies on WinUSB, libusb-1.0, and OS X's I/O Kit.
 Documentation is not complete yet, you can have a look at the examples in the meanwhile.
 
 **Documentation**  
+
 Doxygen documentation can be found here: http://fpoussin.github.io/doxygen/qtusb/
 
 **Downloads**
