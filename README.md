@@ -4,7 +4,7 @@
 [![Build Status](http://vps2.ntx.so/jenkins/buildStatus/icon?job=QtUsb)](http://vps2.ntx.so/jenkins/job/QtUsb)
 
 A Multi-platform USB Library for Qt.
-Relies on WinUSB and libusb-1.0.
+Relies on WinUSB, libusb-1.0, and OS X's I/O Kit.
 
 **Features**
 
@@ -16,14 +16,14 @@ Relies on WinUSB and libusb-1.0.
 
 - Interrupt transfer
 - isochronous transfer
+- OS X support (I/O Kit)
 
 **Usage**
 
 Documentation is not complete yet, you can have a look at the examples in the meanwhile.
 
-**Documentation**
-Doxygen documentation can be found here:  
-http://fpoussin.github.io/doxygen/qtusb/
+**Documentation**  
+Doxygen documentation can be found here: http://fpoussin.github.io/doxygen/qtusb/
 
 **Downloads**
 
