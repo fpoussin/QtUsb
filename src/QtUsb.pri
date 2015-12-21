@@ -29,14 +29,13 @@ msvc {
 }
 
 else:linux {
-    packagesExist(libusb-1.0) {
-        message(Building QtUsb with LibUsb 1.0 support.)
-        DEFINES += QLIBUSB
-        SOURCES += qlibusb.cpp
-        HEADERS += qlibusb.h
-        LIBS    += -lusb-1.0
-    }
-    else:error("Could not find libusb-1.0")
+    !packagesExist(libusb-1.0):message("Could not find libusb-1.0 libs")
+    else:message("Found libusb 1.0")
+    message(Building QtUsb with LibUsb 1.0 support.)
+    DEFINES += QLIBUSB
+    SOURCES += qlibusb.cpp
+    HEADERS += qlibusb.h
+    LIBS    += -lusb-1.0
 }
 
 else:osx {

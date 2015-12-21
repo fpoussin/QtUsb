@@ -95,7 +95,6 @@ private:
     void printUsbError(int error_code);
 
     CFMutableDictionaryRef mMatchingDictionary;
-    IOCFPlugInInterface** mPlugin;
     IOUSBDeviceInterface300** mUsbDevice;
     IOUSBConfigurationDescriptorPtr mConfig;
     IOUSBFindInterfaceRequest mInterfaceRequest;
