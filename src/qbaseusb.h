@@ -17,101 +17,101 @@ class QUSBSHARED_EXPORT QBaseUsbDevice : public QObject
     
 public:
     /**
-     * @brief
+     * @brief Constructor
      *
      * @param parent
      */
     QBaseUsbDevice(QObject *parent = 0);
     /**
-     * @brief
+     * @brief Desctructor
      *
      */
     virtual ~QBaseUsbDevice();
 
     /**
-     * @brief
+     * @brief Enable/Disable debug
      *
      * @param enable
      */
     void setDebug(bool enable) { mDebug = enable; }
     /**
-     * @brief
+     * @brief Set device filter
      *
-     * @param filter
+     * @param Filter Filter to apply
      */
     void setFilter(const QtUsb::DeviceFilter& filter) { mFilter = filter; }
     /**
-     * @brief
+     * @brief Set device config
      *
-     * @param config
+     * @param Config config to apply
      */
     void setConfig(const QtUsb::DeviceConfig& config) { mConfig = config; }
 
     /**
-     * @brief
+     * @brief Get current device filter
      *
      * @return QtUsb::DeviceFilter
      */
     QtUsb::DeviceFilter getFilter(void) { return mFilter; }
     /**
-     * @brief
+     * @brief Get current device config
      *
      * @return QtUsb::DeviceConfig
      */
     QtUsb::DeviceConfig getConfig(void) { return mConfig; }
 
     /**
-     * @brief
+     * @brief Get current device pid
      *
      * @return quint16
      */
     quint16 getPid(void) { return mFilter.pid; }
     /**
-     * @brief
+     * @brief Get current device vid
      *
      * @return quint16
      */
     quint16 getVid(void) { return mFilter.vid; }
     /**
-     * @brief
+     * @brief Get current device Guid
      *
      * @return QString
      */
     QString getGuid(void) { return mFilter.guid; }
     /**
-     * @brief
+     * @brief Get current read (IN) endpoint
      *
      * @return quint8
      */
     quint8 getReadEp(void) { return mConfig.readEp; }
     /**
-     * @brief
+     * @brief Get current write (OUT) endpoint
      *
      * @return quint8
      */
     quint8 getWriteEp(void) { return mConfig.writeEp; }
     /**
-     * @brief
+     * @brief Get current timeout
      *
-     * @return quint16
+     * @return quint16 Timeout
      */
     quint16 getTimeout(void) { return mTimeout; }
 
     /**
-     * @brief
+     * @brief Get current device speed
      *
      * @return QtUsb::DeviceSpeed
      */
     QtUsb::DeviceSpeed getSpeed(void) { return mSpd; }
     /**
-     * @brief
+     * @brief Get current device speed string
      *
      * @return QString
      */
     QString getSpeedString(void);
 
     /**
-     * @brief
+     * @brief Get a list of all the available USB devices
      *
      * @return QtUsb::FilterList
      */
@@ -119,94 +119,94 @@ public:
 
 public slots:
     /**
-     * @brief
+     * @brief Open the devices
      *
-     * @return qint32
+     * @return qint32 0 on sucess, negative on error
      */
     virtual qint32 open() = 0;
     /**
-     * @brief
+     * @brief Close the device
      *
      */
     virtual void close() = 0;
     /**
-     * @brief
+     * @brief Flush the device buffer (IN only)
      *
      */
     virtual void flush() = 0;
 
     /**
-     * @brief
+     * @brief Write to device
      *
-     * @param buf
-     * @param maxSize
-     * @return qint32
+     * @param buf pointer to data
+     * @param maxSize maximum number of bytes to write
+     * @return qint32 actual number of bytes written on success, negative on error
      */
     virtual qint32 write(const QByteArray* buf, quint32 maxSize) = 0;
     /**
-     * @brief
+     * @brief Read from device
      *
-     * @param buf
-     * @param maxSize
-     * @return qint32
+     * @param buf pointer to data
+     * @param maxSize maximum number of bytes to read
+     * @return qint32 actual number of bytes read on success, negative on error
      */
     virtual qint32 read(QByteArray* buf, quint32 maxSize) = 0;
 
     /**
-     * @brief
+     * @brief Write full array to device
      *
-     * @param buf
-     * @return qint32
+     * @param buf data to write
+     * @return qint32 actual number of bytes written on success, negative on error
      */
     qint32 write(const QByteArray& buf);
     /**
-     * @brief
+     * @brief Read maximum amount of bytes to buffer, up to 4096 bytes
      *
-     * @param buf
-     * @return qint32
+     * @param buf data to write into
+     * @return qint32 actual number of bytes read on success, negative on error
      */
     qint32 read(QByteArray* buf);
     /**
-     * @brief
+     * @brief Write a single char
      *
-     * @param c
-     * @return bool
+     * @param c char
+     * @return bool true on sucess
      */
     bool write(char c);
     /**
-     * @brief
+     * @brief Read a single char
      *
-     * @param c
-     * @return bool
+     * @param c char
+     * @return bool true on sucess
      */
     bool read(char* c);
 
     /**
-     * @brief
+     * @brief Set device timeout
      *
-     * @param timeout
+     * @param timeout Timeout in milliseconds
      */
     void setTimeout(quint16 timeout);
     /**
-     * @brief
+     * @brief Print settings to qDebug
      *
      */
     void showSettings(void);
 
 protected slots:
     /**
-     * @brief
+     * @brief Set default values (config)
      *
      */
     void setDefaults(void);
 
 protected:
-    QtUsb::DeviceFilter mFilter; /**< TODO: describe */
-    QtUsb::DeviceConfig mConfig; /**< TODO: describe */
-    quint16 mTimeout; /**< TODO: describe */
-    bool mDebug; /**< TODO: describe */
-    bool mConnected; /**< TODO: describe */
-    QtUsb::DeviceSpeed mSpd; /**< TODO: describe */
+    QtUsb::DeviceFilter mFilter; /**< Device filter */
+    QtUsb::DeviceConfig mConfig; /**< Device config */
+    quint16 mTimeout; /**< Device timeout */
+    bool mDebug; /**< Debug enabled boolean */
+    bool mConnected; /**< Connected boolean */
+    QtUsb::DeviceSpeed mSpd; /**< Device speed */
 };
 
 #endif // QBASEUSB_H

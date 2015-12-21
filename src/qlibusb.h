@@ -19,19 +19,19 @@ class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
 
 public:
     /**
-     * @brief
+     * @brief See base class
      *
      * @param parent
      */
     explicit QUsbDevice(QBaseUsbDevice *parent = 0);
     /**
-     * @brief
+     * @brief See base class
      *
      */
     ~QUsbDevice();
 
     /**
-     * @brief
+     * @brief See base class
      *
      * @return QtUsb::FilterList
      */
@@ -39,24 +39,24 @@ public:
 
 public slots:
     /**
-     * @brief
+     * @brief See base class
      *
      * @return qint32
      */
     qint32 open();
     /**
-     * @brief
+     * @brief See base class
      *
      */
     void close();
 
     /**
-     * @brief
+     * @brief See base class
      *
      */
     void flush();
     /**
-     * @brief
+     * @brief See base class
      *
      * @param buf
      * @param maxSize
@@ -64,7 +64,7 @@ public slots:
      */
     qint32 read(QByteArray* buf, quint32 maxSize);
     /**
-     * @brief
+     * @brief See base class
      *
      * @param buf
      * @param maxSize
@@ -73,7 +73,7 @@ public slots:
     qint32 write(const QByteArray* buf, quint32 maxSize);
 
     /**
-     * @brief
+     * @brief See base class
      *
      * @param enable
      */
@@ -83,13 +83,13 @@ private slots:
 
 private:
     /**
-     * @brief
+     * @brief Print error code to qWarning
      *
      * @param error_code
      */
     void printUsbError(int error_code);
-    libusb_device **mDevs; /**< TODO: describe */
-    libusb_device_handle *mDevHandle; /**< TODO: describe */
-    libusb_context *mCtx; /**< TODO: describe */
+    libusb_device **mDevs; /**< libusb device ptr to ptr */
+    libusb_device_handle *mDevHandle; /**< libusb device handle ptr */
+    libusb_context *mCtx; /**< libusb context */
 };
 #endif // QLIBUSB_H

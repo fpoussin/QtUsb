@@ -5,60 +5,52 @@
 
 namespace QtUsb {
 
-    const quint16 DefaultTimeout = 250; /**< TODO: describe */
+    const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
     /**
-     * @brief
+     * @brief USB speeds
      *
      */
     enum DeviceSpeed {unknownSpeed = -1, lowSpeed = 0, fullSpeed, highSpeed, superSpeed};
     /**
-     * @brief
+     * @brief Device status
      *
      */
     enum DeviceStatus {deviceOK = 0, deviceBusy = -1, deviceNotFound = -2, devicePgmError = -3};
 
     /**
-     * @brief
+     * @brief Device configuration
      *
      */
     typedef struct
     {
-        quint8 readEp; /**< TODO: describe */
-        quint8 writeEp; /**< TODO: describe */
-        quint8 config; /**< TODO: describe */
-        quint8 interface; /**< TODO: describe */
-        quint8 alternate; /**< TODO: describe */
+        quint8 readEp; /**< Read Endpoint (IN) */
+        quint8 writeEp; /**< Write Endpoint (OUT) */
+        quint8 config; /**< Configuration index */
+        quint8 interface; /**< Interface index */
+        quint8 alternate; /**< Alternate configuration index */
 
-    /**
-     * @brief
-     *
-     */
     } DeviceConfig;
 
     /**
-     * @brief
+     * @brief Device filter
      *
      */
     typedef struct
     {
-        quint16 pid; /**< TODO: describe */
-        quint16 vid; /**< TODO: describe */
-        QString guid; /**< TODO: describe */
-        DeviceConfig cfg; /**< TODO: describe */
+        quint16 pid; /**< Product ID */
+        quint16 vid; /**< Vendor ID */
+        QString guid; /**< GUID (Windows) */
+        DeviceConfig cfg; /**< Configuration for a given device */
 
-    /**
-     * @brief
-     *
-     */
     } DeviceFilter;
 
     /**
-     * @brief
+     * @brief List of device filters
      *
      */
     typedef QList<DeviceFilter> FilterList;
     /**
-     * @brief
+     * @brief List of device configs
      *
      */
     typedef QList<DeviceConfig> ConfigList;

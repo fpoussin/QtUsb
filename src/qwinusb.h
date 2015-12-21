@@ -33,47 +33,47 @@ class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice
     Q_OBJECT
 
     /**
-     * @brief
+     * @brief Endpoint structure
      *
      */
     struct PIPE_ID
     {
-        uchar  pipeInId; /**< TODO: describe */
-        uchar  pipeOutId; /**< TODO: describe */
+        uchar  pipeInId; /**< Read endpoint */
+        uchar  pipeOutId; /**< write endpoint */
     };
 public:
     /**
-     * @brief
+     * @brief See base class
      *
      * @param parent
      */
     explicit QUsbDevice(QBaseUsbDevice *parent = 0);
     /**
-     * @brief
+     * @brief See base class
      *
      * @return QtUsb::FilterList
      */
     static QtUsb::FilterList getAvailableDevices(void);
     /**
-     * @brief
+     * @brief Set Guid object from string
      *
-     * @param str
-     * @param guid
-     * @return bool
+     * @param str String containing the Guid
+     * @param guid GUID object pointer to write
+     * @return bool true on success
      */
     static bool guidFromString(const QString &str, GUID* guid);
     /**
-     * @brief
+     * @brief Set Guid member object from string
      *
-     * @param guid
-     * @return bool
+     * @param guid String containing the Guid
+     * @return bool true on success
      */
     bool setGuid(const QString &guid);
     /**
-     * @brief
+     * @brief Set Guid member object
      *
-     * @param guid
-     * @return bool
+     * @param guid GUID object to copy
+     * @return bool true on success
      */
     bool setGuid(const GUID &guid);
     /**
@@ -84,23 +84,23 @@ public:
     
 public slots:
     /**
-     * @brief
+     * @brief See base class
      *
      * @return qint32
      */
     qint32 open();
     /**
-     * @brief
+     * @brief See base class
      *
      */
     void close();
     /**
-     * @brief
+     * @brief See base class
      *
      */
     void flush();
     /**
-     * @brief
+     * @brief See base class
      *
      * @param buf
      * @param maxSize
@@ -108,7 +108,7 @@ public slots:
      */
     qint32 read(QByteArray* buf, quint32 maxSize);
     /**
-     * @brief
+     * @brief See base class
      *
      * @param buf
      * @param maxSize
@@ -117,7 +117,7 @@ public slots:
     qint32 write(const QByteArray* buf, quint32 maxSize);
 
     /**
-     * @brief
+     * @brief See base class
      *
      * @param timeout
      */
@@ -157,17 +157,17 @@ private:
      */
     bool queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, PIPE_ID* pipeId);
     /**
-     * @brief
+     * @brief Print errors to qWarning
      *
      * @param func
      */
     void printUsbError(const QString& func);
 
-    GUID mGuid; /**< TODO: describe */
-    HANDLE mDevHandle; /**< TODO: describe */
-    WINUSB_INTERFACE_HANDLE mUsbHandle; /**< TODO: describe */
-    uchar mDevSpeed; /**< TODO: describe */
-    PIPE_ID mPipeId; /**< TODO: describe */
+    GUID mGuid; /**< GUID structure */
+    HANDLE mDevHandle; /**< Device Handle */
+    WINUSB_INTERFACE_HANDLE mUsbHandle; /**< WinUSB interfance handle */
+    uchar mDevSpeed; /**< Device speed */
+    PIPE_ID mPipeId; /**< Device endpoints */
 };
 
 #endif // QWINUSB_H
