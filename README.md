@@ -21,6 +21,10 @@ Relies on WinUSB and libusb-1.0.
 
 Documentation is not complete yet, you can have a look at the examples in the meanwhile.
 
+**Documentation**
+Doxygen documentation can be found here:  
+http://fpoussin.github.io/doxygen/qtusb/
+
 **Downloads**
 
 Ubuntu PPA: https://launchpad.net/~fpoussin/+archive/ubuntu/ppa 
