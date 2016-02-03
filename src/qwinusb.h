@@ -139,7 +139,7 @@ private:
      * @param phWinUSBHandle
      * @return bool
      */
-    bool getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle);
+    bool getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle, UCHAR interface);
     /**
      * @brief
      *

@@ -131,7 +131,7 @@ qint32 QUsbDevice::open()
         return -1;
 
     if (!getDeviceHandle(mGuid, &mDevHandle)) return -1;
-    else if (!getWinUSBHandle(mDevHandle, &mUsbHandle)) return -2;
+    else if (!getWinUSBHandle(mDevHandle, &mUsbHandle, mConfig.interface)) return -2;
     else if (!getUSBDeviceSpeed(mUsbHandle, &mDevSpeed)) return -3;
     else if (!queryDeviceEndpoints(mUsbHandle, &mPipeId)) return -4;
 
@@ -376,7 +376,7 @@ bool QUsbDevice::getDeviceHandle(GUID guidDeviceInterface, PHANDLE hDeviceHandle
     return bResult;
 }
 
-bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle)
+bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE phWinUSBHandle, UCHAR interface)
 {
     UsbPrintFuncName();
     if (hDeviceHandle == INVALID_HANDLE_VALUE)
@@ -385,11 +385,26 @@ bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE 
         return false;
     }
 
-    if(!WinUsb_Initialize(hDeviceHandle, phWinUSBHandle))
+    PWINUSB_INTERFACE_HANDLE tempHandlePtr = phWinUSBHandle;
+    if(!WinUsb_Initialize(hDeviceHandle, tempHandlePtr))
     {
-        //Error.
         printUsbError("WinUsb_Initialize");
         return false;
+    }
+    qDebug() << "interface" << interface;
+    if (interface > 0)
+    {
+        interface -= 1;
+        qDebug() << "interface" << interface;
+        if(!WinUsb_GetAssociatedInterface(*tempHandlePtr, interface, phWinUSBHandle))
+        {
+            printUsbError("WinUsb_GetAssociatedInterface");
+            return false;
+        }
+    }
+    else
+    {
+        phWinUSBHandle = tempHandlePtr;
     }
 
     return true;
@@ -459,13 +474,19 @@ bool QUsbDevice::queryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hWinUSBHandle, QUs
     WINUSB_PIPE_INFORMATION  pipe;
     ZeroMemory(&pipe, sizeof(WINUSB_PIPE_INFORMATION));
 
-    bResult = WinUsb_QueryInterfaceSettings(hWinUSBHandle, mConfig.interface, &InterfaceDescriptor);
+    UCHAR interface = mConfig.interface;
+    if (interface > 0)
+    {
+        interface -= 1;
+    }
+
+    bResult = WinUsb_QueryInterfaceSettings(hWinUSBHandle, interface, &InterfaceDescriptor);
 
     if (bResult)
     {
         for (int index = 0; index < InterfaceDescriptor.bNumEndpoints; index++)
         {
-            bResult = WinUsb_QueryPipe(hWinUSBHandle, mConfig.interface, index, &pipe);
+            bResult = WinUsb_QueryPipe(hWinUSBHandle, interface, index, &pipe);
 
             if (bResult)
             {
