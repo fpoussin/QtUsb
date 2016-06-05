@@ -391,11 +391,11 @@ bool QUsbDevice::getWinUSBHandle(HANDLE hDeviceHandle, PWINUSB_INTERFACE_HANDLE 
         printUsbError("WinUsb_Initialize");
         return false;
     }
-    qDebug() << "interface" << interface;
+    if (mDebug) qDebug() << "interface" << interface;
     if (interface > 0)
     {
         interface -= 1;
-        qDebug() << "interface" << interface;
+        if (mDebug) qDebug() << "interface" << interface;
         if(!WinUsb_GetAssociatedInterface(*tempHandlePtr, interface, phWinUSBHandle))
         {
             printUsbError("WinUsb_GetAssociatedInterface");
