@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 0.2
+VERSION = 0.2.1
 QT -= gui
 TEMPLATE = lib
 CONFIG  += static_and_shared

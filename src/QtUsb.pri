@@ -28,10 +28,9 @@ msvc {
     LIBS += setupapi.lib winusb.lib
 }
 
-else:linux {
-    !packagesExist(libusb-1.0):message("Could not find libusb-1.0 libs")
-    else:message("Found libusb 1.0")
-    message(Building QtUsb with LibUsb 1.0 support.)
+else:linux-g++* {
+    !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
+    else:message(Building QtUsb with LibUsb 1.0 support.)
     DEFINES += QLIBUSB
     SOURCES += qlibusb.cpp
     HEADERS += qlibusb.h
