@@ -1,5 +1,9 @@
 #include "usbexample.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 UsbExample::UsbExample(QObject *parent) :
     QObject(parent)
 {
@@ -8,10 +12,6 @@ UsbExample::UsbExample(QObject *parent) :
     QByteArray send, recv;
 
     send.append((char)0xAB);
-
-    #ifdef interface
-    #undef interface
-    #endif
 
     if (this->openDevice())
     {
@@ -35,12 +35,9 @@ void UsbExample::setupDevice()
     mUsbDev = new QUsbDevice();
     mUsbDev->setDebug(true);
 
-    // Linux
+    //
     mFilter.pid = 0x3748;
     mFilter.vid = 0x0483;
-
-    // Win (Get this id from the driver's .inf)
-    mFilter.guid = "DBCE1CD9-A320-4b51-A365-A0C3F3C5FB29";
 
     //
     mConfig.alternate = 0;

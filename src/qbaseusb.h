@@ -73,12 +73,6 @@ public:
      */
     quint16 getVid(void) { return mFilter.vid; }
     /**
-     * @brief Get current device Guid
-     *
-     * @return QString
-     */
-    QString getGuid(void) { return mFilter.guid; }
-    /**
      * @brief Get current read (IN) endpoint
      *
      * @return quint8

@@ -43,7 +43,6 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices()
             QtUsb::DeviceFilter filter;
             filter.pid = desc.idProduct;
             filter.vid = desc.idVendor;
-            filter.guid = "";
 
             list.append(filter);
         }

@@ -39,7 +39,6 @@ namespace QtUsb {
     {
         quint16 pid; /**< Product ID */
         quint16 vid; /**< Vendor ID */
-        QString guid; /**< GUID (Windows) */
         DeviceConfig cfg; /**< Configuration for a given device */
 
     } DeviceFilter;

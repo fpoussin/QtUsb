@@ -30,7 +30,6 @@ private:
 
     QtUsb::DeviceFilter mFilter;
     QtUsb::DeviceConfig mConfig;
-
 };
 
 #endif // USBEXAMPLE_H

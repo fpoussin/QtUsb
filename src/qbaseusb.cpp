@@ -80,8 +80,7 @@ void QBaseUsbDevice::showSettings()
                << "mWriteEp" << QString::number(mConfig.writeEp, 16) << "\n"
                << "mInterface" << mConfig.interface << "\n"
                << "mDevice.pid" << QString::number(mFilter.pid, 16) << "\n"
-               << "mDevice.vid" << QString::number(mFilter.vid, 16) << "\n"
-               << "mGuid" << mFilter.guid;
+               << "mDevice.vid" << QString::number(mFilter.vid, 16) << "\n";
 }
 
 void QBaseUsbDevice::setDefaults()

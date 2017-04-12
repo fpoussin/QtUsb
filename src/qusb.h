@@ -3,13 +3,7 @@
 
 #include "qusb_global.h"
 #include "qusb_types.h"
-
-#ifdef WIN32
-    #include <qwinusb.h>
-#else
-    #include <qlibusb.h>
-#endif
-
+#include <qlibusb.h>
 #include <qusbmanager.h>
 
 #endif // QUSB_H
