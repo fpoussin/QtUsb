@@ -27,16 +27,17 @@ public:
     ~QUsbManager(void);
 
     /**
-     * @brief Gets a list of devices presents in the system
+     * @brief Gets a list of devices present in the system
+     * You have to add these devices to the list using addDevice beforehand
      *
      * @return QtUsb::FilterList
      */
     QtUsb::FilterList getPresentDevices(void);
     /**
-     * @brief Check it device is present
+     * @brief Check if device is present
      *
      * @param filter Device to search
-     * @return bool true is present
+     * @return bool true if present
      */
     bool isPresent(const QtUsb::DeviceFilter &filter);
 

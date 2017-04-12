@@ -26,12 +26,12 @@ QtUsb::FilterList QUsbManager::getPresentDevices()
     QtUsb::FilterList list;
     QtUsb::DeviceFilter filter;
 
+    /* Search the system list with our own list */
     for (int i = 0; i < mFilterList.length(); i++)
     {
         filter = mFilterList.at(i);
         if (this->findDevice(filter, mSystemList) < 0)
         {
-            // It's not in the old system list
             list.append(filter);
         }
     }
@@ -139,6 +139,7 @@ void QUsbManager::monitorDevices(const QtUsb::FilterList& list)
     mSystemList = list;
 }
 
+//TODO: Use OS notifications
 void QUsbManager::run()
 {
     QtUsb::FilterList list;

@@ -111,7 +111,7 @@ public:
     QString getSpeedString(void);
 
     /**
-     * @brief Get a list of all the available USB devices
+     * @brief Get a list of all USB devices available for use
      *
      * @return QtUsb::FilterList
      */
