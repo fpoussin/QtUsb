@@ -48,6 +48,7 @@ QUsbManager::QUsbManager(QObject *parent) :
     QThread(parent)
 {
     mStop = false;
+    int rc;
 
     qRegisterMetaType<QtUsb::DeviceFilter>("QtUsb::DeviceFilter");
     qRegisterMetaType<QtUsb::DeviceConfig>("QtUsb::DeviceConfig");
@@ -55,14 +56,19 @@ QUsbManager::QUsbManager(QObject *parent) :
     qRegisterMetaType<QtUsb::FilterList>("QtUsb::FilterList");
     qRegisterMetaType<QtUsb::ConfigList>("QtUsb::ConfigList");
 
+    rc = libusb_init(&mCtx); //initialize the library for the session we just declared
+    if(rc < 0) {
+        qCritical() << "LibUsb Init Error " << rc; //there was an error
+        return;
+    }
+
     // Populate list once
     mSystemList = QUsbDevice::getAvailableDevices();
 
     // Try hotplug first
     if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG))
     {
-        int rc;
-        rc = libusb_hotplug_register_callback(NULL,
+        rc = libusb_hotplug_register_callback(mCtx,
                                               (libusb_hotplug_event)(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
                                               (libusb_hotplug_flag)0,
                                               LIBUSB_HOTPLUG_MATCH_ANY,

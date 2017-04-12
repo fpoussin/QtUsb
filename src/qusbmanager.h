@@ -111,6 +111,7 @@ protected slots:
 
 protected:
     bool mStop; /**< Stop monitoring boolean */
+    libusb_context *mCtx; /**< libusb context */
     QList<QUsbDevice*> mUsedDeviceList; /**< List of devices in use */
     QtUsb::FilterList mFilterList; /**< List of filters we are using */
     QtUsb::FilterList mSystemList; /**< List of all filters in the system */
