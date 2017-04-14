@@ -1,36 +1,38 @@
 #include "qusbmanager.h"
 
 static libusb_hotplug_callback_handle callback_handle;
-static int hotplugCallback(libusb_context *ctx, libusb_device *dev,
-                           libusb_hotplug_event event, void *object) {
+static int hotplugCallback(libusb_context *ctx,
+                           libusb_device *device,
+                           libusb_hotplug_event event,
+                           void *user_data) {
 
   static libusb_device_handle *handle = NULL;
   struct libusb_device_descriptor desc;
   int rc;
   (void)ctx;
   QtUsb::FilterList device_list;
-  QtUsb::DeviceFilter device;
-  QUsbManager *manager = (QUsbManager *)object;
+  QtUsb::DeviceFilter dev;
+  QUsbManager *manager = (QUsbManager *)user_data;
 
-  (void)libusb_get_device_descriptor(dev, &desc);
+  (void)libusb_get_device_descriptor(device, &desc);
   if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event) {
-    rc = libusb_open(dev, &handle);
+    rc = libusb_open(device, &handle);
     if (LIBUSB_SUCCESS != rc) {
       qWarning("Could not open new USB device");
       return -1;
     }
     // Add to list
-    device.vid = desc.idVendor;
-    device.pid = desc.idProduct;
-    device_list.append(device);
+    dev.vid = desc.idVendor;
+    dev.pid = desc.idProduct;
+    device_list.append(dev);
     emit manager->deviceInserted(device_list);
 
   } else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
     if (handle) {
       // Remove from list
-      device.vid = desc.idVendor;
-      device.pid = desc.idProduct;
-      device_list.append(device);
+      dev.vid = desc.idVendor;
+      dev.pid = desc.idProduct;
+      device_list.append(dev);
       emit manager->deviceRemoved(device_list);
 
       libusb_close(handle);
@@ -68,12 +70,15 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
   // Try hotplug first
   mHasHotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
   if (mHasHotplug) {
-    rc = libusb_hotplug_register_callback(
-        mCtx, (libusb_hotplug_event)(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED |
-                                     LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
-        (libusb_hotplug_flag)0, LIBUSB_HOTPLUG_MATCH_ANY,
-        LIBUSB_HOTPLUG_MATCH_ANY, LIBUSB_HOTPLUG_MATCH_ANY, hotplugCallback,
-        this, &callback_handle);
+    rc = libusb_hotplug_register_callback(mCtx,
+                                          (libusb_hotplug_event)(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
+                                          (libusb_hotplug_flag)0,
+                                          LIBUSB_HOTPLUG_MATCH_ANY,
+                                          LIBUSB_HOTPLUG_MATCH_ANY,
+                                          LIBUSB_HOTPLUG_MATCH_ANY,
+                                          (libusb_hotplug_callback_fn)hotplugCallback,
+                                          (void*)this,
+                                          &callback_handle);
     if (LIBUSB_SUCCESS != rc) {
       libusb_exit(mCtx);
       qWarning("Error creating hotplug callback");
