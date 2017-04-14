@@ -3,8 +3,8 @@
 [![GitHub version](https://badge.fury.io/gh/fpoussin%2Fqtusb.svg)](https://badge.fury.io/gh/fpoussin%2Fqtusb)
 [![Build Status](http://jenkins.netyxia.net/buildStatus/icon?job=QtUsb)](http://jenkins.netyxia.net/job/QtUsb)
 
-A Multi-platform USB Library for Qt.
-Relies on WinUSB, libusb-1.0, and OS X's I/O Kit.
+A Cross-platform USB Library for Qt.
+Relies on libusb-1.0.
 
 **Features**
 
@@ -16,7 +16,6 @@ Relies on WinUSB, libusb-1.0, and OS X's I/O Kit.
 
 - Interrupt transfer
 - isochronous transfer
-- OS X support (I/O Kit)
 
 **Usage**
 
