@@ -26,6 +26,7 @@
 
 #ifdef _MSC_VER
 /* on MS environments, the inline keyword is available in C++ only */
+#pragma warning(disable: 4200) // non-standard extension
 #if !defined(__cplusplus)
 #define inline __inline
 #endif
