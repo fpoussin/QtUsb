@@ -52,37 +52,50 @@ qint32 QUsbDevice::open() {
 
   UsbPrintFuncName();
 
-  int r;       // for return values
+  int r = 0;       // for return values
   ssize_t cnt; // holding number of devices in list
+  libusb_device *dev;
 
   if (mConnected)
     return -1;
 
   cnt = libusb_get_device_list(mCtx, &mDevs); // get the list of devices
   if (cnt < 0) {
-    qCritical() << "Get Device List Error";
+    qCritical("libusb_get_device_list error");
+    libusb_free_device_list(mDevs, 1);
     return -1;
   }
 
-  mDevHandle = libusb_open_device_with_vid_pid(mCtx, mFilter.vid,
-                                               mFilter.pid); // Open device
-  if (mDevHandle == NULL) {
-    qWarning() << "Cannot open device";
+  for (int i = 0; i < cnt; i++) {
+    dev = mDevs[i];
+    libusb_device_descriptor desc;
+
+    if (libusb_get_device_descriptor(dev, &desc) == 0) {
+      if (desc.idProduct == mFilter.pid && desc.idVendor == mFilter.vid) {
+        if (mDebug) qDebug("Found device.");
+        r = libusb_open(dev, &mDevHandle);
+        break;
+      }
+    }
+  }
+  libusb_free_device_list(mDevs, 1); // free the list, unref the devices in it
+
+  if (r != 0 || mDevHandle == NULL) {
+    qWarning("Cannot open device. Error code: %d", r);
     return -2;
   }
 
   if (mDebug)
-    qDebug() << "Device Opened";
-  libusb_free_device_list(mDevs, 1); // free the list, unref the devices in it
+    qDebug("Device Opened");
 
   if (libusb_kernel_driver_active(mDevHandle, mConfig.interface) ==
       1) { // find out if kernel driver is attached
     if (mDebug)
-      qDebug() << "Kernel Driver Active";
+      qDebug("Kernel Driver Active");
     if (libusb_detach_kernel_driver(mDevHandle, mConfig.interface) ==
         0) // detach it
       if (mDebug)
-        qDebug() << "Kernel Driver Detached!";
+        qDebug("Kernel Driver Detached!");
   }
 
   int conf;
@@ -90,22 +103,20 @@ qint32 QUsbDevice::open() {
 
   if (conf != mConfig.config) {
     if (mDebug)
-      qDebug() << "Configuration needs to be changed";
+      qDebug("Configuration needs to be changed");
     r = libusb_set_configuration(mDevHandle, mConfig.config);
     if (r != 0) {
-      qWarning() << "Cannot Set Configuration";
+      qWarning("Cannot Set Configuration");
       this->printUsbError(r);
       return -3;
     }
   }
   r = libusb_claim_interface(mDevHandle, mConfig.interface);
   if (r != 0) {
-    qWarning() << "Cannot Claim Interface";
+    qWarning("Cannot Claim Interface");
     this->printUsbError(r);
     return -4;
   }
-
-  libusb_device *dev = libusb_get_device(mDevHandle);
 
   switch (libusb_get_device_speed(dev)) {
     case LIBUSB_SPEED_LOW:
