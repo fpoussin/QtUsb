@@ -72,6 +72,7 @@ qint32 QUsbDevice::open() {
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
       if (desc.idProduct == mFilter.pid && desc.idVendor == mFilter.vid) {
+
         if (mDebug) qDebug("Found device.");
         r = libusb_open(dev, &mDevHandle);
         break;
@@ -162,7 +163,7 @@ void QUsbDevice::setDebug(bool enable) {
 
   QBaseUsbDevice::setDebug(enable);
   if (enable)
-    libusb_set_debug(mCtx, 3);
+    libusb_set_debug(mCtx, LIBUSB_LOG_LEVEL_DEBUG);
   else
     libusb_set_debug(mCtx, 0);
 }
