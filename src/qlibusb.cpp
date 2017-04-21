@@ -156,54 +156,7 @@ void QUsbDevice::setDebug(bool enable)
 
 void QUsbDevice::printUsbError(int error_code)
 {
-    switch (error_code) {
-
-        case LIBUSB_SUCCESS:
-            qWarning("LIBUSB_SUCCESS");
-            break;
-        case LIBUSB_ERROR_IO:
-            qWarning("LIBUSB_ERROR_IO");
-            break;
-        case LIBUSB_ERROR_INVALID_PARAM:
-            qWarning("LIBUSB_ERROR_INVALID_PARAM");
-            break;
-        case LIBUSB_ERROR_ACCESS:
-            qWarning("LIBUSB_ERROR_ACCESS");
-            break;
-        case LIBUSB_ERROR_NO_DEVICE:
-            qWarning("LIBUSB_ERROR_NO_DEVICE");
-            break;
-        case LIBUSB_ERROR_NOT_FOUND:
-            qWarning("LIBUSB_ERROR_NOT_FOUND");
-            break;
-        case LIBUSB_ERROR_BUSY:
-            qWarning("LIBUSB_ERROR_BUSY");
-            break;
-        case LIBUSB_ERROR_TIMEOUT:
-            qWarning("LIBUSB_ERROR_TIMEOUT");
-            break;
-        case LIBUSB_ERROR_OVERFLOW:
-            qWarning("LIBUSB_ERROR_OVERFLOW");
-            break;
-        case LIBUSB_ERROR_PIPE:
-            qWarning("LIBUSB_ERROR_PIPE");
-            break;
-        case LIBUSB_ERROR_INTERRUPTED:
-            qWarning("LIBUSB_ERROR_INTERRUPTED");
-            break;
-        case LIBUSB_ERROR_NO_MEM:
-            qWarning("LIBUSB_ERROR_NO_MEM");
-            break;
-        case LIBUSB_ERROR_NOT_SUPPORTED:
-            qWarning("LIBUSB_ERROR_NOT_SUPPORTED");
-            break;
-        case LIBUSB_ERROR_OTHER:
-            qWarning("LIBUSB_ERROR_OTHER");
-            break;
-        default:
-            qWarning("Unknown libusb error code: %d", error_code);
-            break;
-    }
+    qWarning("libusb Error: %s", libusb_strerror((enum libusb_error)error_code));
 }
 
 void QUsbDevice::flush()
@@ -220,7 +173,8 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
     UsbPrintFuncName();
     Q_CHECK_PTR(buf);
     qint32 rc, read_bytes;
-    qint64 read_total;
+    qint32 read_total;
+    quint32 bsize = 1024;
     QElapsedTimer timer;
 
     // check it isn't closed already
@@ -232,16 +186,26 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
     read_total = 0;
     read_bytes = 0;
 
-    buf->resize(maxSize);
+    buf->resize(bsize);
 
     timer.start();
     while (timer.elapsed() < mTimeout && maxSize-read_total > 0) {
-        rc = libusb_bulk_transfer(mDevHandle, mConfig.readEp, (uchar*)(buf->data()+read_total), maxSize-read_total, &read_bytes, mTimeout);
+        rc = libusb_bulk_transfer(mDevHandle, mConfig.readEp, (uchar*)(buf->data()+read_total), bsize, &read_bytes, 1);
+        if (rc == LIBUSB_ERROR_PIPE) {
+            libusb_clear_halt(mDevHandle, mConfig.readEp);
+        }
+        if (rc == LIBUSB_ERROR_TIMEOUT)
+            rc = 0;
         read_total += read_bytes;
         if (rc != 0) break;
     }
     // we resize the buffer.
     buf->resize(read_total);
+
+
+    if (rc != LIBUSB_SUCCESS) {
+        printUsbError(rc);
+    }
 
     QString datastr, s;
 
@@ -250,7 +214,7 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 maxSize)
     }
     if (mDebug) {
         datastr.remove(datastr.size()-1, 1); //remove last colon
-        qDebug("Received: %s", datastr.toStdString().c_str());
+        qDebug("%d out of %d Received: %s", read_total, maxSize, datastr.toStdString().c_str());
     }
 
     if (rc != 0)
@@ -274,7 +238,7 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
     UsbPrintFuncName();
     Q_CHECK_PTR(buf);
     qint32 rc, sent_tmp;
-    qint64 sent;
+    qint32 sent;
     QElapsedTimer timer;
 
     // check it isn't closed
@@ -282,8 +246,8 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
 
     if (mDebug) {
         QString cmd, s;
-        for (qint64 i=0; i<maxSize; i++) {
-            cmd.append(s.sprintf("%02X:", buf->at(i)));
+        for (quint32 i=0; i<maxSize; i++) {
+            cmd.append(s.sprintf("%02X:", (uchar)buf->at(i)));
         }
         cmd.remove(cmd.size()-1, 1); //remove last colon;
         qDebug() << "Sending" << maxSize << "bytes:" << cmd;
@@ -296,26 +260,23 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 maxSize)
     timer.start();
     while (timer.elapsed() < mTimeout && maxSize-sent > 0) {
         rc = libusb_bulk_transfer(mDevHandle, (mConfig.writeEp), (uchar*)buf->data(), maxSize, &sent_tmp, mTimeout);
+        if (rc == LIBUSB_ERROR_PIPE) {
+            libusb_clear_halt(mDevHandle, mConfig.readEp);
+        }
         sent += sent_tmp;
         if (rc != 0) break;
     }
 
+    if ((qint32)maxSize != sent) {
+        qWarning("Only sent %d out of %d", sent, maxSize);
+        return -1;
+    }
+
     if (rc != 0)
     {
-        if (rc == -110)
-        {
-            qWarning("libusb_bulk_transfer Timeout");
-        }
-        else if (rc == -2)
-        {
-            qWarning("EndPoint not found");
-            return -1;
-        }
-        else {
-            qWarning("libusb_bulk_transfer Error Writing: %d", rc);
-            this->printUsbError(rc);
-            return -1;
-        }
+        qWarning("libusb_bulk_transfer Error Writing: %d", rc);
+        this->printUsbError(rc);
+        return -2;
     }
 
     return sent;
