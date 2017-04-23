@@ -62,7 +62,7 @@ public slots:
      * @param maxSize
      * @return qint32
      */
-    qint32 read(QByteArray* buf, quint32 maxSize);
+    qint32 read(QByteArray* buf, quint32 len);
     /**
      * @brief See base class
      *
@@ -70,7 +70,7 @@ public slots:
      * @param maxSize
      * @return qint32
      */
-    qint32 write(const QByteArray* buf, quint32 maxSize);
+    qint32 write(const QByteArray* buf, quint32 len);
 
     /**
      * @brief See base class
@@ -91,5 +91,7 @@ private:
     libusb_device **mDevs; /**< libusb device ptr to ptr */
     libusb_device_handle *mDevHandle; /**< libusb device handle ptr */
     libusb_context *mCtx; /**< libusb context */
+    QByteArray mReadBuffer;
+    quint32 mReadBufferSize;
 };
 #endif // QLIBUSB_H
