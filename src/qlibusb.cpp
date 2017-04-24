@@ -24,7 +24,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices() {
   libusb_init(&ctx);
   cnt = libusb_get_device_list(ctx, &devs);  // get the list of devices
   if (cnt < 0) {
-    qCritical() << "Get Device List Error";
+    qCritical("libusb_get_device_list Error");
     libusb_free_device_list(devs, 1);
     return list;
   }
@@ -50,7 +50,7 @@ QtUsb::FilterList QUsbDevice::getAvailableDevices() {
 qint32 QUsbDevice::open() {
   UsbPrintFuncName();
 
-  int r = 0;    // for return values
+  int rc = -5;   // Not found by default
   ssize_t cnt;  // holding number of devices in list
   libusb_device* dev = NULL;
 
@@ -69,17 +69,21 @@ qint32 QUsbDevice::open() {
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
       if (desc.idProduct == mFilter.pid && desc.idVendor == mFilter.vid) {
-        if (mDebug) qDebug("Found device.");
-        r = libusb_open(dev, &mDevHandle);
-        break;
+        if (mDebug) {
+          qDebug("Found device.");
+        }
+        rc = libusb_open(dev, &mDevHandle);
+        if (rc == 0) break;
+        else {
+          qWarning("Failed to open device: %s", libusb_strerror((enum libusb_error)rc));
+        }
       }
     }
   }
   libusb_free_device_list(mDevs, 1);  // free the list, unref the devices in it
 
-  if (r != 0 || mDevHandle == NULL) {
-    qWarning("Cannot open device. Error code: %d", r);
-    return -2;
+  if (rc != 0 || mDevHandle == NULL) {
+    return rc;
   }
 
   if (mDebug) qDebug("Device Opened");
@@ -97,17 +101,17 @@ qint32 QUsbDevice::open() {
 
   if (conf != mConfig.config) {
     if (mDebug) qDebug("Configuration needs to be changed");
-    r = libusb_set_configuration(mDevHandle, mConfig.config);
-    if (r != 0) {
+    rc = libusb_set_configuration(mDevHandle, mConfig.config);
+    if (rc != 0) {
       qWarning("Cannot Set Configuration");
-      this->printUsbError(r);
+      this->printUsbError(rc);
       return -3;
     }
   }
-  r = libusb_claim_interface(mDevHandle, mConfig.interface);
-  if (r != 0) {
+  rc = libusb_claim_interface(mDevHandle, mConfig.interface);
+  if (rc != 0) {
     qWarning("Cannot Claim Interface");
-    this->printUsbError(r);
+    this->printUsbError(rc);
     return -4;
   }
 
