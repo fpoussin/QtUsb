@@ -2,6 +2,7 @@
 #define QUSB_TYPES_H
 
 #include <QMetaType>
+#include <QString>
 
 namespace QtUsb {
 
@@ -46,6 +47,7 @@ typedef struct {
  *
  */
 typedef struct {
+  QString guid;     /**< Device GUID */
   quint16 pid;      /**< Product ID */
   quint16 vid;      /**< Vendor ID */
   DeviceConfig cfg; /**< Configuration for a given device */
