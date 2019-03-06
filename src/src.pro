@@ -7,7 +7,6 @@
 VERSION = 0.3.0
 QT -= gui
 TEMPLATE = lib
-CONFIG  += static_and_shared
 
 include(QtUsb.pri)
 

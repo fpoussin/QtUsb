@@ -1,7 +1,1 @@
-Makefile
-*.o
-*.dylib
-moc_*
-.qmake.stash
-examples/SimpleBulkTransfer/SimpleBulkTransfer
-examples/UsbNotifications/UsbNotifications
+build
