@@ -1,7 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('') {
+    stage('Build') {
       agent {
         docker {
           image 'fpoussin/jenkins:ubuntu-16.10-qt5'
@@ -9,8 +9,10 @@ pipeline {
 
       }
       steps {
-        sh '''qmake
-make'''
+        sh '''mkdir build
+cd build
+qmake ..
+nice make -j $(nproc)'''
       }
     }
   }
