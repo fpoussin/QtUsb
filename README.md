@@ -12,6 +12,23 @@ Relies on libusb-1.0.
 - Device insertion/removal detection
 - Device search
 
+**To build**
+
+For a shared library:
+```shell
+mkdir build && cd build
+qmake ..
+make
+```
+
+For a static library:
+```shell
+mkdir build && cd build
+qmake "CONFIG+=staticlib" ..
+make
+```
+
+
 **TODO**
 
 - Interrupt transfer

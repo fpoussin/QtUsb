@@ -20,13 +20,14 @@ HEADERS +=  \
     qusb_types.h \
     qlibusb.h
 
-linux-g++* {
-    !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
+unix {
+   !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
+   CONFIG += link_pkgconfig
+   PKGCONFIG += libusb-1.0
 }
 
 msvc {
   HEADERS += $$PWD/libusb-1.0/libusb.h
   LIBS += -L$$PWD/ libusb-1.0.lib
 }
-else:LIBS += -lusb-1.0
 
