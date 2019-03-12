@@ -4,20 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += core
-QT       -= gui
+QT += core usb
+QT -= gui
 
-TARGET = UsbNotifications
-CONFIG   += console
-CONFIG   -= app_bundle
-win32:CONFIG += winusb
-
+TARGET = SimpleBulkTransfer
 TEMPLATE = app
-
-include(../../src/QtUsb.pri)
 
 SOURCES += main.cpp \
     usbexample.cpp
 
 HEADERS += \
     usbexample.h
+
+target.path = $$[QT_INSTALL_EXAMPLES]/usb/SimpleBulkTransfer
+INSTALLS += target
