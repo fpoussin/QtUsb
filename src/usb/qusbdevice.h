@@ -1,19 +1,21 @@
 #ifndef QLIBUSB_H
 #define QLIBUSB_H
 
-#include "qbaseusb.h"
-#include "qusb_compat.h"
+#include "qbaseusb_p.h"
+#include "qusbcompat_p.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QString>
 #include <QtEndian>
 #include <libusb-1.0/libusb.h>
 
+QT_BEGIN_NAMESPACE
+
 /**
  * @brief
  *
  */
-class QUSBSHARED_EXPORT QUsbDevice : public QBaseUsbDevice {
+class Q_USB_EXPORT QUsbDevice : public QBaseUsbDevice {
   Q_OBJECT
 
 public:
@@ -22,7 +24,7 @@ public:
    *
    * @param parent
    */
-  explicit QUsbDevice(QBaseUsbDevice *parent = 0);
+  explicit QUsbDevice(QBaseUsbDevice *parent = Q_NULLPTR);
   /**
    * @brief See base class
    *
@@ -87,10 +89,14 @@ private:
    * @param error_code
    */
   void printUsbError(int error_code);
+
   libusb_device **mDevs;            /**< libusb device ptr to ptr */
   libusb_device_handle *mDevHandle; /**< libusb device handle ptr */
   libusb_context *mCtx;             /**< libusb context */
   QByteArray mReadBuffer;
   quint32 mReadBufferSize;
 };
+
+QT_END_NAMESPACE
+
 #endif // QLIBUSB_H

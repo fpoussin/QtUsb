@@ -1,0 +1,42 @@
+include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
+
+project                 = QtUsb
+description             = Qt Usb Reference Documentation
+version                 = $QT_VERSION
+
+qhp.projects            = QtUsb
+
+qhp.QtUsb.file                = qtusb.qhp
+qhp.QtUsb.namespace           = org.qt-project.qtusb.$QT_VERSION_TAG
+qhp.QtUsb.virtualFolder       = qtusb
+qhp.QtUsb.indexTitle          = Qt Usb
+qhp.QtUsb.indexRoot           =
+
+qhp.QtUsb.filterAttributes    = qtusb $QT_VERSION qtrefdoc
+qhp.QtUsb.customFilters.Qt.name = QtUsb $QT_VERSION
+qhp.QtUsb.customFilters.Qt.filterAttributes = qtusb $QT_VERSION
+
+qhp.QtUsb.subprojects         = classes examples
+
+qhp.QtUsb.subprojects.classes.title = C++ Classes
+qhp.QtUsb.subprojects.classes.indexTitle = Qt Usb C++ Classes
+qhp.QtUsb.subprojects.classes.selectors = class fake:headerfile
+qhp.QtUsb.subprojects.classes.sortPages = true
+
+qhp.QtUsb.subprojects.examples.title = Examples
+qhp.QtUsb.subprojects.examples.indexTitle = Qt Usb Examples
+qhp.QtUsb.subprojects.examples.selectors = fake:example
+qhp.QtUsb.subprojects.examples.sortPages = true
+
+headerdirs  += ..
+sourcedirs  += ..
+exampledirs += ../../../examples/usb
+imagedirs   += images
+excludedirs += ../qt4support
+
+examplesinstallpath = usb
+
+depends += qtcore qtdoc qtnetwork qmake
+
+navigation.landingpage = "Qt Usb"
+navigation.cppclassespage = "Qt Usb C++ Classes"

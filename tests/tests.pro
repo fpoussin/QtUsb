@@ -1,3 +1,2 @@
 TEMPLATE = subdirs
-
-SUBDIRS = usb
+SUBDIRS += auto

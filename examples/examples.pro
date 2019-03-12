@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 
-SUBDIRS = usb
+!qnx:SUBDIRS += usb

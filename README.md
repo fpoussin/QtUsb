@@ -3,7 +3,7 @@
 [![GitHub version](https://badge.fury.io/gh/fpoussin%2Fqtusb.svg)](https://badge.fury.io/gh/fpoussin%2Fqtusb)
 [![Build Status](https://jenkins.netyxia.net/buildStatus/icon?job=QtUsb%2Fmaster)](https://jenkins.netyxia.net/job/QtUsb/job/master/)  
 
-A Cross-platform USB Library for Qt.
+A Cross-platform USB Module for Qt.
 Relies on libusb-1.0.
 
 **Features**
@@ -14,20 +14,11 @@ Relies on libusb-1.0.
 
 **To build**
 
-For a shared library:
 ```shell
 mkdir build && cd build
 qmake ..
-make
+make install
 ```
-
-For a static library:
-```shell
-mkdir build && cd build
-qmake "CONFIG+=staticlib" ..
-make
-```
-
 
 **TODO**
 
@@ -37,6 +28,20 @@ make
 **Usage**
 
 Documentation is not complete yet, you can have a look at the examples in the meanwhile.
+
+You'll need to add the module to your project file:
+
+```
+qt += usb
+```
+
+Then include it into your headers:
+
+```
+#include <QUsb>
+
+QUsbDevice mydev;
+```
 
 **Documentation**  
 

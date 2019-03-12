@@ -1,4 +1,4 @@
-#include "qbaseusb.h"
+#include "qbaseusb_p.h"
 
 QBaseUsbDevice::QBaseUsbDevice(QObject *parent) : QObject(parent) {
   this->setDefaults();
@@ -7,7 +7,7 @@ QBaseUsbDevice::QBaseUsbDevice(QObject *parent) : QObject(parent) {
 
 QBaseUsbDevice::~QBaseUsbDevice() {}
 
-QString QBaseUsbDevice::getSpeedString() {
+QByteArray QBaseUsbDevice::getSpeedString() {
   switch (mSpd) {
     case QtUsb::unknownSpeed:
       return "Unknown speed";
