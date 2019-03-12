@@ -3,7 +3,8 @@
 
 #include <QList>
 #include <QThread>
-#include "qusb.h"
+#include "qusbtypes.h"
+#include "qusbdevice.h"
 
 QT_BEGIN_NAMESPACE
 
