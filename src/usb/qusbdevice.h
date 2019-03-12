@@ -24,7 +24,7 @@ public:
    *
    * @param parent
    */
-  explicit QUsbDevice(QBaseUsbDevice *parent = nullptr);
+  explicit QUsbDevice(QBaseUsbDevice *parent = Q_NULLPTR);
   /**
    * @brief See base class
    *

@@ -22,7 +22,7 @@ public:
    *
    * @param parent
    */
-  QBaseUsbDevice(QObject *parent = nullptr);
+  QBaseUsbDevice(QObject *parent = Q_NULLPTR);
   /**
    * @brief Desctructor
    *

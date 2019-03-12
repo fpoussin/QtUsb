@@ -2,7 +2,7 @@
 #include <QElapsedTimer>
 
 QUsbDevice::QUsbDevice(QBaseUsbDevice* parent) : QBaseUsbDevice(parent) {
-  mDevHandle = nullptr;
+  mDevHandle = Q_NULLPTR;
   int r = libusb_init(
       &mCtx);  // initialize the library for the session we just declared
   if (r < 0) {
@@ -53,7 +53,7 @@ qint32 QUsbDevice::open() {
 
   int rc = -5;   // Not found by default
   ssize_t cnt;  // holding number of devices in list
-  libusb_device* dev = nullptr;
+  libusb_device* dev = Q_NULLPTR;
 
   if (mConnected) return -1;
 
@@ -83,7 +83,7 @@ qint32 QUsbDevice::open() {
   }
   libusb_free_device_list(mDevs, 1);  // free the list, unref the devices in it
 
-  if (rc != 0 || mDevHandle == nullptr) {
+  if (rc != 0 || mDevHandle == Q_NULLPTR) {
     return rc;
   }
 
