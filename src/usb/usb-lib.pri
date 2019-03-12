@@ -3,7 +3,7 @@ INCLUDEPATH += $$PWD
 PUBLIC_HEADERS += \
     $$PWD/qusbglobal.h \
     $$PWD/qusb.h \
-    $$PWD/qusbdevice.h
+    $$PWD/qusbdevice.h \
     $$PWD/qusbtypes.h \
     $$PWD/qusbmanager.h
 
