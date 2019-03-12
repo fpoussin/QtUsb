@@ -3,7 +3,7 @@
 
 #include "qusbglobal.h"
 #include "qusbtypes.h"
-#include "qlibusb_p.h"
+#include "qusbdevice.h"
 #include "qusbmanager.h"
 
 #endif // QUSB_H
