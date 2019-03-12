@@ -89,6 +89,7 @@ private:
    * @param error_code
    */
   void printUsbError(int error_code);
+
   libusb_device **mDevs;            /**< libusb device ptr to ptr */
   libusb_device_handle *mDevHandle; /**< libusb device handle ptr */
   libusb_context *mCtx;             /**< libusb context */

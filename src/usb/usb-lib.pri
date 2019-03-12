@@ -3,13 +3,13 @@ INCLUDEPATH += $$PWD
 PUBLIC_HEADERS += \
     $$PWD/qusbglobal.h \
     $$PWD/qusb.h \
+    $$PWD/qusbdevice.h
     $$PWD/qusbtypes.h \
     $$PWD/qusbmanager.h
 
 PRIVATE_HEADERS += \
     $$PWD/qbaseusb_p.h \
-    $$PWD/qusbcompat_p.h \
-    $$PWD/qlibusb_p.h
+    $$PWD/qusbcompat_p.h
 
 SOURCES += \
     $$PWD/qusbmanager.cpp \

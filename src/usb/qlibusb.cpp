@@ -1,4 +1,4 @@
-#include "qlibusb_p.h"
+#include "qusbdevice.h"
 #include <QElapsedTimer>
 
 QUsbDevice::QUsbDevice(QBaseUsbDevice* parent) : QBaseUsbDevice(parent) {
