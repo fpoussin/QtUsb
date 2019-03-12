@@ -1,17 +1,19 @@
 #ifndef QBASEUSB_H
 #define QBASEUSB_H
 
-#include "qusb_global.h"
-#include "qusb_types.h"
+#include "qusbglobal.h"
+#include "qusbtypes.h"
 #include <QDebug>
 #include <QList>
 #include <QString>
+
+QT_BEGIN_NAMESPACE
 
 /**
  * @brief
  *
  */
-class QUSBSHARED_EXPORT QBaseUsbDevice : public QObject {
+class Q_USB_EXPORT QBaseUsbDevice : public QObject {
   Q_OBJECT
 
 public:
@@ -20,7 +22,7 @@ public:
    *
    * @param parent
    */
-  QBaseUsbDevice(QObject *parent = 0);
+  QBaseUsbDevice(QObject *parent = nullptr);
   /**
    * @brief Desctructor
    *
@@ -99,9 +101,9 @@ public:
   /**
    * @brief Get current device speed string
    *
-   * @return QString
+   * @return QByteArray
    */
-  QString getSpeedString(void);
+  QByteArray getSpeedString(void);
 
   /**
    * @brief Get a list of all USB devices available for use
@@ -201,5 +203,7 @@ protected:
   bool mConnected;             /**< Connected boolean */
   QtUsb::DeviceSpeed mSpd;     /**< Device speed */
 };
+
+QT_END_NAMESPACE
 
 #endif // QBASEUSB_H

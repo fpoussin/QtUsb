@@ -3,14 +3,16 @@
 
 #include <QList>
 #include <QThread>
-#include <QUsb>
+#include "qusb.h"
+
+QT_BEGIN_NAMESPACE
 
 /**
  * @brief The QUsb manager class.
  * Handles USB events, searching, and devices.
  *
  */
-class QUSBSHARED_EXPORT QUsbManager : public QThread {
+class Q_USB_EXPORT QUsbManager : public QThread {
   Q_OBJECT
 public:
   /**
@@ -119,5 +121,7 @@ protected:
   QtUsb::FilterList mFilterList;       /**< List of filters we are using */
   QtUsb::FilterList mSystemList;       /**< List of all filters in the system */
 };
+
+QT_END_NAMESPACE
 
 #endif // QUSBMANAGER_H

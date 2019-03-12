@@ -18,16 +18,6 @@ This file is part of QSTLink2.
 #define QUSB_COMPAT_H
 #include <stdio.h>
 
-#if QT_VERSION >= 0x040700
-  #include <QElapsedTimer> // QElapsedTimer was introduced in QT 4.7
-  #ifdef __GNUC__
-  #include <unistd.h> //for usleep starting with GCC 4.7
-#endif
-#else
-  #include <QTime>
-  #define QElapsedTimer QTime
-#endif
-
 #define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define UsbPrintFuncName() if (mDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 

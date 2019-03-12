@@ -1,6 +1,1 @@
-TEMPLATE = subdirs
-CONFIG += ordered
-
-SUBDIRS = src \
-examples/SimpleBulkTransfer \
-examples/UsbNotifications
+load(qt_parts)
