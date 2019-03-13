@@ -1,18 +1,20 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys, os, re, argparse, iso8601, shutil, time
 from subprocess import call, check_output, Popen, CalledProcessError, STDOUT, PIPE
 from xml.etree import ElementTree as ET
 from traceback import print_exc
+from glob import glob
 
-releases = ["trusty", "vivid", "wily"]
+releases = ['xenial', 'bionic', 'cosmic', 'disco']
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r', '--release', help='The Ubuntu release')
 parser.add_argument('-s', '--source', help='Build signed source package', action="store_true")
 parser.add_argument('-lb', '--bin', help='Build local binary package', action="store_true")
-parser.add_argument('-p', '--ppa', help='Send source package to PPA', action="store_true")
+parser.add_argument('-u', '--upload', help='Send source package to PPA', action="store_true")
 parser.add_argument('-b', '--sbuild', help='Build binary package with sbuild', action="store_true")
+parser.add_argument('-p', '--prefix', help='Location of the build')
 
 
 def run_cmd(cmd, do_print=True, **kwargs):
@@ -24,7 +26,8 @@ def run_cmd(cmd, do_print=True, **kwargs):
     else:
         p.wait()
 
-def makeChangelog(release, dest, rev):
+
+def make_changelog(release, dest, rev):
     # ~ f = open(dest+"/debian/changelog", "r")
     # ~ tmp = f.read()
     # ~ f.close()
@@ -32,46 +35,51 @@ def makeChangelog(release, dest, rev):
     pass
 
 
-def copySrc(dest, rev, release):
-    check_output(["rm -rf " + dest], shell=True)
-    print check_output(["mkdir -v " + dest], shell=True)
+def copy_src(dest, rev, release):
 
-    # ~ print check_output(["shopt -s extglob; cp -r ../!(package) "+dest+"/"], shell=True)
-    cmd = "find .. -maxdepth 1 \! \( -name package -o -name *.pro.user* -o -name .. \) -exec cp -vr '{}' " + dest + "/ ';'"
-    print check_output([cmd], shell=True)
+    shutil.rmtree(dest, ignore_errors=True)
+    shutil.copytree("..", "{0}".format(dest))
+    shutil.rmtree('{}/examples'.format(dest))
+    shutil.rmtree('{}/tests'.format(dest))
 
-    check_output(["cd {0}; echo '' | dh_make -n --single -e fabien.poussin@gmail.com -c gpl3".format(dest)],
-                       shell=True)
+    r = check_output(["cd {0}; dh_make -yn --single -e fabien.poussin@gmail.com -c gpl3".format(dest)],
+                 shell=True).decode("utf-8")
+    print(r)
 
-    print check_output(["cp -v debian/control_{0} {1}/debian/control".format(release, dest)], shell=True)
-    print check_output(["cp -v debian/copyright debian/README debian/rules {0}/debian/".format(dest)], shell=True)
-    check_output(["rm -f {0}/debian/*.ex {0}/debian/*.EX {0}/debian/ex.*".format(dest)], shell=True)
+    shutil.copy("debian/control_{0}".format(release), "{0}/debian/control".format(dest))
 
-    f = open(dest + "/debian/changelog", "r")
-    tmp = f.read().replace("unstable; urgency=low", args.release + "; urgency=medium")
-    f.close()
-    f = open(dest + "/debian/changelog", "w")
-    f.write(str(tmp))
-    f.close()
+    for i in ['copyright', 'README', 'rules']:
+        shutil.copy("debian/{0}".format(i), "{0}/debian/{1}".format(dest, i))
 
-    f = open(dest + "/version", "w")
-    f.write(str(rev))
-    f.close()
+    for f in glob("{0}/debian/*.ex".format(dest)):
+        os.remove(f)
+
+    with open(dest + "/debian/changelog", "r") as f:
+        tmp = f.read().replace("unstable", args.release).replace("urgency=low", "urgency=medium")
+
+    with open(dest + "/debian/changelog", "w") as f:
+        f.write(str(tmp))
+
+    with open(dest + "/version", "w") as f:
+        f.write(str(rev))
 
 
-def makeSrc(dest):
-    print "Building Source package"
+def make_src(dest):
+    print("Building Source package")
     run_cmd(["cd {0}; debuild -j4 -S -sa".format(dest)])
 
-def makeSBuild(dest):
-    print "Building binary package (sbuild)"
-    run_cmd(["sbuild -vd {0} -c {0}-amd64-shm -j4 {1}".format(args.release, dest)])
 
-def makeBin(dest):
-    print "Building binary package"
+def make_s_build(dest):
+    print("Building binary package (sbuild)")
+    run_cmd(["sbuild -vd {0} -c {0}-amd64 -j4 {1}".format(args.release, dest)])
+
+
+def make_bin(dest):
+    print("Building binary package")
     run_cmd(["cd {0}; debuild -j4 -b -uc -us".format(dest)])
 
-def sendSrc(ver):
+
+def send_src(ver):
     run_cmd(["dput ppa:fpoussin/ppa {0}_source.changes".format(ver)])
 
 
@@ -84,41 +92,51 @@ if __name__ == "__main__":
         parser.print_help()
 
     if args.release not in releases:
-        print "Invalid Ubuntu release, please chose among:", releases
+        print("Invalid Ubuntu release, please chose among:", releases)
         exit(1)
 
-    ver = check_output(["grep \"VERSION =\" ../src/src.pro | awk '{ print $3 }' "], shell=True).replace('\n', '')
+    if not args.prefix:
+        args.prefix = '/tmp'
+
+    with open('../.qmake.conf') as f:
+        for l in f.readlines():
+            r = re.search(r'^MODULE_VERSION = (.+)', l)
+            if r:
+                ver = r.group(1)
+                break
+
     if not ver:
-        print "Could not fetch last version"
+        print("Could not read version from .qmake.conf")
         exit(1)
 
-    print "Last version:", ver
+    print("Source Version:", ver)
 
-    folder_name = 'libqt5usb5-{0}~{1}~{2}'.format(ver, now, args.release)
-    dsc_name = 'libqt5usb5_{0}~{1}~{2}'.format(ver, now, args.release)
+    folder_name = '{0}/libqt5usb5-{1}~{2}~{3}'.format(args.prefix, ver, now, args.release)
+    dsc_name = '{0}/libqt5usb5_{1}~{2}~{3}'.format(args.prefix, ver, now, args.release)
 
-    print "Package version:", folder_name
+    print("Package location:", folder_name)
 
-    copySrc(folder_name, ver, args.release)
-    makeChangelog(args.release, folder_name, ver)
+    copy_src(folder_name, ver, args.release)
+    make_changelog(args.release, folder_name, ver)
 
     try:
         if args.source:
-            makeSrc(folder_name)
+            make_src(folder_name)
             if args.ppa:
-                sendSrc(dsc_name)
+                send_src(dsc_name)
         if args.sbuild:
             if not args.source:  # Need to make sources first
-                makeSrc(folder_name)
-            makeSBuild(folder_name)
+                make_src(folder_name)
+            make_s_build(folder_name)
         if args.bin:
-            makeBin(folder_name)
+            make_bin(folder_name)
 
     except CalledProcessError as e:
-        print e.output
+        print(e.output)
     except OSError as e:
-        print e.filename, e
-        print print_exc()
+        print(e.filename, e)
+        print(print_exc())
     finally:
-        check_output(["rm -rf " + folder_name], shell=True)
-        check_output(["schroot -e --all-sessions"], shell=True)
+        pass
+        #shutil.rmtree(folder_name)
+        #check_output(["schroot -e --all-sessions"], shell=True)

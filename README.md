@@ -12,6 +12,13 @@ Relies on libusb-1.0.
 - Device insertion/removal detection
 - Device search
 
+**Install (Ubuntu)**  
+
+```
+sudo add-apt-repository ppa:fpoussin/ppa
+sudo apt install libqt5usb5 libqt5usb5-dev
+```
+
 **To build**
 
 ```shell
