@@ -7,12 +7,10 @@ PUBLIC_HEADERS += \
     $$PWD/qusbmanager.h
 
 PRIVATE_HEADERS += \
-    $$PWD/qbaseusb_p.h \
-    $$PWD/qusbcompat_p.h
+    $$PWD/qusbdevice_p.h
 
 SOURCES += \
     $$PWD/qusbmanager.cpp \
-    $$PWD/qbaseusb.cpp \
     $$PWD/qlibusb.cpp
 
 win32 {

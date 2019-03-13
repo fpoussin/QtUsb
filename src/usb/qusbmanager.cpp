@@ -65,7 +65,7 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
   }
 
   // Populate list once
-  mSystemList = QUsbDevice::getAvailableDevices();
+  mSystemList = QUsbDevice::availableDevices();
 
   // Try hotplug first
   mHasHotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
@@ -211,7 +211,7 @@ void QUsbManager::run() {
     if (mHasHotplug) {
       libusb_handle_events_completed(mCtx, NULL);
     } else {
-      list = QUsbDevice::getAvailableDevices();
+      list = QUsbDevice::availableDevices();
       this->monitorDevices(list);
     }
     this->msleep(250);
