@@ -9,3 +9,4 @@ install:
 script:
   - qmake
   - make -j $(nproc)
+  - sudo make install
