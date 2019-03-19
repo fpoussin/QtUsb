@@ -2,14 +2,18 @@
 #define QUSB_TYPES_H
 
 #include <QMetaType>
+#include <QString>
+
+QT_BEGIN_NAMESPACE
 
 namespace QtUsb {
 
 const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
-                                    /**
-                                     * @brief USB speeds
-                                     *
-                                     */
+
+/**
+ * @brief USB speeds
+ *
+ */
 enum DeviceSpeed {
   unknownSpeed = -1,
   lowSpeed = 0,
@@ -49,6 +53,7 @@ typedef struct {
   quint16 pid;      /**< Product ID */
   quint16 vid;      /**< Vendor ID */
   DeviceConfig cfg; /**< Configuration for a given device */
+  QString guid;     /**< GUID (Windows) */
 
 } DeviceFilter;
 
@@ -62,12 +67,14 @@ typedef QList<DeviceFilter> FilterList;
  *
  */
 typedef QList<DeviceConfig> ConfigList;
-}
+} // namespace QtUsb
 
 Q_DECLARE_METATYPE(QtUsb::DeviceFilter)
 Q_DECLARE_METATYPE(QtUsb::DeviceConfig)
 
 Q_DECLARE_METATYPE(QtUsb::FilterList)
 Q_DECLARE_METATYPE(QtUsb::ConfigList)
+
+QT_END_NAMESPACE
 
 #endif // QUSB_TYPES_H

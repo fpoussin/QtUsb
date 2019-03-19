@@ -1,0 +1,51 @@
+branches:
+  only:
+    - master
+    - winusb
+    - winusb-reimport
+
+shallow_clone: true
+matrix:
+  fast_finish: false
+
+environment:
+  matrix:
+  - arch: x64
+    qt: 5.12.1
+    cc: VS2017
+    mode: release
+    QTDIR: C:\Qt\5.12.1\msvc2017_64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+  - arch: x86
+    qt: 5.12.1
+    cc: VS2017
+    mode: release
+    QTDIR: C:\Qt\5.12.1\msvc2017
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+init:
+  - set vcarch=%arch%
+  - if "%arch%" == "x64" set vcarch=amd64
+  - if %cc%==VS2017 (
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
+    ) else if not %cc%==MinGW (
+      call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
+    )
+  - echo QTDIR=%QTDIR%
+
+install:
+  - mkdir build
+  - cd build
+
+before_build:
+  - set PATH=%QTDIR%\bin;%PATH%
+  - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
+  - echo PATH=%PATH%
+
+build_script:
+  - qmake ..
+  - nmake
+
+test: off
+

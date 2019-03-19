@@ -1,10 +1,10 @@
 #ifndef QUSBMANAGER_H
 #define QUSBMANAGER_H
 
+#include "qusbdevice.h"
+#include "qusbtypes.h"
 #include <QList>
 #include <QThread>
-#include "qusbtypes.h"
-#include "qusbdevice.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -13,8 +13,13 @@ QT_BEGIN_NAMESPACE
  * Handles USB events, searching, and devices.
  *
  */
+
+class QUsbManagerPrivate;
+
 class Q_USB_EXPORT QUsbManager : public QThread {
   Q_OBJECT
+
+  Q_DECLARE_PRIVATE(QUsbManager)
 public:
   /**
    * @brief Constructor
@@ -115,12 +120,11 @@ protected slots:
   void run(void);
 
 protected:
-  bool mStop; /**< Stop monitoring boolean */
-  bool mHasHotplug;
-  libusb_context *mCtx;                /**< libusb context */
-  QList<QUsbDevice *> mUsedDeviceList; /**< List of devices in use */
-  QtUsb::FilterList mFilterList;       /**< List of filters we are using */
-  QtUsb::FilterList mSystemList;       /**< List of all filters in the system */
+  bool m_stop; /**< Stop monitoring boolean */
+  bool m_has_hotplug;
+  QList<QUsbDevice *> m_used_device_list; /**< List of devices in use */
+  QtUsb::FilterList m_filter_list;        /**< List of filters we are using */
+  QtUsb::FilterList m_system_list; /**< List of all filters in the system */
 };
 
 QT_END_NAMESPACE

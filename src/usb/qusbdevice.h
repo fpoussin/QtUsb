@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QString>
 #include <QtEndian>
-#include <libusb-1.0/libusb.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -213,19 +212,6 @@ public slots:
 private slots:
 
 private:
-  /**
-   * @brief Print error code to qWarning
-   *
-   * @param error_code
-   */
-  void printUsbError(int error_code) const;
-
-  /**
-   * @brief Set default values (config)
-   *
-   */
-  void setDefaults(void);
-
   quint16 m_timeout;            /**< Device timeout */
   bool m_debug;                 /**< Debug enabled boolean */
   bool m_connected;             /**< Connected boolean */
@@ -235,10 +221,6 @@ private:
 
   QByteArray mReadBuffer;
   quint32 mReadBufferSize;
-
-  libusb_device **m_devs;            /**< libusb device ptr to ptr */
-  libusb_device_handle *m_devHandle; /**< libusb device handle ptr */
-  libusb_context *m_ctx;             /**< libusb context */
 };
 
 QT_END_NAMESPACE

@@ -1,4 +1,6 @@
 #include "qusbmanager.h"
+#include "qusbmanager_p.h"
+#include <libusb-1.0/libusb.h>
 
 static libusb_hotplug_callback_handle callback_handle;
 static int hotplugCallback(libusb_context *ctx,
@@ -47,8 +49,9 @@ static int hotplugCallback(libusb_context *ctx,
 }
 
 QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
+  Q_D(QUsbManager);
 
-  mStop = false;
+  m_stop = false;
   int rc;
 
   qRegisterMetaType<QtUsb::DeviceFilter>("QtUsb::DeviceFilter");
@@ -57,20 +60,20 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
   qRegisterMetaType<QtUsb::FilterList>("QtUsb::FilterList");
   qRegisterMetaType<QtUsb::ConfigList>("QtUsb::ConfigList");
 
-  rc = libusb_init(&mCtx);
+  rc = libusb_init(&d->m_ctx);
   if (rc < 0) {
-    libusb_exit(mCtx);
+    libusb_exit(d->m_ctx);
     qCritical("LibUsb Init Error %d", rc);
     return;
   }
 
   // Populate list once
-  mSystemList = QUsbDevice::availableDevices();
+  m_system_list = QUsbDevice::availableDevices();
 
   // Try hotplug first
-  mHasHotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
-  if (mHasHotplug) {
-    rc = libusb_hotplug_register_callback(mCtx,
+  m_has_hotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
+  if (m_has_hotplug) {
+    rc = libusb_hotplug_register_callback(d->m_ctx,
                                           (libusb_hotplug_event)(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
                                           (libusb_hotplug_flag)0,
                                           LIBUSB_HOTPLUG_MATCH_ANY,
@@ -80,7 +83,7 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
                                           (void*)this,
                                           &callback_handle);
     if (LIBUSB_SUCCESS != rc) {
-      libusb_exit(mCtx);
+      libusb_exit(d->m_ctx);
       qWarning("Error creating hotplug callback");
       return;
     }
@@ -92,7 +95,7 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
 
 QUsbManager::~QUsbManager() {
 
-  mStop = true;
+  m_stop = true;
   this->wait();
 }
 
@@ -102,9 +105,9 @@ QtUsb::FilterList QUsbManager::getPresentDevices() {
   QtUsb::DeviceFilter filter;
 
   /* Search the system list with our own list */
-  for (int i = 0; i < mFilterList.length(); i++) {
-    filter = mFilterList.at(i);
-    if (this->findDevice(filter, mSystemList) < 0) {
+  for (int i = 0; i < m_filter_list.length(); i++) {
+    filter = m_filter_list.at(i);
+    if (this->findDevice(filter, m_system_list) < 0) {
       list.append(filter);
     }
   }
@@ -113,13 +116,13 @@ QtUsb::FilterList QUsbManager::getPresentDevices() {
 
 bool QUsbManager::isPresent(const QtUsb::DeviceFilter &filter) {
 
-  return this->findDevice(filter, mSystemList) >= 0;
+  return this->findDevice(filter, m_system_list) >= 0;
 }
 
 bool QUsbManager::addDevice(const QtUsb::DeviceFilter &filter) {
 
-  if (this->findDevice(filter, mFilterList) == -1) {
-    mFilterList.append(filter);
+  if (this->findDevice(filter, m_filter_list) == -1) {
+    m_filter_list.append(filter);
     return true;
   }
   return false;
@@ -127,9 +130,9 @@ bool QUsbManager::addDevice(const QtUsb::DeviceFilter &filter) {
 
 bool QUsbManager::removeDevice(const QtUsb::DeviceFilter &filter) {
 
-  const int pos = this->findDevice(filter, mFilterList);
+  const int pos = this->findDevice(filter, m_filter_list);
   if (pos > 0) {
-    mFilterList.removeAt(pos);
+    m_filter_list.removeAt(pos);
     return true;
   }
   return true;
@@ -156,7 +159,7 @@ QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev,
   dev->setConfig(config);
   dev->setFilter(filter);
 
-  mUsedDeviceList.append(dev);
+  m_used_device_list.append(dev);
   if (dev->open() == 0)
     return QtUsb::deviceOK;
   else
@@ -166,8 +169,8 @@ QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev,
 QtUsb::DeviceStatus QUsbManager::closeDevice(QUsbDevice *dev) {
 
   if (dev != NULL) {
-    int pos = mUsedDeviceList.indexOf(dev);
-    mUsedDeviceList.removeAt(pos);
+    int pos = m_used_device_list.indexOf(dev);
+    m_used_device_list.removeAt(pos);
     dev->close();
     return QtUsb::deviceOK;
   }
@@ -181,14 +184,14 @@ void QUsbManager::monitorDevices(const QtUsb::FilterList &list) {
 
   for (int i = 0; i < list.length(); i++) {
     filter = list.at(i);
-    if (this->findDevice(filter, mSystemList) < 0) {
+    if (this->findDevice(filter, m_system_list) < 0) {
       // It's not in the old system list
       inserted.append(filter);
     }
   }
 
-  for (int i = 0; i < mSystemList.length(); i++) {
-    filter = mSystemList.at(i);
+  for (int i = 0; i < m_system_list.length(); i++) {
+    filter = m_system_list.at(i);
     if (this->findDevice(filter, list) < 0) {
       // It's in the old system list but not in the current one
       removed.append(filter);
@@ -201,15 +204,16 @@ void QUsbManager::monitorDevices(const QtUsb::FilterList &list) {
   if (removed.length() > 0)
     emit deviceRemoved(removed);
 
-  mSystemList = list;
+  m_system_list = list;
 }
 
 void QUsbManager::run() {
 
+  Q_D(QUsbManager);
   QtUsb::FilterList list;
-  while (!mStop) {
-    if (mHasHotplug) {
-      libusb_handle_events_completed(mCtx, NULL);
+  while (!m_stop) {
+    if (m_has_hotplug) {
+      libusb_handle_events_completed(d->m_ctx, NULL);
     } else {
       list = QUsbDevice::availableDevices();
       this->monitorDevices(list);

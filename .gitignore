@@ -1,1 +1,4 @@
 build
+package/libqt5usb5*
+*.user
+.directory

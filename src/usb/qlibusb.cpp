@@ -6,11 +6,12 @@
 #define UsbPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 QUsbDevice::QUsbDevice(QObject* parent) : QObject(parent) {
-  m_devHandle = Q_NULLPTR;
-  this->setDefaults();
+  Q_D(QUsbDevice);
+  d->m_devHandle = Q_NULLPTR;
+  d->setDefaults();
   m_spd = QtUsb::unknownSpeed;
   int r = libusb_init(
-      &m_ctx);  // initialize the library for the session we just declared
+      &d->m_ctx);  // initialize the library for the session we just declared
   if (r < 0) {
     qCritical("LibUsb Init Error %d", r);  // there was an error
   }
@@ -18,8 +19,9 @@ QUsbDevice::QUsbDevice(QObject* parent) : QObject(parent) {
 }
 
 QUsbDevice::~QUsbDevice() {
+  Q_D(QUsbDevice);
   this->close();
-  libusb_exit(m_ctx);
+  libusb_exit(d->m_ctx);
 }
 
 
@@ -73,15 +75,16 @@ void QUsbDevice::showSettings() {
                << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
 }
 
-void QUsbDevice::setDefaults() {
-    m_connected = false;
-    m_debug = false;
-    m_timeout = QtUsb::DefaultTimeout;
-    m_config.readEp = 0x81;
-    m_config.writeEp = 0x01;
-    m_config.config = 0x01;
-    m_config.interface = 0x00;
-    m_config.alternate = 0x00;
+void QUsbDevicePrivate::setDefaults() {
+    Q_Q(QUsbDevice);
+    q->m_connected = false;
+    q->m_debug = false;
+    q->m_timeout = QtUsb::DefaultTimeout;
+    q->m_config.readEp = 0x81;
+    q->m_config.writeEp = 0x01;
+    q->m_config.config = 0x01;
+    q->m_config.interface = 0x00;
+    q->m_config.alternate = 0x00;
 }
 
 
@@ -119,6 +122,7 @@ QtUsb::FilterList QUsbDevice::availableDevices() {
 
 qint32 QUsbDevice::open() {
   UsbPrintFuncName();
+  Q_D(QUsbDevice);
 
   int rc = -5;   // Not found by default
   ssize_t cnt;  // holding number of devices in list
@@ -126,15 +130,15 @@ qint32 QUsbDevice::open() {
 
   if (m_connected) return -1;
 
-  cnt = libusb_get_device_list(m_ctx, &m_devs);  // get the list of devices
+  cnt = libusb_get_device_list(d->m_ctx, &d->m_devs);  // get the list of devices
   if (cnt < 0) {
     qCritical("libusb_get_device_list error");
-    libusb_free_device_list(m_devs, 1);
+    libusb_free_device_list(d->m_devs, 1);
     return -1;
   }
 
   for (int i = 0; i < cnt; i++) {
-    dev = m_devs[i];
+    dev = d->m_devs[i];
     libusb_device_descriptor desc;
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
@@ -142,7 +146,7 @@ qint32 QUsbDevice::open() {
         if (m_debug) {
           qDebug("Found device.");
         }
-        rc = libusb_open(dev, &m_devHandle);
+        rc = libusb_open(dev, &d->m_devHandle);
         if (rc == 0) break;
         else {
           qWarning("Failed to open device: %s", libusb_strerror((enum libusb_error)rc));
@@ -150,38 +154,38 @@ qint32 QUsbDevice::open() {
       }
     }
   }
-  libusb_free_device_list(m_devs, 1);  // free the list, unref the devices in it
+  libusb_free_device_list(d->m_devs, 1);  // free the list, unref the devices in it
 
-  if (rc != 0 || m_devHandle == Q_NULLPTR) {
+  if (rc != 0 || d->m_devHandle == Q_NULLPTR) {
     return rc;
   }
 
   if (m_debug) qDebug("Device Opened");
 
-  if (libusb_kernel_driver_active(m_devHandle, m_config.interface) ==
+  if (libusb_kernel_driver_active(d->m_devHandle, m_config.interface) ==
       1) {  // find out if kernel driver is attached
     if (m_debug) qDebug("Kernel Driver Active");
-    if (libusb_detach_kernel_driver(m_devHandle, m_config.interface) ==
+    if (libusb_detach_kernel_driver(d->m_devHandle, m_config.interface) ==
         0)  // detach it
       if (m_debug) qDebug("Kernel Driver Detached!");
   }
 
   int conf;
-  libusb_get_configuration(m_devHandle, &conf);
+  libusb_get_configuration(d->m_devHandle, &conf);
 
   if (conf != m_config.config) {
     if (m_debug) qDebug("Configuration needs to be changed");
-    rc = libusb_set_configuration(m_devHandle, m_config.config);
+    rc = libusb_set_configuration(d->m_devHandle, m_config.config);
     if (rc != 0) {
       qWarning("Cannot Set Configuration");
-      this->printUsbError(rc);
+      d->printUsbError(rc);
       return -3;
     }
   }
-  rc = libusb_claim_interface(m_devHandle, m_config.interface);
+  rc = libusb_claim_interface(d->m_devHandle, m_config.interface);
   if (rc != 0) {
     qWarning("Cannot Claim Interface");
-    this->printUsbError(rc);
+    d->printUsbError(rc);
     return -4;
   }
 
@@ -210,51 +214,55 @@ qint32 QUsbDevice::open() {
 
 void QUsbDevice::close() {
   UsbPrintFuncName();
+  Q_D(QUsbDevice);
 
-  if (m_devHandle && m_connected) {
+  if (d->m_devHandle && m_connected) {
     // stop any further write attempts whilst we close down
     qDebug("Closing USB connection...");
 
     QUsbDevice::close();
 
-    libusb_release_interface(m_devHandle, 0);  // release the claimed interface
-    libusb_close(m_devHandle);                 // close the device we opened
+    libusb_release_interface(d->m_devHandle, 0);  // release the claimed interface
+    libusb_close(d->m_devHandle);                 // close the device we opened
   }
 
   m_connected = false;
 }
 
 void QUsbDevice::setDebug(bool enable) {
+  Q_D(QUsbDevice);
   m_debug = enable;
   if (enable)
-    libusb_set_debug(m_ctx, LIBUSB_LOG_LEVEL_INFO);
+    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_INFO);
   else
-    libusb_set_debug(m_ctx, LIBUSB_LOG_LEVEL_ERROR);
+    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
 }
 
-void QUsbDevice::printUsbError(int error_code) const
+void QUsbDevicePrivate::printUsbError(int error_code) const
 {
     qWarning("libusb Error: %s", libusb_strerror((enum libusb_error)error_code));
 }
 
 void QUsbDevice::flush() {
+  Q_D(QUsbDevice);
   QByteArray buf;
   qint32 read_bytes;
 
   buf.resize(4096);
-  libusb_bulk_transfer(m_devHandle, m_config.readEp, (uchar*)(buf.data()), 4096,
+  libusb_bulk_transfer(d->m_devHandle, m_config.readEp, (uchar*)(buf.data()), 4096,
                        &read_bytes, 25);
 }
 
 qint32 QUsbDevice::read(QByteArray* buf, quint32 len) {
   UsbPrintFuncName();
+  Q_D(QUsbDevice);
   Q_CHECK_PTR(buf);
   qint32 rc, read_bytes;
   qint32 read_total;
   QElapsedTimer timer;
 
   // check it isn't closed already
-  if (!m_devHandle || !m_connected) return -1;
+  if (!d->m_devHandle || !m_connected) return -1;
 
   if (len == 0) return 0;
 
@@ -282,12 +290,12 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 len) {
   timer.start();
   rc = LIBUSB_SUCCESS;
   while (timer.elapsed() < m_timeout && (qint32)len - read_total > 0) {
-    rc = libusb_bulk_transfer(m_devHandle, m_config.readEp,
+    rc = libusb_bulk_transfer(d->m_devHandle, m_config.readEp,
                               (uchar*)(mReadBuffer.data() + read_total),
                               mReadBufferSize, &read_bytes, 10);
     read_total += read_bytes;
     if (rc == LIBUSB_ERROR_PIPE) {
-      libusb_clear_halt(m_devHandle, m_config.readEp);
+      libusb_clear_halt(d->m_devHandle, m_config.readEp);
       continue;
     }
     if (rc == LIBUSB_ERROR_TIMEOUT) {
@@ -313,7 +321,7 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 len) {
   }
 
   if (rc != LIBUSB_SUCCESS) {
-    this->printUsbError(rc);
+    d->printUsbError(rc);
     return rc;
   }
 
@@ -322,13 +330,14 @@ qint32 QUsbDevice::read(QByteArray* buf, quint32 len) {
 
 qint32 QUsbDevice::write(const QByteArray* buf, quint32 len) {
   UsbPrintFuncName();
+  Q_D(QUsbDevice);
   Q_CHECK_PTR(buf);
   qint32 rc, sent_tmp;
   qint32 sent;
   QElapsedTimer timer;
 
   // check it isn't closed
-  if (!m_devHandle || !m_connected) return -1;
+  if (!d->m_devHandle || !m_connected) return -1;
 
   if (m_debug) {
     QString cmd, s;
@@ -345,10 +354,10 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 len) {
 
   timer.start();
   while (timer.elapsed() < m_timeout && len - sent > 0) {
-    rc = libusb_bulk_transfer(m_devHandle, (m_config.writeEp),
+    rc = libusb_bulk_transfer(d->m_devHandle, (m_config.writeEp),
                               (uchar*)buf->data(), len, &sent_tmp, m_timeout);
     if (rc == LIBUSB_ERROR_PIPE) {
-      libusb_clear_halt(m_devHandle, m_config.readEp);
+      libusb_clear_halt(d->m_devHandle, m_config.readEp);
     }
     sent += sent_tmp;
     if (rc != LIBUSB_SUCCESS) break;
@@ -360,7 +369,7 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 len) {
   }
 
   if (rc != LIBUSB_SUCCESS) {
-    this->printUsbError(rc);
+    d->printUsbError(rc);
     return rc;
   }
 
