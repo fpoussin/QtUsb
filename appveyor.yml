@@ -2,7 +2,6 @@ branches:
   only:
     - master
     - winusb
-    - winusb-reimport
 
 shallow_clone: true
 matrix:
