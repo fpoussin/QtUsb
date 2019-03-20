@@ -48,7 +48,7 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "DEFINES += QT_BUILD_USB_LIB" "CONFIG += release" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
+  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "CONFIG += release" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
   - nmake
 
 test: off
