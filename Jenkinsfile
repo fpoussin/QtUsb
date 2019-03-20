@@ -12,7 +12,9 @@ pipeline {
         sh '''mkdir build
 cd build
 qmake ..
-nice make -j $(nproc)'''
+nice make -j $(nproc)
+mkdir -p /tmp/qtusb
+make INSTALL_ROOT=/tmp/qtusb install'''
       }
     }
   }
