@@ -1,7 +1,7 @@
 branches:
   only:
     - master
-    - winusb
+    - appveyor
 
 matrix:
   fast_finish: false
@@ -42,13 +42,13 @@ install:
   - git submodule update --init --recursive
   - cd libusb
   - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cp -v %arch%/Release/lib/libusb-1.0.lib %APPVEYOR_BUILD_FOLDER%/libusb_out/
+  - cp -v %arch%/Release/lib/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "CONFIG += release" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
+  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "CONFIG += release" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
   - nmake
 
 test: off
