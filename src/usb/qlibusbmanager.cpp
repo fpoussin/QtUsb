@@ -1,6 +1,5 @@
 #include "qusbmanager.h"
 #include "qusbmanager_p.h"
-#include <libusb-1.0/libusb.h>
 
 static libusb_hotplug_callback_handle callback_handle;
 static int hotplugCallback(libusb_context *ctx,
