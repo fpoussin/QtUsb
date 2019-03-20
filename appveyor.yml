@@ -31,24 +31,23 @@ init:
     ) else if not %cc%==MinGW (
       call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
     )
-  - echo QTDIR=%QTDIR%
-
-install:
-  - git submodule update --init
-  - cd libusb
-  - msbuild msvc\libusb_2017.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - mkdir ..\libusb_out
-  - cp %arch%\Debug\lib\* ..\libusb_out
-  - cp %arch%\Debug\dll\* ..\libusb_out
-
-before_build:
-  - mkdir build
-  - cd build
   - set PATH=%QTDIR%\bin;%PATH%
   - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
+  - echo QTDIR=%QTDIR%
+
+install:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - mkdir libusb_out
+  - git submodule update --init --recursive
+  - cd libusb
+  - msbuild msvc\libusb_2017.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cp %arch%\Release\lib\* %APPVEYOR_BUILD_FOLDER%\libusb_out
+  - cp %arch%\Release\dll\* %APPVEYOR_BUILD_FOLDER%\libusb_out
 
 build_script:
+  - mkdir %APPVEYOR_BUILD_FOLDER%\build
+  - cd %APPVEYOR_BUILD_FOLDER%\build
   - qmake ..
   - nmake
 
