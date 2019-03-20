@@ -41,8 +41,8 @@ install:
   - mkdir libusb_out
   - git submodule update --init --recursive
   - cd libusb
-  - msbuild msvc\libusb_dll_2017.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cp -v %arch%/Release/dll/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
+  - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cp -v %arch%/Release/lib/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
