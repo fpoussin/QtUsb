@@ -11,7 +11,7 @@ PRIVATE_HEADERS += \
     $$PWD/qusbmanager_p.h
 
 win32 {
-    LIBS_PRIVATE += -L$$PWD/libusb_out libusb-1.0.lib
+    LIBS_PRIVATE += -L$$PWD/ libusb-1.0.lib
     INCLUDEPATH += $$PWD/libusb
 }
 
