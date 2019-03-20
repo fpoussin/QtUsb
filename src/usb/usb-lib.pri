@@ -14,7 +14,7 @@ SOURCES += $$PWD/qlibusb.cpp \
            $$PWD/qlibusbmanager.cpp
 
 msvc {
-    LIBS_PRIVATE += -L$$PWD libusb-1.0.lib
+    LIBS_PRIVATE += -L$$PWD libusb-1.0.lib Advapi32.lib
     INCLUDEPATH += $$PWD/libusb
 }
 
