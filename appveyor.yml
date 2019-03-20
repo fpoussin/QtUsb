@@ -3,7 +3,6 @@ branches:
     - master
     - winusb
 
-shallow_clone: true
 matrix:
   fast_finish: false
 
