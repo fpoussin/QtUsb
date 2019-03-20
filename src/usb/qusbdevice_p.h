@@ -2,8 +2,13 @@
 #define QUSBDEVICE_P_H
 
 #include "qusbdevice.h"
-#include <libusb-1.0/libusb.h>
 #include <private/qobject_p.h>
+
+#ifdef Q_OS_UNIX
+#include <libusb-1.0/libusb.h>
+#else
+#include <libusb.h>
+#endif
 
 QT_BEGIN_NAMESPACE
 
