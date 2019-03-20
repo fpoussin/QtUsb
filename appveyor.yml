@@ -44,8 +44,9 @@ install:
   - cp %arch%/Release/lib/libusb-1.0.lib %APPVEYOR_BUILD_FOLDER%/libusb_out
 
 build_script:
-  - mkdir %APPVEYOR_BUILD_FOLDER%/build
-  - cd %APPVEYOR_BUILD_FOLDER%/build
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - mkdir build
+  - cd build
   - qmake ..
   - nmake
 
