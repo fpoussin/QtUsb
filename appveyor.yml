@@ -15,7 +15,7 @@ environment:
     QTDIR: C:\Qt\5.12.1\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
-  - arch: x86
+  - arch: Win32
     qt: 5.12.1
     cc: VS2017
     mode: release
@@ -40,13 +40,14 @@ install:
   - mkdir libusb_out
   - git submodule update --init --recursive
   - cd libusb
-  - msbuild msvc\libusb_2017.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cp %arch%\Release\lib\* %APPVEYOR_BUILD_FOLDER%\libusb_out
-  - cp %arch%\Release\dll\* %APPVEYOR_BUILD_FOLDER%\libusb_out
+  - msbuild msvc\libusb_dll_2017.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - msbuild msvc\libusb_static_2017.sln /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cp %arch%/Release/lib/* %APPVEYOR_BUILD_FOLDER%/libusb_out
+  - cp %arch%/Release/dll/* %APPVEYOR_BUILD_FOLDER%/libusb_out
 
 build_script:
-  - mkdir %APPVEYOR_BUILD_FOLDER%\build
-  - cd %APPVEYOR_BUILD_FOLDER%\build
+  - mkdir %APPVEYOR_BUILD_FOLDER%/build
+  - cd %APPVEYOR_BUILD_FOLDER%/build
   - qmake ..
   - nmake
 
