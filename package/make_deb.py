@@ -23,7 +23,7 @@ def run_cmd(cmd, do_print=True, **kwargs):
     if do_print:
         lines_iterator = iter(p.stdout.readline, b'')
         for line in lines_iterator:
-            print(line.strip())  # yield line
+            print(line.strip().decode('utf-8'))  # yield line
     else:
         p.wait()
 
@@ -34,6 +34,7 @@ def make_changelog(release, dest, rev):
     # ~ f.close()
 
     pass
+
 
 def copy_src(dest, rev, release):
 
@@ -48,9 +49,9 @@ def copy_src(dest, rev, release):
                  shell=True).decode('utf-8')
     print(r)
 
-    shutil.copy('debian/control_{0}'.format(release), '{0}/debian/control'.format(dest))
+    shutil.copy('debian/control', '{0}/debian/control'.format(dest))
 
-    for i in ['copyright', 'README', 'rules']:
+    for i in ['copyright', 'README', 'rules', 'libqt5usb5.install', 'libqt5usb5-dev.install']:
         shutil.copy('debian/{0}'.format(i), '{0}/debian/{1}'.format(dest, i))
 
     for f in glob('{0}/debian/*.ex'.format(dest)):
@@ -124,18 +125,17 @@ if __name__ == '__main__':
     try:
         if args.source:
             make_src(folder_name)
-            if args.ppa:
+            if args.upload:
                 send_src(dsc_name)
         if args.sbuild:
             if not args.source:  # Need to make sources first
                 make_src(folder_name)
             make_s_build(folder_name)
-            print(check_output(['dpkg -c libqt5usb_-{0}~{1}~{2}_amd64.deb'.format(ver, now, args.release)], shell=True).decode(
-                'utf-8'))
         if args.bin:
             make_bin(folder_name)
-            print(check_output(['dpkg -c {}_amd64.deb'.format(folder_name.replace('-', '_'))], shell=True).decode(
-                'utf-8'))
+            for i in glob('{0}/libqt5usb5*_{1}~{2}~{3}*.deb'.format(args.prefix, ver, now, args.release)):
+                print(i)
+                print(check_output(['dpkg -c {0}'.format(i)], shell=True).decode('utf-8'))
 
     except CalledProcessError as e:
         print(e.output)

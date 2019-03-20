@@ -1,0 +1,24 @@
+Source: libqt5usb5
+Section: libs
+Priority: optional
+Maintainer: Fabien Poussin <fabien.poussin@gmail.com>
+Build-Depends: debhelper (>= 10.0), cdbs, qtbase5-dev, qtbase5-private-dev, qt5-qmake, qt5-default, libusb-1.0-0-dev
+Standards-Version: 4.1.1
+Homepage: https://github.com/fpoussin/QtUsb
+ 
+Package: libqt5usb5
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: USB library for QT
+ A convenient way to use libusb 1.0 with your QT applications.
+
+Package: libqt5usb5-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libqt5usb5 (= ${binary:Version}), qtbase5-dev, ${misc:Depends}
+Description: Qt 5 USB development files
+ .
+ This package includes the development headers for the USB library.
