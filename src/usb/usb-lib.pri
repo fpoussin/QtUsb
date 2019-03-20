@@ -10,6 +10,9 @@ PRIVATE_HEADERS += \
     $$PWD/qusbdevice_p.h \
     $$PWD/qusbmanager_p.h
 
+SOURCES += $$PWD/qlibusb.cpp \
+￼           $$PWD/qlibusbmanager.cpp
+
 win32 {
     LIBS_PRIVATE += -L$$PWD/ libusb-1.0.lib
     INCLUDEPATH += $$PWD/libusb
