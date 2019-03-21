@@ -53,12 +53,12 @@ def copy_src(dest, ver, release, distro):
 
 def make_src(dest):
     print('Building Signed Source package')
-    run_cmd(['cd {0}; debuild -S -sa -v'.format(dest)])
+    run_cmd(['debuild -S -sa -v'])
 
 
 def make_local_src(dest):
     print('Building Unsigned Source package')
-    run_cmd(['cd {0}; debuild -S -us -uc'.format(dest)])
+    run_cmd([' debuild -S -us -uc'])
 
 
 def make_s_build(dest):
@@ -68,7 +68,7 @@ def make_s_build(dest):
 
 def make_bin(dest):
     print('Building binary package')
-    run_cmd(['cd {0}; debuild -j8 -b -uc -us'.format(dest)])
+    run_cmd(['debuild -j8 -b -uc -us'])
 
 
 def upload(ver):
