@@ -1,0 +1,5 @@
+qtusb (0.0.0) distro; urgency=medium
+
+  * Automatic build.
+
+ -- Fabien Poussin <fabien.poussin@gmail.com>  Thu, 21 Mar 2019 13:36:52 +0100
