@@ -29,6 +29,9 @@ private:
 
     QtUsb::DeviceFilter m_filter;
     QtUsb::DeviceConfig m_config;
+
+    quint8 m_read_ep;
+    quint8 m_write_ep;
 };
 
 #endif // USBEXAMPLE_H

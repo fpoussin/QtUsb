@@ -20,6 +20,7 @@ public slots:
 
 private:
     QUsbManager m_usb_manager;
+
 };
 
 #endif // USBEXAMPLE_H

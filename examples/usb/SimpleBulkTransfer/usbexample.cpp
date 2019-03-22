@@ -41,8 +41,10 @@ void UsbExample::setupDevice() {
   m_config.alternate = 0;
   m_config.config = 0;
   m_config.interface = 1;
-  m_config.readEp = 0x81;
-  m_config.writeEp = 0x02;
+
+  //
+  m_read_ep = 0x81;
+  m_write_ep = 0x02;
 
   //
   m_usb_dev->setFilter(m_filter);
@@ -66,9 +68,9 @@ bool UsbExample::closeDevice() {
 }
 
 void UsbExample::read(QByteArray *buf) {
-  m_usb_dev->read(buf, 1);
+  m_usb_dev->read(buf, 1, m_read_ep);
 }
 
 void UsbExample::write(QByteArray *buf) {
-  m_usb_dev->write(buf, static_cast<quint32>(buf->size()));
+  m_usb_dev->write(buf, static_cast<quint32>(buf->size()), m_write_ep);
 }

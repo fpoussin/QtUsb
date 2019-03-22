@@ -10,6 +10,8 @@ namespace QtUsb {
 
 const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
 
+typedef quint8 endpoint_t;
+
 /**
  * @brief USB speeds
  *
@@ -37,8 +39,6 @@ enum DeviceStatus {
  *
  */
 typedef struct {
-  quint8 readEp;    /**< Read Endpoint (IN) */
-  quint8 writeEp;   /**< Write Endpoint (OUT) */
   quint8 config;    /**< Configuration index */
   quint8 interface; /**< Interface index */
   quint8 alternate; /**< Alternate configuration index */
