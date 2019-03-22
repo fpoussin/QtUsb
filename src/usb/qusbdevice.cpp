@@ -27,7 +27,7 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
     qWarning("libusb Error: %s", libusb_strerror((enum libusb_error)error_code));
 }
 
-QUsbDevice::QUsbDevice(QObject* parent) : QObject(*new QUsbDevicePrivate, parent), d_dummy(Q_NULLPTR) {
+QUsbDevice::QUsbDevice(QObject* parent) : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR) {
   Q_D(QUsbDevice);
   d->m_devHandle = Q_NULLPTR;
   d->setDefaults();

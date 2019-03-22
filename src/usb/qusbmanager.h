@@ -4,7 +4,6 @@
 #include "qusbdevice.h"
 #include "qusbtypes.h"
 #include <QList>
-#include <QThread>
 
 QT_BEGIN_NAMESPACE
 
@@ -16,7 +15,7 @@ QT_BEGIN_NAMESPACE
 
 class QUsbManagerPrivate;
 
-class Q_USB_EXPORT QUsbManager : public QThread {
+class Q_USB_EXPORT QUsbManager : public QObject {
   Q_OBJECT
 
   Q_DECLARE_PRIVATE(QUsbManager)
@@ -26,7 +25,7 @@ public:
    *
    * @param parent
    */
-  explicit QUsbManager(QObject *parent = 0);
+  explicit QUsbManager(QObject *parent = Q_NULLPTR);
   /**
    * @brief Destructor
    *
@@ -116,19 +115,18 @@ protected slots:
    * @param list Lists of devices to monitor
    */
   void monitorDevices(const QtUsb::FilterList &list);
-  /**
-   * @brief
-   *
-   */
-  void run(void);
+
+  void checkDevices();
 
 protected:
   bool m_debug;
-  bool m_stop; /**< Stop monitoring boolean */
-  bool m_has_hotplug;
   QList<QUsbDevice *> m_used_device_list; /**< List of devices in use */
   QtUsb::FilterList m_filter_list;        /**< List of filters we are using */
   QtUsb::FilterList m_system_list; /**< List of all filters in the system */
+
+private:
+  QUsbManagerPrivate * const d_dummy;
+  Q_DISABLE_COPY(QUsbManager)
 };
 
 QT_END_NAMESPACE
