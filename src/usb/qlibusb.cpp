@@ -355,6 +355,7 @@ qint32 QUsbDevice::write(const QByteArray* buf, quint32 len) {
 
   sent = 0;
   sent_tmp = 0;
+  rc = -99;
 
   timer.start();
   while (timer.elapsed() < m_timeout && len - sent > 0) {

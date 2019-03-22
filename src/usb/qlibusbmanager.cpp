@@ -2,21 +2,24 @@
 #include "qusbmanager_p.h"
 
 static libusb_hotplug_callback_handle callback_handle;
+
 static int hotplugCallback(libusb_context *ctx,
                            libusb_device *device,
                            libusb_hotplug_event event,
                            void *user_data) {
 
-  static libusb_device_handle *handle = NULL;
+  qDebug("hotplugCallback");
+
+  static libusb_device_handle *handle = Q_NULLPTR;
   struct libusb_device_descriptor desc;
   int rc;
   (void)ctx;
   QtUsb::FilterList device_list;
   QtUsb::DeviceFilter dev;
-  QUsbManager *manager = (QUsbManager *)user_data;
+  QUsbManager *manager = static_cast<QUsbManager*>(user_data);
 
   (void)libusb_get_device_descriptor(device, &desc);
-  if (LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED == event) {
+  if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
     rc = libusb_open(device, &handle);
     if (LIBUSB_SUCCESS != rc) {
       qWarning("Could not open new USB device");
@@ -28,7 +31,7 @@ static int hotplugCallback(libusb_context *ctx,
     device_list.append(dev);
     emit manager->deviceInserted(device_list);
 
-  } else if (LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT == event) {
+  } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
     if (handle) {
       // Remove from list
       dev.vid = desc.idVendor;
@@ -37,7 +40,7 @@ static int hotplugCallback(libusb_context *ctx,
       emit manager->deviceRemoved(device_list);
 
       libusb_close(handle);
-      handle = NULL;
+      handle = Q_NULLPTR;
       return 0;
     }
   } else {
@@ -66,6 +69,8 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
     return;
   }
 
+  libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
+
   // Populate list once
   m_system_list = QUsbDevice::availableDevices();
 
@@ -73,13 +78,13 @@ QUsbManager::QUsbManager(QObject *parent) : QThread(parent) {
   m_has_hotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
   if (m_has_hotplug) {
     rc = libusb_hotplug_register_callback(d->m_ctx,
-                                          (libusb_hotplug_event)(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
-                                          (libusb_hotplug_flag)0,
+                                          static_cast<libusb_hotplug_event>((LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT)),
+                                          static_cast<libusb_hotplug_flag>(0),
                                           LIBUSB_HOTPLUG_MATCH_ANY,
                                           LIBUSB_HOTPLUG_MATCH_ANY,
                                           LIBUSB_HOTPLUG_MATCH_ANY,
-                                          (libusb_hotplug_callback_fn)hotplugCallback,
-                                          (void*)this,
+                                          static_cast<libusb_hotplug_callback_fn>(hotplugCallback),
+                                          static_cast<void*>(this),
                                           &callback_handle);
     if (LIBUSB_SUCCESS != rc) {
       libusb_exit(d->m_ctx);
@@ -149,11 +154,21 @@ int QUsbManager::findDevice(const QtUsb::DeviceFilter &filter,
   return -1;
 }
 
+void QUsbManager::setDebug(bool debug)
+{
+  Q_D(QUsbManager);
+  m_debug = debug;
+  if (m_debug)
+    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
+  else
+    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
+}
+
 QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev,
                                             const QtUsb::DeviceFilter &filter,
                                             const QtUsb::DeviceConfig &config) {
 
-  if (dev == NULL)
+  if (dev == Q_NULLPTR)
     return QtUsb::devicePgmError;
   dev->setConfig(config);
   dev->setFilter(filter);
@@ -167,7 +182,7 @@ QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev,
 
 QtUsb::DeviceStatus QUsbManager::closeDevice(QUsbDevice *dev) {
 
-  if (dev != NULL) {
+  if (dev != Q_NULLPTR) {
     int pos = m_used_device_list.indexOf(dev);
     m_used_device_list.removeAt(pos);
     dev->close();
@@ -212,7 +227,7 @@ void QUsbManager::run() {
   QtUsb::FilterList list;
   while (!m_stop) {
     if (m_has_hotplug) {
-      libusb_handle_events_completed(d->m_ctx, NULL);
+      libusb_handle_events_completed(d->m_ctx, Q_NULLPTR);
     } else {
       list = QUsbDevice::availableDevices();
       this->monitorDevices(list);

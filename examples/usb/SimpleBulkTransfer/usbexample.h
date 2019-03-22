@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QUsbDevice>
-#include <QUsbManager>
 
 const quint8 USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
 const quint8 USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
@@ -13,7 +12,7 @@ class UsbExample : public QObject
 {
     Q_OBJECT
 public:
-    explicit UsbExample(QObject *parent = 0);
+    explicit UsbExample(QObject *parent = Q_NULLPTR);
     ~UsbExample(void);
     void setupDevice(void);
     bool openDevice(void);
@@ -26,11 +25,10 @@ signals:
 public slots:
 
 private:
-    QUsbManager mUsbManager;
-    QUsbDevice* mUsbDev;
+    QUsbDevice* m_usb_dev;
 
-    QtUsb::DeviceFilter mFilter;
-    QtUsb::DeviceConfig mConfig;
+    QtUsb::DeviceFilter m_filter;
+    QtUsb::DeviceConfig m_config;
 };
 
 #endif // USBEXAMPLE_H

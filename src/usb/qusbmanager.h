@@ -87,6 +87,9 @@ public slots:
   int findDevice(const QtUsb::DeviceFilter &filter,
                  const QtUsb::FilterList &list);
 
+  void setDebug(bool debug);
+  bool debug() {return m_debug;}
+
   /**
    * @brief
    *
@@ -120,6 +123,7 @@ protected slots:
   void run(void);
 
 protected:
+  bool m_debug;
   bool m_stop; /**< Stop monitoring boolean */
   bool m_has_hotplug;
   QList<QUsbDevice *> m_used_device_list; /**< List of devices in use */
