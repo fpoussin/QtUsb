@@ -9,44 +9,50 @@ UsbExample::UsbExample(QObject *parent) : QObject(parent) {
 
   QByteArray send, recv;
 
-  send.append((char)0xAB);
+  send.append(static_cast<char>(0xAB));
 
   if (this->openDevice()) {
-    qDebug("Device open!");
+    qInfo("Device open!");
     this->write(&send);
     this->read(&recv);
   }
+  else {
+    qWarning("Could not open device!");
+  }
 }
 
-UsbExample::~UsbExample() { delete mUsbDev; }
+UsbExample::~UsbExample() { delete m_usb_dev; }
 
 void UsbExample::setupDevice() {
   /* There are 2 ways of identifying devices depending on the platform.
    * You can use both methods, only one will be taken into account.
    */
 
-  mUsbDev = new QUsbDevice();
-  mUsbDev->setDebug(true);
+  qDebug("setupDevice");
+
+  m_usb_dev = new QUsbDevice();
+  m_usb_dev->setDebug(true);
 
   //
-  mFilter.pid = 0x3748;
-  mFilter.vid = 0x0483;
+  m_filter.pid = 0x3748;
+  m_filter.vid = 0x0483;
 
   //
-  mConfig.alternate = 0;
-  mConfig.config = 0;
-  mConfig.interface = 1;
-  mConfig.readEp = 0x81;
-  mConfig.writeEp = 0x02;
+  m_config.alternate = 0;
+  m_config.config = 0;
+  m_config.interface = 1;
+  m_config.readEp = 0x81;
+  m_config.writeEp = 0x02;
+
+  //
+  m_usb_dev->setFilter(m_filter);
+  m_usb_dev->setConfig(m_config);
 }
 
 bool UsbExample::openDevice() {
   qDebug("Opening");
 
-  QtUsb::DeviceStatus ds;
-  ds = mUsbManager.openDevice(mUsbDev, mFilter, mConfig);
-
-  if (ds == QtUsb::deviceOK) {
+  if (m_usb_dev->open() == QtUsb::deviceOK) {
     // Device is open
     return true;
   }
@@ -55,10 +61,14 @@ bool UsbExample::openDevice() {
 
 bool UsbExample::closeDevice() {
   qDebug("Closing");
-  mUsbManager.closeDevice(mUsbDev);
+  m_usb_dev->close();
   return false;
 }
 
-void UsbExample::read(QByteArray *buf) { mUsbDev->read(buf, 1); }
+void UsbExample::read(QByteArray *buf) {
+  m_usb_dev->read(buf, 1);
+}
 
-void UsbExample::write(QByteArray *buf) { mUsbDev->write(buf, buf->size()); }
+void UsbExample::write(QByteArray *buf) {
+  m_usb_dev->write(buf, static_cast<quint32>(buf->size()));
+}

@@ -13,11 +13,12 @@
 QT_BEGIN_NAMESPACE
 
 class QUsbDevicePrivate : public QObjectPrivate {
+
   Q_DECLARE_PUBLIC(QUsbDevice)
+
 public:
   QUsbDevicePrivate();
 
-private:
   /**
    * @brief Print error code to qWarning
    *

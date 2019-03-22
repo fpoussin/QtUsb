@@ -3,6 +3,7 @@
 
 #include "qusbmanager.h"
 #include <private/qobject_p.h>
+#include <QTimer>
 
 #ifdef Q_OS_UNIX
 #include <libusb-1.0/libusb.h>
@@ -13,12 +14,17 @@
 QT_BEGIN_NAMESPACE
 
 class QUsbManagerPrivate : public QObjectPrivate {
+
   Q_DECLARE_PUBLIC(QUsbManager)
+
 public:
   QUsbManagerPrivate();
 
-private:
+  ~QUsbManagerPrivate();
+
+  bool m_has_hotplug;
   libusb_context *m_ctx;
+  QTimer *m_refresh_timer;
 };
 
 QT_END_NAMESPACE

@@ -5,15 +5,11 @@
 #include <QUsbDevice>
 #include <QUsbManager>
 
-const quint8 USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
-const quint8 USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
-const quint16 USB_TIMEOUT_MSEC = 300;
-
 class UsbExample : public QObject
 {
     Q_OBJECT
 public:
-    explicit UsbExample(QObject *parent = 0);
+    explicit UsbExample(QObject *parent = Q_NULLPTR);
     ~UsbExample(void);
 
 signals:
@@ -23,8 +19,7 @@ public slots:
     void onDevRemoved(QtUsb::FilterList list);
 
 private:
-    QUsbManager mUsbManager;
-
+    QUsbManager m_usb_manager;
 };
 
 #endif // USBEXAMPLE_H

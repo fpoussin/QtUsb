@@ -6,6 +6,8 @@ int main(int argc, char *argv[]) {
   QCoreApplication a(argc, argv);
   QTimer timer;
 
+  qInfo("SimpleBulkTransfer");
+
   QObject::connect(&timer, SIGNAL(timeout()), &a, SLOT(quit()));
 
   timer.setInterval(1000);
