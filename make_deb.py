@@ -28,6 +28,23 @@ def run_cmd(cmd, do_print=True, **kwargs):
         p.wait()
 
 
+def clean_src():
+    # Clean local build folders
+    for i in ('bin', 'lib', 'include', 'mkspecs'):
+        shutil.rmtree(i, ignore_errors=True)
+
+    # Clean files from local builds
+    types = ('*.deb', '*.ddeb', 'qtusb_*', 'libqt5usb5*')
+    files_grabbed = []
+    for files in types:
+        files_grabbed.extend(glob(files))
+    for i in files_grabbed:
+        try:
+            os.remove(i)
+        except OSError:
+            pass
+
+
 def copy_src(dest, ver, release, distro):
 
     # Add distro / release
@@ -42,13 +59,24 @@ def copy_src(dest, ver, release, distro):
     with open('version', 'w') as f:
         f.write(str(ver))
 
+    clean_src()
+
+    # Generate headers manually since we are exporting to an archive
     run_cmd('perl -w /usr/lib/*/qt5/bin/syncqt.pl -module QtUsb -version {0} -outdir . .'.format(ver))
+
+    # Exclude all the files we don't need to build the package
     run_cmd('tar cvf ../qtusb_{0}.orig.tar.gz '
             '--exclude=debian '
-            '--exclude=.git/* '
+            '--exclude=.git* '
             '--exclude=libusb '
             '--exclude=build '
             '--exclude=*.user '
+            '--exclude=.travis '
+            '--exclude=appveyor.yml '
+            '--exclude=Jenkinsfile '
+            '--exclude=*.py '
+            '--exclude=*.bat '
+            '--exclude=Doxyfile '
             '.'.format(ver))
 
 
@@ -87,6 +115,7 @@ if __name__ == '__main__':
         print('Invalid Ubuntu release, please chose among:', distros)
         exit(1)
 
+    # Extract version from .qmake.conf
     ver = ''
     with open('.qmake.conf') as f:
         for l in f.readlines():
@@ -118,6 +147,8 @@ if __name__ == '__main__':
             make_s_build(dsc_name + '.dsc')
         if args.bin:
             make_bin(folder_name)
+            if not args.keep:
+                run_cmd('make distclean')
             for i in glob('../libqt5usb5*_{0}-0ubuntu{1}*.deb'.format(ver, args.release)):
                 print(i)
                 run_cmd('dpkg -c {0}'.format(i))
@@ -130,3 +161,4 @@ if __name__ == '__main__':
     finally:
         if not args.keep:
             run_cmd('schroot -e --all-sessions')
+            clean_src()
