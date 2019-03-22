@@ -212,6 +212,10 @@ public slots:
 private slots:
 
 private:
+  QUsbDevicePrivate * const d_dummy;
+  Q_DISABLE_COPY(QUsbDevice)
+
+
   quint16 m_timeout;            /**< Device timeout */
   bool m_debug;                 /**< Debug enabled boolean */
   bool m_connected;             /**< Connected boolean */

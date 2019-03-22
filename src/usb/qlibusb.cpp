@@ -5,7 +5,29 @@
 #define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define UsbPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
-QUsbDevice::QUsbDevice(QObject* parent) : QObject(parent) {
+QUsbDevicePrivate::QUsbDevicePrivate()
+{
+
+}
+
+void QUsbDevicePrivate::setDefaults() {
+    Q_Q(QUsbDevice);
+    q->m_connected = false;
+    q->m_debug = false;
+    q->m_timeout = QtUsb::DefaultTimeout;
+    q->m_config.readEp = 0x81;
+    q->m_config.writeEp = 0x01;
+    q->m_config.config = 0x01;
+    q->m_config.interface = 0x00;
+    q->m_config.alternate = 0x00;
+}
+
+void QUsbDevicePrivate::printUsbError(int error_code) const
+{
+    qWarning("libusb Error: %s", libusb_strerror((enum libusb_error)error_code));
+}
+
+QUsbDevice::QUsbDevice(QObject* parent) : QObject(*new QUsbDevicePrivate, parent), d_dummy(Q_NULLPTR) {
   Q_D(QUsbDevice);
   d->m_devHandle = Q_NULLPTR;
   d->setDefaults();
@@ -74,19 +96,6 @@ void QUsbDevice::showSettings() {
                << "Device.pid" << QString::number(m_filter.pid, 16) << "\n"
                << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
 }
-
-void QUsbDevicePrivate::setDefaults() {
-    Q_Q(QUsbDevice);
-    q->m_connected = false;
-    q->m_debug = false;
-    q->m_timeout = QtUsb::DefaultTimeout;
-    q->m_config.readEp = 0x81;
-    q->m_config.writeEp = 0x01;
-    q->m_config.config = 0x01;
-    q->m_config.interface = 0x00;
-    q->m_config.alternate = 0x00;
-}
-
 
 QtUsb::FilterList QUsbDevice::availableDevices() {
   QtUsb::FilterList list;
@@ -236,11 +245,6 @@ void QUsbDevice::setDebug(bool enable) {
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_INFO);
   else
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
-}
-
-void QUsbDevicePrivate::printUsbError(int error_code) const
-{
-    qWarning("libusb Error: %s", libusb_strerror((enum libusb_error)error_code));
 }
 
 void QUsbDevice::flush() {
