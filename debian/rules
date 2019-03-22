@@ -1,4 +1,15 @@
 #!/usr/bin/make -f
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/qmake.mk
+#export DH_VERBOSE=1
+include /usr/share/dpkg/default.mk
+
+export QT_SELECT=qt5
+
+override_dh_auto_configure:
+	qmake
+	perl -w /usr/lib/*/qt5/bin/syncqt.pl -module QtUsb -version 0.4.0 -outdir . .
+
+override_dh_auto_test:
+
+%:
+	dh $@ --buildsystem=qmake
