@@ -7,7 +7,6 @@ export QT_SELECT=qt5
 
 override_dh_auto_configure:
 	qmake
-	perl -w /usr/lib/*/qt5/bin/syncqt.pl -module QtUsb -version 0.4.0 -outdir . .
 
 override_dh_auto_test:
 

@@ -42,9 +42,10 @@ def copy_src(dest, ver, release, distro):
     with open('version', 'w') as f:
         f.write(str(ver))
 
+    run_cmd('perl -w /usr/lib/*/qt5/bin/syncqt.pl -module QtUsb -version {0} -outdir . .'.format(ver))
     run_cmd('tar cvf ../qtusb_{0}.orig.tar.gz '
             '--exclude=debian '
-            '--exclude=.git '
+            '--exclude=.git/* '
             '--exclude=libusb '
             '--exclude=build '
             '--exclude=*.user '

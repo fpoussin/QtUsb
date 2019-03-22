@@ -6,3 +6,9 @@ package/libqt5usb5*
 .qmake.stash
 Makefile
 version
+include
+lib
+mkspecs
+bin
+qtusb*
+libqt5usb*
