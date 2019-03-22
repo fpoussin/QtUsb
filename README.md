@@ -28,6 +28,8 @@ make install
 ```
 
 **MSVC 2017**  
+You will need WDK 8.1 and CRT SDK installed to compile libusb  
+These are both available from the Visual Studio Installer
 ```
 build_msvc2017.bat [x64|x86] QT_PATH
 ie: build_msvc2017.bat x64 C:\Qt\5.12.1\msvc2017_64
