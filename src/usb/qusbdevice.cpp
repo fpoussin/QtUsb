@@ -238,7 +238,7 @@ void QUsbDevice::setDebug(bool enable) {
   Q_D(QUsbDevice);
   m_debug = enable;
   if (enable)
-    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_INFO);
+    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
   else
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
 }

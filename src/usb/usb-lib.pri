@@ -15,8 +15,8 @@ SOURCES += \
     $$PWD/qusbdevice.cpp
 
 win32 {
-    LIBS_PRIVATE += -L$$PWD/ libusb-1.0.lib Advapi32.lib
-    INCLUDEPATH += $$PWD/libusb
+    LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ libusb-1.0.lib Advapi32.lib
+    INCLUDEPATH += $$PWD/libusb $$PWD/../libusb $$PWD/../../libusb
 }
 
 unix {

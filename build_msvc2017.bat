@@ -17,10 +17,11 @@ SET PATH=%QTDIR%\bin;%PATH%
 git submodule update --init --recursive
 CD libusb
 msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release
-COPY %usbarch%\Release\lib\libusb-1.0.lib ..\
+COPY %ARCH%\Release\lib\libusb-1.0.lib ..\
 CD ..
 
 MKDIR build
 CD build
-qmake "INCLUDEPATH += ../libusb" "LIBS_PRIVATE += -L../libusb_out/" ..
+nmake distclean
+qmake ..
 nmake install
