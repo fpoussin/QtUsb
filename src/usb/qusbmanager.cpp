@@ -18,7 +18,7 @@ static int hotplugCallback(libusb_context *ctx,
   (void)ctx;
   QtUsb::FilterList device_list;
   QtUsb::DeviceFilter dev;
-  QUsbManager *manager = static_cast<QUsbManager*>(user_data);
+  QUsbManager *manager = reinterpret_cast<QUsbManager*>(user_data);
 
   if (manager->debug())
     qDebug("hotplugCallback");
@@ -124,8 +124,8 @@ QUsbManager::QUsbManager(QObject *parent) : QObject(*(new QUsbManagerPrivate), p
                                           LIBUSB_HOTPLUG_MATCH_ANY,
                                           LIBUSB_HOTPLUG_MATCH_ANY,
                                           LIBUSB_HOTPLUG_MATCH_ANY,
-                                          static_cast<libusb_hotplug_callback_fn>(hotplugCallback),
-                                          static_cast<void*>(this),
+                                          reinterpret_cast<libusb_hotplug_callback_fn>(hotplugCallback),
+                                          reinterpret_cast<void*>(this),
                                           &callback_handle);
     if (LIBUSB_SUCCESS != rc) {
       libusb_exit(d->m_ctx);
