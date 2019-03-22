@@ -62,18 +62,18 @@ QByteArray QUsbDevice::speedString() const {
     return "Error";
 }
 
-qint32 QUsbDevice::write(const QByteArray &buf, QtUsb::endpoint_t endpoint) {
+qint32 QUsbDevice::write(const QByteArray &buf, QtUsb::endpoint endpoint) {
     return this->write(&buf, buf.size(), endpoint);
 }
 
-qint32 QUsbDevice::read(QByteArray *buf, QtUsb::endpoint_t endpoint) { return this->read(buf, 4096, endpoint); }
+qint32 QUsbDevice::read(QByteArray *buf, QtUsb::endpoint endpoint) { return this->read(buf, 4096, endpoint); }
 
-bool QUsbDevice::write(char c, QtUsb::endpoint_t endpoint) {
+bool QUsbDevice::write(char c, QtUsb::endpoint endpoint) {
     QByteArray buf(1, c);
     return this->write(buf, endpoint) > 0;
 }
 
-bool QUsbDevice::read(char *c, QtUsb::endpoint_t endpoint) {
+bool QUsbDevice::read(char *c, QtUsb::endpoint endpoint) {
     QByteArray buf;
     Q_CHECK_PTR(c);
     if (this->read(&buf, 1, endpoint) > 0) {
@@ -256,7 +256,7 @@ void QUsbDevice::flush(quint8 endpoint) {
                        &read_bytes, 25);
 }
 
-qint32 QUsbDevice::read(QByteArray* buf, int len, QtUsb::endpoint_t endpoint) {
+qint32 QUsbDevice::read(QByteArray* buf, int len, QtUsb::endpoint endpoint) {
   UsbPrintFuncName();
   Q_D(QUsbDevice);
   Q_CHECK_PTR(buf);
@@ -334,7 +334,7 @@ qint32 QUsbDevice::read(QByteArray* buf, int len, QtUsb::endpoint_t endpoint) {
   return read_total;
 }
 
-qint32 QUsbDevice::write(const QByteArray* buf, int len, QtUsb::endpoint_t endpoint) {
+qint32 QUsbDevice::write(const QByteArray* buf, int len, QtUsb::endpoint endpoint) {
   UsbPrintFuncName();
   Q_D(QUsbDevice);
   Q_CHECK_PTR(buf);

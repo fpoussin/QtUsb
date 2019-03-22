@@ -152,7 +152,7 @@ public slots:
    * @param maxSize
    * @return qint32
    */
-  qint32 read(QByteArray *buf, int len, QtUsb::endpoint_t endpoint);
+  qint32 read(QByteArray *buf, int len, QtUsb::endpoint endpoint);
 
   /**
    * @brief See base class
@@ -161,7 +161,7 @@ public slots:
    * @param maxSize
    * @return qint32
    */
-  qint32 write(const QByteArray *buf, int len, QtUsb::endpoint_t endpoint);
+  qint32 write(const QByteArray *buf, int len, QtUsb::endpoint endpoint);
 
   /**
    * @brief Read maximum amount of bytes to buffer, up to 4096 bytes
@@ -169,7 +169,7 @@ public slots:
    * @param buf data to write into
    * @return qint32 actual number of bytes read on success, negative on error
    */
-  qint32 read(QByteArray *buf, QtUsb::endpoint_t endpoint);
+  qint32 read(QByteArray *buf, QtUsb::endpoint endpoint);
 
   /**
    * @brief Write full array to device
@@ -177,7 +177,7 @@ public slots:
    * @param buf data to write
    * @return qint32 actual number of bytes written on success, negative on error
    */
-  qint32 write(const QByteArray &buf, QtUsb::endpoint_t endpoint);
+  qint32 write(const QByteArray &buf, QtUsb::endpoint endpoint);
 
   /**
    * @brief Write a single char
@@ -185,7 +185,7 @@ public slots:
    * @param c char
    * @return bool true on sucess
    */
-  bool write(char c, QtUsb::endpoint_t endpoint);
+  bool write(char c, QtUsb::endpoint endpoint);
 
   /**
    * @brief Read a single char
@@ -193,7 +193,7 @@ public slots:
    * @param c char
    * @return bool true on sucess
    */
-  bool read(char *c, QtUsb::endpoint_t endpoint);
+  bool read(char *c, QtUsb::endpoint endpoint);
 
   /**
    * @brief Print settings to qDebug

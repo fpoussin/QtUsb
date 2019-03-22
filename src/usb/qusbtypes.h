@@ -10,7 +10,7 @@ namespace QtUsb {
 
 const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
 
-typedef quint8 endpoint_t;
+typedef quint8 endpoint;
 
 /**
  * @brief USB speeds
