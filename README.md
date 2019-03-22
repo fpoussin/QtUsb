@@ -21,6 +21,7 @@ sudo apt install libqt5usb5 libqt5usb5-dev
 ## Build
 
 **Unix**  
+You need libusb-1.0-0-dev and pkg-config packages installed  
 ```shell   
 mkdir build && cd build
 qmake ..
@@ -28,7 +29,7 @@ make install
 ```
 
 **MSVC 2017**  
-You will need WDK 8.1 and CRT SDK installed to compile libusb  
+You need WDK 8.1 and CRT SDK installed to compile libusb  
 These are both available from the Visual Studio Installer
 ```
 build_msvc2017.bat [x64|x86] QT_PATH
