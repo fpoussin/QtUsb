@@ -26,8 +26,6 @@ class Q_USB_EXPORT QUsbDevice : public QObject {
   Q_PROPERTY(QtUsb::DeviceConfig config READ config WRITE setConfig)
   Q_PROPERTY(quint16 pid READ pid)
   Q_PROPERTY(quint16 vid READ vid)
-  Q_PROPERTY(quint8 readEp READ readEp)
-  Q_PROPERTY(quint8 writeEp READ writeEp)
   Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
   Q_PROPERTY(QtUsb::DeviceSpeed speed READ speed)
 
@@ -100,18 +98,6 @@ public:
    *
    * @return quint8
    */
-  quint8 readEp(void) const { return m_config.readEp; }
-  /**
-   * @brief Get current write (OUT) endpoint
-   *
-   * @return quint8
-   */
-  quint8 writeEp(void) const { return m_config.writeEp; }
-  /**
-   * @brief Get current timeout
-   *
-   * @return quint16 Timeout
-   */
   quint16 timeout(void) const { return m_timeout; }
   /**
    * @brief Get debug mode
@@ -146,6 +132,7 @@ public slots:
    * @return qint32
    */
   qint32 open();
+
   /**
    * @brief See base class
    *
@@ -156,7 +143,8 @@ public slots:
    * @brief See base class
    *
    */
-  void flush();
+  void flush(quint8 endpoint);
+
   /**
    * @brief See base class
    *
@@ -164,7 +152,8 @@ public slots:
    * @param maxSize
    * @return qint32
    */
-  qint32 read(QByteArray *buf, quint32 len);
+  qint32 read(QByteArray *buf, int len, QtUsb::endpoint endpoint);
+
   /**
    * @brief See base class
    *
@@ -172,7 +161,15 @@ public slots:
    * @param maxSize
    * @return qint32
    */
-  qint32 write(const QByteArray *buf, quint32 len);
+  qint32 write(const QByteArray *buf, int len, QtUsb::endpoint endpoint);
+
+  /**
+   * @brief Read maximum amount of bytes to buffer, up to 4096 bytes
+   *
+   * @param buf data to write into
+   * @return qint32 actual number of bytes read on success, negative on error
+   */
+  qint32 read(QByteArray *buf, QtUsb::endpoint endpoint);
 
   /**
    * @brief Write full array to device
@@ -180,28 +177,23 @@ public slots:
    * @param buf data to write
    * @return qint32 actual number of bytes written on success, negative on error
    */
-  qint32 write(const QByteArray &buf);
-  /**
-   * @brief Read maximum amount of bytes to buffer, up to 4096 bytes
-   *
-   * @param buf data to write into
-   * @return qint32 actual number of bytes read on success, negative on error
-   */
-  qint32 read(QByteArray *buf);
+  qint32 write(const QByteArray &buf, QtUsb::endpoint endpoint);
+
   /**
    * @brief Write a single char
    *
    * @param c char
    * @return bool true on sucess
    */
-  bool write(char c);
+  bool write(char c, QtUsb::endpoint endpoint);
+
   /**
    * @brief Read a single char
    *
    * @param c char
    * @return bool true on sucess
    */
-  bool read(char *c);
+  bool read(char *c, QtUsb::endpoint endpoint);
 
   /**
    * @brief Print settings to qDebug
@@ -223,8 +215,8 @@ private:
   QtUsb::DeviceConfig m_config; /**< Device config */
   QtUsb::DeviceSpeed m_spd;     /**< Device speed */
 
-  QByteArray mReadBuffer;
-  quint32 mReadBufferSize;
+  QByteArray m_read_buffer;
+  int m_read_buffer_size;
 };
 
 QT_END_NAMESPACE
