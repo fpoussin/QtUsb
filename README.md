@@ -46,9 +46,11 @@ qt += usb
 Then include it into your headers:
 
 ```
-#include <QUsb>
+#include <QUsbDevice>
+#include <QUsbManager>
 
-QUsbDevice mydev;
+QUsbDevice device;
+QUsbManager manager;
 ```
 
 ## TODO
