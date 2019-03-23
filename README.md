@@ -12,11 +12,14 @@ A Cross-platform USB Module for Qt built around libusb-1.0
 - Device search
 
 ## Install
-
+**Ubuntu**  
 ```
 sudo add-apt-repository ppa:fpoussin/ppa
 sudo apt install libqt5usb5 libqt5usb5-dev
 ```
+
+**Windows**  
+Check the releases page for binary archives
 
 ## Build
 
