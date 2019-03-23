@@ -50,7 +50,7 @@ def copy_src(dest, ver, release, distro):
     # Add distro / release
     with open('debian/changelog_template', 'r') as f:
         tmp = f.read().replace('distro', distro)\
-            .replace('(0.0.0)', '({0}-ppa{1})'.format(ver, release))
+            .replace('(0.0.0)', '({0}-{1}{2})'.format(ver, distro, release))
         print(tmp)
 
     with open('debian/changelog', 'w') as f:
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     print('Source Version:', ver)
 
     folder_name = '../qtusb-{0}.orig.tar.gz'.format(ver)
-    dsc_name = '../qtusb_{0}-ppa{1}'.format(ver, args.release)
+    dsc_name = '../qtusb_{0}-{1}{2}'.format(ver, args.distro, args.release)
 
     print('Package location:', folder_name)
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
             make_bin(folder_name)
             if not args.keep:
                 run_cmd('make distclean')
-            for i in glob('../libqt5usb5*_{0}-ppa{1}*.deb'.format(ver, args.release)):
+            for i in glob('../libqt5usb5*_{0}-{1}{2}*.deb'.format(ver, args.distro, args.release)):
                 print(i)
                 run_cmd('dpkg -c {0}'.format(i))
 
