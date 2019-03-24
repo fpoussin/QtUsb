@@ -39,19 +39,18 @@ init:
 install:
   - mkdir C:\artifacts
   - cd %APPVEYOR_BUILD_FOLDER%
-  - mkdir libusb_out
   - git submodule update --init --recursive
   - cd libusb
   - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
   - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cp -v %usbarch%/Release/lib/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
-  - cp -v %usbarch%/Debug/lib/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
+  - cp -v %usbarch%/Release/lib/libusb-1.0.lib %APPVEYOR_BUILD_FOLDER%/libusb-1.0.lib
+  - cp -v %usbarch%/Debug/lib/libusb-1.0.lib %APPVEYOR_BUILD_FOLDER%/libusb-1.0d.lib
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
+  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/" ..
   - nmake INSTALL_ROOT=\projects\install install
   - 7z a C:\artifacts\qt%qt%-usb-%arch%.7z C:\projects\install\*
 
