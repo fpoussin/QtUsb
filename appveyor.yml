@@ -37,7 +37,6 @@ init:
   - echo PATH=%PATH%
 
 install:
-  - mkdir C:\artifacts
   - cd %APPVEYOR_BUILD_FOLDER%
   - git submodule update --init --recursive
   - cd libusb
@@ -52,10 +51,10 @@ build_script:
   - cd build
   - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/" ..
   - nmake INSTALL_ROOT=\projects\install install
-  - 7z a C:\artifacts\qt%qt%-usb-%arch%.7z C:\projects\install\*
+  - 7z a qt%qt%-usb-%arch%.7z C:\projects\install\*
 
 artifacts:
-  - path: C:\artifacts\*.7z
+  - path: build\*.7z
     name: QtUsb install files
 
 test: off
