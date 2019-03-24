@@ -9,14 +9,14 @@ matrix:
 environment:
   matrix:
   - arch: x64
-    qt: 5.12.1
+    qt: 5.12.2
     cc: VS2017
     mode: release
     QTDIR: C:\Qt\5.12.1\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
-  - arch: Win32
-    qt: 5.12.1
+  - arch: x86
+    qt: 5.12.2
     cc: VS2017
     mode: release
     QTDIR: C:\Qt\5.12.1\msvc2017
@@ -24,8 +24,9 @@ environment:
 
 init:
   - set vcarch=%arch%
+  - set usbarch=%arch%
   - if "%arch%" == "x64" set vcarch=amd64
-  - if "%arch%" == "Win32" set vcarch=x86
+  - if "%arch%" == "x86" set usbarch=Win32
   - if %cc%==VS2017 (
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
     ) else if not %cc%==MinGW (
@@ -34,22 +35,27 @@ init:
   - set PATH=%QTDIR%\bin;%PATH%
   - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
-  - echo QTDIR=%QTDIR%
 
 install:
+  - mkdir C:\artifacts
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir libusb_out
   - git submodule update --init --recursive
   - cd libusb
-  - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cp -v %arch%/Release/lib/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
+  - msbuild msvc\libusb_static_2017.vcxproj /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cp -v %usbarch%/Release/lib/libusb-1.0.* %APPVEYOR_BUILD_FOLDER%/libusb_out/
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "CONFIG += release" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
-  - nmake install
+  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/libusb_out/" ..
+  - nmake INSTALL_ROOT=\projects\install install
+  - 7z a C:\artifacts\qt%qt%-usb-%arch%.7z C:\projects\install\*
+
+artifacts:
+  - path: C:\artifacts\*.7z
+    name: QtUsb install files
 
 test: off
 
