@@ -9,18 +9,18 @@ matrix:
 environment:
   matrix:
   - arch: x64
-    qt: 5.12.2
+    qt: 5.12.1
     cc: VS2017
     mode: release
-    QTDIR: C:\Qt\5.12.2\msvc2017_64
+    QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: msvc-x64
 
   - arch: x86
-    qt: 5.12.2
+    qt: 5.12.1
     cc: VS2017
     mode: release
-    QTDIR: C:\Qt\5.12.2\msvc2017
+    QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     APPVEYOR_JOB_NAME: msvc-x86
 
