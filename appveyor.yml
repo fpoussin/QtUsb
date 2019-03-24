@@ -14,6 +14,7 @@ environment:
     mode: release
     QTDIR: C:\Qt\5.12.1\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    APPVEYOR_JOB_NAME: msvc-x64
 
   - arch: x86
     qt: 5.12.2
@@ -21,6 +22,7 @@ environment:
     mode: release
     QTDIR: C:\Qt\5.12.1\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    APPVEYOR_JOB_NAME: msvc-x86
 
 init:
   - set vcarch=%arch%
