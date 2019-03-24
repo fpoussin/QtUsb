@@ -19,7 +19,7 @@ sudo apt install libqt5usb5 libqt5usb5-dev
 ```
 
 **Windows**  
-Check the releases page for binary archives
+Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appveyor builds artifacts](https://ci.appveyor.com/project/fpoussin/qtusb) for binary archives  
 
 ## Build
 
