@@ -57,5 +57,15 @@ artifacts:
   - path: build\*.7z
     name: QtUsb install files
 
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: FUMVTjWuerUmKlLiPtjpxjmizC+wsDanxGBFWF/T6sicn7ctP/Aleh9+hZKKskXJ
+    artifact: QtUsb install files
+    force_update: true
+    on:
+      branch: master
+      APPVEYOR_REPO_TAG: true
+
 test: off
 
