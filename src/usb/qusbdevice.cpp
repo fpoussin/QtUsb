@@ -62,21 +62,21 @@ QByteArray QUsbDevice::speedString() const {
     return "Error";
 }
 
-qint32 QUsbDevice::write(const QByteArray &buf, QtUsb::endpoint endpoint) {
-    return this->write(&buf, buf.size(), endpoint);
+qint32 QUsbDevice::write(QtUsb::endpoint endpoint, const QByteArray &buf) {
+    return this->write(endpoint, &buf, buf.size());
 }
 
-qint32 QUsbDevice::read(QByteArray *buf, QtUsb::endpoint endpoint) { return this->read(buf, 4096, endpoint); }
+qint32 QUsbDevice::read(QtUsb::endpoint endpoint, QByteArray *buf) { return this->read(endpoint, buf, 4096); }
 
-bool QUsbDevice::write(char c, QtUsb::endpoint endpoint) {
+bool QUsbDevice::write(QtUsb::endpoint endpoint, char c) {
     QByteArray buf(1, c);
-    return this->write(buf, endpoint) > 0;
+    return this->write(endpoint, buf) > 0;
 }
 
-bool QUsbDevice::read(char *c, QtUsb::endpoint endpoint) {
+bool QUsbDevice::read(QtUsb::endpoint endpoint, char *c) {
     QByteArray buf;
     Q_CHECK_PTR(c);
-    if (this->read(&buf, 1, endpoint) > 0) {
+    if (this->read(endpoint, &buf, 1) > 0) {
         *c = buf.at(0);
         return true;
     }
@@ -151,6 +151,7 @@ qint32 QUsbDevice::open() {
         if (m_debug) {
           qDebug("Found device.");
         }
+        
         rc = libusb_open(dev, &d->m_devHandle);
         if (rc == 0) break;
         else {
@@ -256,7 +257,7 @@ void QUsbDevice::flush(quint8 endpoint) {
                        &read_bytes, 25);
 }
 
-qint32 QUsbDevice::read(QByteArray* buf, int len, QtUsb::endpoint endpoint) {
+qint32 QUsbDevice::read(QtUsb::endpoint endpoint, QByteArray* buf, int len) {
   UsbPrintFuncName();
   Q_D(QUsbDevice);
   Q_CHECK_PTR(buf);
@@ -334,7 +335,7 @@ qint32 QUsbDevice::read(QByteArray* buf, int len, QtUsb::endpoint endpoint) {
   return read_total;
 }
 
-qint32 QUsbDevice::write(const QByteArray* buf, int len, QtUsb::endpoint endpoint) {
+qint32 QUsbDevice::write( QtUsb::endpoint endpoint, const QByteArray* buf, int len) {
   UsbPrintFuncName();
   Q_D(QUsbDevice);
   Q_CHECK_PTR(buf);
