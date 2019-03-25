@@ -7,6 +7,12 @@
 
 QUsbDevicePrivate::QUsbDevicePrivate()
 {
+  int r = libusb_init(&m_ctx);
+  if (r < 0) {
+    qCritical("LibUsb Init Error %d", r);
+  }
+  m_devHandle = Q_NULLPTR;
+
   m_events = new QUsbEventsThread();
   m_events->m_ctx = m_ctx;
   m_events->start();
@@ -14,19 +20,13 @@ QUsbDevicePrivate::QUsbDevicePrivate()
 
 QUsbDevicePrivate::~QUsbDevicePrivate()
 {
-  m_events->exit();
+  Q_Q(QUsbDevice);
+  m_events->requestInterruption();
   m_events->wait();
   m_events->deleteLater();
-}
 
-void QUsbDevicePrivate::setDefaults() {
-  Q_Q(QUsbDevice);
-  q->m_connected = false;
-  q->m_debug = false;
-  q->m_timeout = QtUsb::DefaultTimeout;
-  q->m_config.config = 0x01;
-  q->m_config.interface = 0x00;
-  q->m_config.alternate = 0x00;
+  q->close();
+  libusb_exit(m_ctx);
 }
 
 void QUsbDevicePrivate::printUsbError(int error_code) const
@@ -35,23 +35,19 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
 }
 
 QUsbDevice::QUsbDevice(QObject* parent) : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR) {
-  Q_D(QUsbDevice);
-  d->m_devHandle = Q_NULLPTR;
-  d->setDefaults();
   m_spd = QtUsb::unknownSpeed;
-  int r = libusb_init(
-      &d->m_ctx);  // initialize the library for the session we just declared
-  if (r < 0) {
-    qCritical("LibUsb Init Error %d", r);  // there was an error
-  }
+
+  m_connected = false;
+  m_debug = false;
+  m_timeout = QtUsb::DefaultTimeout;
+  m_config.config = 0x01;
+  m_config.interface = 0x00;
+  m_config.alternate = 0x00;
 }
 
 QUsbDevice::~QUsbDevice() {
-  Q_D(QUsbDevice);
-  this->close();
-  libusb_exit(d->m_ctx);
-}
 
+}
 
 QByteArray QUsbDevice::speedString() const {
   switch (m_spd) {
@@ -233,15 +229,10 @@ void QUsbDevice::setDebug(bool enable) {
 
 void QUsbEventsThread::run() {
 
-  int r = -1;
-  struct timeval timeout = {0, 100000};
-  libusb_lock_events(m_ctx);
-
+  timeval t = {0, 100000};
   while (!this->isInterruptionRequested()) {
-    r = libusb_handle_events_locked(m_ctx, &timeout);
-    if (r < 0) {
+    if (libusb_handle_events_timeout_completed(m_ctx, &t, Q_NULLPTR) != 0) {
       break;
     }
   }
-  libusb_unlock_events(m_ctx);
 }

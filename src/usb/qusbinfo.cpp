@@ -69,9 +69,13 @@ QUsbInfoPrivate::QUsbInfoPrivate() : m_refresh_timer(new QTimer)
 
 QUsbInfoPrivate::~QUsbInfoPrivate()
 {
+  m_refresh_timer->stop();
   m_refresh_timer->disconnect();
-  m_refresh_timer->thread()->deleteLater();
   m_refresh_timer->deleteLater();
+
+  m_refresh_timer->thread()->exit();
+  m_refresh_timer->thread()->wait();
+  m_refresh_timer->thread()->deleteLater();
 }
 
 void QUsbInfo::checkDevices()
@@ -80,7 +84,7 @@ void QUsbInfo::checkDevices()
   Q_D(QUsbInfo);
   QtUsb::FilterList list;
 
-  timeval t = {0, 10000};
+  timeval t = {0, 0};
 
   if (d->m_has_hotplug) {
     libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);

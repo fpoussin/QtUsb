@@ -21,6 +21,10 @@ public:
     void read(QByteArray *buf);
     void write(QByteArray *buf);
 
+public slots:
+    void onReadComplete(void);
+    void onWriteComplete(qint64 bytes);
+
 signals:
 
 public slots:
@@ -29,11 +33,12 @@ private:
     QUsbDevice* m_usb_dev;
     QUsbTransferHandler* m_transfer_handler;
 
+    QByteArray m_send, m_recv;
+
     QtUsb::DeviceFilter m_filter;
     QtUsb::DeviceConfig m_config;
 
-    QtUsb::Endpoint m_read_ep;
-    QtUsb::Endpoint m_write_ep;
+    QtUsb::Endpoint m_read_ep, m_write_ep;
 };
 
 #endif // USBEXAMPLE_H

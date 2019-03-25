@@ -136,10 +136,11 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
   return true;
 }
 
-QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out, QObject* parent) :
-  QIODevice(*(new QUsbTransferHandlerPrivate), parent), d_dummy(Q_NULLPTR), m_status(QtUsb::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
+QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out) :
+  QIODevice(*(new QUsbTransferHandlerPrivate)), d_dummy(Q_NULLPTR), m_status(QtUsb::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
   Q_CHECK_PTR(dev);
+  setParent(dev);
 }
 
 QUsbTransferHandler::~QUsbTransferHandler()

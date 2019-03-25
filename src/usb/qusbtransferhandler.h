@@ -26,7 +26,7 @@ public:
    * @param out OUT endpoint
    * @param parent
    */
-  explicit QUsbTransferHandler(QUsbDevice * dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out, QObject* parent = Q_NULLPTR);
+  explicit QUsbTransferHandler(QUsbDevice * dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out);
   /**
    * @brief
    *
@@ -63,6 +63,8 @@ public:
    *
    */
   void flush();
+
+  bool isSequential() const {return true;}
 
 signals:
   void error(QtUsb::TransferStatus);

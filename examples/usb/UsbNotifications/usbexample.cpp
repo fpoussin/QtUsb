@@ -6,12 +6,14 @@ UsbExample::UsbExample(QObject *parent) : QObject(parent) {
   QObject::connect(&m_usb_manager, SIGNAL(deviceRemoved(QtUsb::FilterList)), this,
                    SLOT(onDevRemoved(QtUsb::FilterList)));
 
-  m_usb_manager.setDebug(true);
+  m_usb_manager.setDebug(false);
   qInfo("Starting...");
   qInfo("Press CTRL+C to close.");
 }
 
-UsbExample::~UsbExample() {}
+UsbExample::~UsbExample() {
+
+}
 
 void UsbExample::onDevInserted(QtUsb::FilterList list) {
   qInfo("devices inserted");

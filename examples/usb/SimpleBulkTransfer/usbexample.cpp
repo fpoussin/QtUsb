@@ -4,24 +4,26 @@
 #undef interface
 #endif
 
-UsbExample::UsbExample(QObject *parent) : QObject(parent) {
+UsbExample::UsbExample(QObject *parent) : QObject(parent), m_usb_dev(new QUsbDevice()) {
   this->setupDevice();
 
-  QByteArray send, recv;
-
-  send.append(static_cast<char>(0xAB));
+  m_send.append(static_cast<char>(0xAB));
 
   if (this->openDevice()) {
     qInfo("Device open!");
-    this->write(&send);
-    this->read(&recv);
+    this->write(&m_send);
+    this->read(&m_recv);
   }
   else {
     qWarning("Could not open device!");
   }
+
+  this->closeDevice();
 }
 
-UsbExample::~UsbExample() { delete m_usb_dev; }
+UsbExample::~UsbExample() {
+  m_usb_dev->deleteLater();
+}
 
 void UsbExample::setupDevice() {
   /* There are 2 ways of identifying devices depending on the platform.
@@ -30,8 +32,7 @@ void UsbExample::setupDevice() {
 
   qDebug("setupDevice");
 
-  m_usb_dev = new QUsbDevice();
-  m_usb_dev->setDebug(true);
+  m_usb_dev->setDebug(false);
 
   //
   m_filter.pid = 0x3748;
@@ -57,6 +58,9 @@ bool UsbExample::openDevice() {
   if (m_usb_dev->open() == QtUsb::deviceOK) {
     // Device is open
     m_transfer_handler = new QUsbTransferHandler(m_usb_dev, QtUsb::bulkTransfer, m_read_ep, m_write_ep);
+
+    connect(m_transfer_handler, SIGNAL(readyRead()), this, SLOT(onReadComplete()));
+    connect(m_transfer_handler, SIGNAL(bytesWritten(qint64)), this, SLOT(onWriteComplete(qint64)));
     return true;
   }
   return false;
@@ -64,7 +68,9 @@ bool UsbExample::openDevice() {
 
 bool UsbExample::closeDevice() {
   qDebug("Closing");
-  m_transfer_handler->deleteLater();
+
+  m_transfer_handler->disconnect();
+  delete m_transfer_handler;
   m_usb_dev->close();
   return false;
 }
@@ -77,3 +83,16 @@ void UsbExample::read(QByteArray *buf) {
 void UsbExample::write(QByteArray *buf) {
   m_transfer_handler->write(buf->constData(), buf->size());
 }
+
+void UsbExample::onReadComplete()
+{
+  qDebug("Data received");
+  qDebug() << m_recv;
+}
+
+void UsbExample::onWriteComplete(qint64 bytes)
+{
+  qDebug("Data written");
+  qDebug() << bytes;
+}
+

@@ -38,12 +38,6 @@ public:
    */
   void printUsbError(int error_code) const;
 
-  /**
-   * @brief Set default values (config)
-   *
-   */
-  void setDefaults(void);
-
   libusb_device **m_devs;            /**< libusb device ptr to ptr */
   libusb_device_handle *m_devHandle; /**< libusb device handle ptr */
   libusb_context *m_ctx;             /**< libusb context */
