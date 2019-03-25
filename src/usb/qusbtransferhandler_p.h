@@ -26,10 +26,9 @@ public:
   void setStatus(QtUsb::TransferStatus status);
 
   bool prepareTransfer(libusb_transfer* tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep);
+  void stopTransfer();
 
-  libusb_transfer * m_transfer_in;
-  libusb_transfer * m_transfer_out;
-
+  libusb_transfer * m_transfer;
   QByteArray m_write_buf;
   QMutex m_mutex;
 };

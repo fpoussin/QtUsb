@@ -125,7 +125,7 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
                              buf,
                              maxSize,
                              1,
-                             cb_in,
+                             cb,
                              this,
                              timeout);
   }
@@ -134,6 +134,11 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
   }
 
   return true;
+}
+
+void QUsbTransferHandlerPrivate::stopTransfer()
+{
+    libusb_cancel_transfer(m_transfer);
 }
 
 QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out) :
@@ -145,7 +150,7 @@ QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType ty
 
 QUsbTransferHandler::~QUsbTransferHandler()
 {
-
+  cancelTransfer();
 }
 
 void QUsbTransferHandler::flush() {
@@ -165,6 +170,12 @@ void QUsbTransferHandler::flush() {
                        &read_bytes, 25);
 }
 
+void QUsbTransferHandler::cancelTransfer()
+{
+  Q_D(QUsbTransferHandler);
+  d->stopTransfer();
+}
+
 
 qint64 QUsbTransferHandler::readData(char *data, qint64 maxSize)
 {
@@ -179,8 +190,8 @@ qint64 QUsbTransferHandler::readData(char *data, qint64 maxSize)
   if (maxSize == 0) return 0;
 
   d->m_mutex.lock();
-  if (!d->prepareTransfer(d->m_transfer_in, cb_in, data, maxSize, m_in_ep)) return -1;
-  rc = libusb_submit_transfer(d->m_transfer_in);
+  if (!d->prepareTransfer(d->m_transfer, cb_in, data, maxSize, m_in_ep)) return -1;
+  rc = libusb_submit_transfer(d->m_transfer);
 
   if (rc != LIBUSB_SUCCESS) {
     m_dev->d_func()->printUsbError(rc);
@@ -204,8 +215,8 @@ qint64 QUsbTransferHandler::writeData(const char *data, qint64 maxSize)
   d->m_write_buf.resize(static_cast<int>(maxSize));
   memcpy(d->m_write_buf.data(), data, static_cast<ulong>(maxSize));
 
-  if (!d->prepareTransfer(d->m_transfer_out, cb_out, d->m_write_buf.data(), maxSize, m_out_ep)) return -1;
-  rc = libusb_submit_transfer(d->m_transfer_out);
+  if (!d->prepareTransfer(d->m_transfer, cb_out, d->m_write_buf.data(), maxSize, m_out_ep)) return -1;
+  rc = libusb_submit_transfer(d->m_transfer);
 
   if (rc != LIBUSB_SUCCESS) {
     m_dev->d_func()->printUsbError(rc);

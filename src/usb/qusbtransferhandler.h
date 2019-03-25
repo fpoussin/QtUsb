@@ -66,6 +66,9 @@ public:
 
   bool isSequential() const {return true;}
 
+public slots:
+  void cancelTransfer(void);
+
 signals:
   void error(QtUsb::TransferStatus);
 
