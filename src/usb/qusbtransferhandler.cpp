@@ -10,6 +10,7 @@ static void cb_out(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
+  handler->setStatus(static_cast<QtUsb::TransferStatus>(transfer->status));
   if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
     handler->error(static_cast<QtUsb::TransferStatus>(transfer->status));
   }
@@ -26,6 +27,7 @@ static void cb_in(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
+  handler->setStatus(static_cast<QtUsb::TransferStatus>(transfer->status));
   if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
     handler->error(static_cast<QtUsb::TransferStatus>(transfer->status));
   }
@@ -57,6 +59,22 @@ void QUsbTransferHandlerPrivate::error(QtUsb::TransferStatus error)
 {
   Q_Q(QUsbTransferHandler);
   emit q->error(error);
+}
+
+void QUsbTransferHandlerPrivate::setStatus(QtUsb::TransferStatus status)
+{
+  Q_Q(QUsbTransferHandler);
+
+  q->m_status = status;
+  switch (status) {
+    case QtUsb::transferCompleted: q->setErrorString(QString::fromUtf8("transferCompleted")); break;
+    case QtUsb::transferError: q->setErrorString(QString::fromUtf8("transferError")); break;
+    case QtUsb::transferTimeout: q->setErrorString(QString::fromUtf8("transferTimeout")); break;
+    case QtUsb::transferCanceled: q->setErrorString(QString::fromUtf8("transferCanceled")); break;
+    case QtUsb::transferStall: q->setErrorString(QString::fromUtf8("transferStall")); break;
+    case QtUsb::transferNoDevice: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
+    case QtUsb::transferOverflow: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
+  }
 }
 
 bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep)
@@ -119,7 +137,7 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
 }
 
 QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out, QObject* parent) :
-  QIODevice(*(new QUsbTransferHandlerPrivate), parent), d_dummy(Q_NULLPTR), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
+  QIODevice(*(new QUsbTransferHandlerPrivate), parent), d_dummy(Q_NULLPTR), m_status(QtUsb::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
   Q_CHECK_PTR(dev);
 }

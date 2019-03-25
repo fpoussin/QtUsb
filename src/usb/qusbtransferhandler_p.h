@@ -23,6 +23,7 @@ public:
   void readyRead();
   void bytesWritten(qint64 bytes);
   void error(QtUsb::TransferStatus error);
+  void setStatus(QtUsb::TransferStatus status);
 
   bool prepareTransfer(libusb_transfer* tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep);
 

@@ -85,6 +85,8 @@ protected:
   */
  qint64 writeData(const char* data, qint64 maxSize);
 
+ QtUsb::TransferStatus status(void) {return m_status;}
+
 private:
   QUsbTransferHandlerPrivate * const d_dummy;
   /**
@@ -95,6 +97,7 @@ private:
   Q_DISABLE_COPY(QUsbTransferHandler)
 
   bool m_busy;
+  QtUsb::TransferStatus m_status;
   const QUsbDevice * m_dev; /**< parent USB Device */
   const QtUsb::TransferType m_type; /**< Transfer type */
   const QtUsb::Endpoint m_in_ep; /**< IN endpoint */
