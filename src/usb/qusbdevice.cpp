@@ -35,7 +35,6 @@ QUsbDevice::QUsbDevice(QObject* parent) : QObject(*(new QUsbDevicePrivate), pare
   if (r < 0) {
     qCritical("LibUsb Init Error %d", r);  // there was an error
   }
-  m_read_buffer_size = 1024 * 64;
 }
 
 QUsbDevice::~QUsbDevice() {
@@ -60,27 +59,6 @@ QByteArray QUsbDevice::speedString() const {
     }
 
     return "Error";
-}
-
-qint32 QUsbDevice::write(QtUsb::endpoint endpoint, const QByteArray &buf) {
-    return this->write(endpoint, &buf, buf.size());
-}
-
-qint32 QUsbDevice::read(QtUsb::endpoint endpoint, QByteArray *buf) { return this->read(endpoint, buf, 4096); }
-
-bool QUsbDevice::write(QtUsb::endpoint endpoint, char c) {
-    QByteArray buf(1, c);
-    return this->write(endpoint, buf) > 0;
-}
-
-bool QUsbDevice::read(QtUsb::endpoint endpoint, char *c) {
-    QByteArray buf;
-    Q_CHECK_PTR(c);
-    if (this->read(endpoint, &buf, 1) > 0) {
-        *c = buf.at(0);
-        return true;
-    }
-    return false;
 }
 
 void QUsbDevice::showSettings() {
@@ -242,149 +220,4 @@ void QUsbDevice::setDebug(bool enable) {
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
   else
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
-}
-
-void QUsbDevice::flush(quint8 endpoint) {
-  Q_D(QUsbDevice);
-  QByteArray buf;
-  qint32 read_bytes;
-
-  buf.resize(4096);
-  libusb_bulk_transfer(d->m_devHandle,
-                       endpoint,
-                       reinterpret_cast<uchar*>(buf.data()),
-                       4096,
-                       &read_bytes, 25);
-}
-
-qint32 QUsbDevice::read(QtUsb::endpoint endpoint, QByteArray* buf, int len) {
-  UsbPrintFuncName();
-  Q_D(QUsbDevice);
-  Q_CHECK_PTR(buf);
-  qint32 rc, read_bytes;
-  qint32 read_total;
-  QElapsedTimer timer;
-
-  // check it isn't closed already
-  if (!d->m_devHandle || !m_connected) return -1;
-
-  if (len == 0) return 0;
-
-  read_total = 0;
-  read_bytes = 0;
-
-  if (m_read_buffer.isEmpty())
-    if (m_debug) qDebug("Read cache empty");
-
-  /* Fetch from buffer first */
-  if (len <= m_read_buffer.size() && !m_read_buffer.isEmpty()) {
-    if (m_debug) qDebug("Reading %d bytes from cache", m_read_buffer.size());
-    *buf = m_read_buffer.mid(0, (len));
-    m_read_buffer.remove(0, len);
-    return static_cast<int>(len);
-  }
-
-  /* Copy what's in the read buffer */
-  len -= static_cast<quint32>(m_read_buffer.size());
-  *buf = m_read_buffer;
-  m_read_buffer.clear();
-  m_read_buffer.resize(m_read_buffer_size);
-
-  /* Wait till we have at least the required data */
-  timer.start();
-  rc = LIBUSB_SUCCESS;
-  while (timer.elapsed() < m_timeout && len - read_total > 0) {
-    rc = libusb_bulk_transfer(d->m_devHandle,
-                              endpoint,
-                              reinterpret_cast<uchar*>((m_read_buffer.data() + read_total)),
-                              m_read_buffer_size,
-                              &read_bytes,
-                              10);
-    read_total += read_bytes;
-    if (rc == LIBUSB_ERROR_PIPE) {
-      libusb_clear_halt(d->m_devHandle, endpoint);
-      continue;
-    }
-    if (rc == LIBUSB_ERROR_TIMEOUT) {
-      rc = LIBUSB_SUCCESS;
-    }
-    if (rc != LIBUSB_SUCCESS) break;
-  }
-  if (m_debug && timer.elapsed() >= m_timeout) qDebug("USB Timeout!");
-
-  // we resize the buffer.
-  m_read_buffer.resize(read_total);
-  buf->append(m_read_buffer.mid(0, len));
-  m_read_buffer.remove(0, len);
-
-  QString datastr, s;
-
-  if (m_debug) {
-    for (int i = 0; i < read_total; i++) {
-      datastr.append(s.sprintf("%02X:", buf->at(i)));
-    }
-    datastr.remove(datastr.size() - 1, 1);  // remove last colon
-    qDebug("%d bytes Received: %s", read_total, datastr.toStdString().c_str());
-  }
-
-  if (rc != LIBUSB_SUCCESS) {
-    d->printUsbError(rc);
-    return rc;
-  }
-
-  return read_total;
-}
-
-qint32 QUsbDevice::write( QtUsb::endpoint endpoint, const QByteArray* buf, int len) {
-  UsbPrintFuncName();
-  Q_D(QUsbDevice);
-  Q_CHECK_PTR(buf);
-  qint32 rc, sent_tmp;
-  qint32 sent;
-  QElapsedTimer timer;
-
-  // check it isn't closed
-  if (!d->m_devHandle || !m_connected) return -1;
-
-  if (m_debug) {
-    QString cmd, s;
-    for (int i = 0; i < len; i++) {
-      cmd.append(s.sprintf("%02X:", buf->at(i)));
-    }
-    cmd.remove(cmd.size() - 1, 1);  // remove last colon;
-    qDebug() << "Sending" << len << "bytes:" << cmd;
-    // qDebug("Sending %ll bytes: %s", maxSize, cmd.toStdString().c_str());
-  }
-
-  sent = 0;
-  sent_tmp = 0;
-  rc = -99;
-
-  timer.start();
-  while (timer.elapsed() < m_timeout && len - sent > 0) {
-    QByteArray b(buf->mid(0, len)); // Need a local copy since we got const data
-    rc = libusb_bulk_transfer(d->m_devHandle,
-                              endpoint,
-                              reinterpret_cast<unsigned char*>(b.data()),
-                              len,
-                              &sent_tmp,
-                              m_timeout);
-    if (rc == LIBUSB_ERROR_PIPE) {
-      libusb_clear_halt(d->m_devHandle, endpoint);
-    }
-    sent += sent_tmp;
-    if (rc != LIBUSB_SUCCESS) break;
-  }
-
-  if (len != sent) {
-    qWarning("Only sent %d out of %d", sent, len);
-    return -1;
-  }
-
-  if (rc != LIBUSB_SUCCESS) {
-    d->printUsbError(rc);
-    return rc;
-  }
-
-  return sent;
 }

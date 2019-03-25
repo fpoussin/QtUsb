@@ -1,5 +1,5 @@
-#ifndef QUSBMANAGER_H
-#define QUSBMANAGER_H
+#ifndef QUSBINFO_H
+#define QUSBINFO_H
 
 #include "qusbdevice.h"
 #include "qusbtypes.h"
@@ -8,29 +8,29 @@
 QT_BEGIN_NAMESPACE
 
 /**
- * @brief The QUsb manager class.
+ * @brief The QUsb info class.
  * Handles USB events, searching, and devices.
  *
  */
 
-class QUsbManagerPrivate;
+class QUsbInfoPrivate;
 
-class Q_USB_EXPORT QUsbManager : public QObject {
+class Q_USB_EXPORT QUsbInfo : public QObject {
   Q_OBJECT
 
-  Q_DECLARE_PRIVATE(QUsbManager)
+  Q_DECLARE_PRIVATE(QUsbInfo)
 public:
   /**
    * @brief Constructor
    *
    * @param parent
    */
-  explicit QUsbManager(QObject *parent = Q_NULLPTR);
+  explicit QUsbInfo(QObject *parent = Q_NULLPTR);
   /**
    * @brief Destructor
    *
    */
-  ~QUsbManager(void);
+  ~QUsbInfo(void);
 
   /**
    * @brief Gets a list of devices present in the system
@@ -63,14 +63,14 @@ signals:
 
 public slots:
   /**
-   * @brief Add a device to the manager's list
+   * @brief Add a device to the list
    *
    * @param filter device filter
    * @return bool false if device was already in the list, else true
    */
   bool addDevice(const QtUsb::DeviceFilter &filter);
   /**
-   * @brief Remove a device from the manager's list
+   * @brief Remove a device from the list
    *
    * @param filter device filter
    * @return bool false if device was not in the list, else true
@@ -125,10 +125,10 @@ protected:
   QtUsb::FilterList m_system_list; /**< List of all filters in the system */
 
 private:
-  QUsbManagerPrivate * const d_dummy;
-  Q_DISABLE_COPY(QUsbManager)
+  QUsbInfoPrivate * const d_dummy;
+  Q_DISABLE_COPY(QUsbInfo)
 };
 
 QT_END_NAMESPACE
 
-#endif // QUSBMANAGER_H
+#endif // QUSBINFO_H

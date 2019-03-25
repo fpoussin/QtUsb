@@ -3,9 +3,10 @@
 
 #include <QObject>
 #include <QUsbDevice>
+#include <QUsbTransferHandler>
 
-const QtUsb::endpoint USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
-const QtUsb::endpoint USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
+const QtUsb::Endpoint USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
+const QtUsb::Endpoint USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
 const quint16 USB_TIMEOUT_MSEC = 300;
 
 class UsbExample : public QObject
@@ -26,12 +27,13 @@ public slots:
 
 private:
     QUsbDevice* m_usb_dev;
+    QUsbTransferHandler* m_transfer_handler;
 
     QtUsb::DeviceFilter m_filter;
     QtUsb::DeviceConfig m_config;
 
-    QtUsb::endpoint m_read_ep;
-    QtUsb::endpoint m_write_ep;
+    QtUsb::Endpoint m_read_ep;
+    QtUsb::Endpoint m_write_ep;
 };
 
 #endif // USBEXAMPLE_H

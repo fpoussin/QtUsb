@@ -1,5 +1,5 @@
-#include "qusbmanager.h"
-#include "qusbmanager_p.h"
+#include "qusbinfo.h"
+#include "qusbinfo_p.h"
 #include <QThread>
 
 #define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
@@ -18,7 +18,7 @@ static int hotplugCallback(libusb_context *ctx,
   (void)ctx;
   QtUsb::FilterList device_list;
   QtUsb::DeviceFilter dev;
-  QUsbManager *manager = reinterpret_cast<QUsbManager*>(user_data);
+  QUsbInfo *manager = reinterpret_cast<QUsbInfo*>(user_data);
 
   if (manager->debug())
     qDebug("hotplugCallback");
@@ -55,7 +55,7 @@ static int hotplugCallback(libusb_context *ctx,
   return 0;
 }
 
-QUsbManagerPrivate::QUsbManagerPrivate() : m_refresh_timer(new QTimer)
+QUsbInfoPrivate::QUsbInfoPrivate() : m_refresh_timer(new QTimer)
 {
   QThread* t = new QThread();
   m_refresh_timer->moveToThread(t);
@@ -67,17 +67,17 @@ QUsbManagerPrivate::QUsbManagerPrivate() : m_refresh_timer(new QTimer)
   t->start();
 }
 
-QUsbManagerPrivate::~QUsbManagerPrivate()
+QUsbInfoPrivate::~QUsbInfoPrivate()
 {
   m_refresh_timer->disconnect();
   m_refresh_timer->thread()->deleteLater();
   m_refresh_timer->deleteLater();
 }
 
-void QUsbManager::checkDevices()
+void QUsbInfo::checkDevices()
 {
   UsbPrintFuncName();
-  Q_D(QUsbManager);
+  Q_D(QUsbInfo);
   QtUsb::FilterList list;
 
   timeval t = {0, 10000};
@@ -90,8 +90,8 @@ void QUsbManager::checkDevices()
   }
 }
 
-QUsbManager::QUsbManager(QObject *parent) : QObject(*(new QUsbManagerPrivate), parent), d_dummy(Q_NULLPTR) {
-  Q_D(QUsbManager);
+QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d_dummy(Q_NULLPTR) {
+  Q_D(QUsbInfo);
 
   m_debug = false;
   int rc;
@@ -137,11 +137,11 @@ QUsbManager::QUsbManager(QObject *parent) : QObject(*(new QUsbManagerPrivate), p
   connect(d->m_refresh_timer, SIGNAL(timeout()), this, SLOT(checkDevices()));
 }
 
-QUsbManager::~QUsbManager() {
+QUsbInfo::~QUsbInfo() {
 
 }
 
-QtUsb::FilterList QUsbManager::getPresentDevices() {
+QtUsb::FilterList QUsbInfo::getPresentDevices() {
   UsbPrintFuncName();
   QtUsb::FilterList list;
   QtUsb::DeviceFilter filter;
@@ -156,12 +156,12 @@ QtUsb::FilterList QUsbManager::getPresentDevices() {
   return list;
 }
 
-bool QUsbManager::isPresent(const QtUsb::DeviceFilter &filter) {
+bool QUsbInfo::isPresent(const QtUsb::DeviceFilter &filter) {
 
   return this->findDevice(filter, m_system_list) >= 0;
 }
 
-bool QUsbManager::addDevice(const QtUsb::DeviceFilter &filter) {
+bool QUsbInfo::addDevice(const QtUsb::DeviceFilter &filter) {
 
   if (this->findDevice(filter, m_filter_list) == -1) {
     m_filter_list.append(filter);
@@ -170,7 +170,7 @@ bool QUsbManager::addDevice(const QtUsb::DeviceFilter &filter) {
   return false;
 }
 
-bool QUsbManager::removeDevice(const QtUsb::DeviceFilter &filter) {
+bool QUsbInfo::removeDevice(const QtUsb::DeviceFilter &filter) {
 
   const int pos = this->findDevice(filter, m_filter_list);
   if (pos > 0) {
@@ -180,7 +180,7 @@ bool QUsbManager::removeDevice(const QtUsb::DeviceFilter &filter) {
   return true;
 }
 
-int QUsbManager::findDevice(const QtUsb::DeviceFilter &filter,
+int QUsbInfo::findDevice(const QtUsb::DeviceFilter &filter,
                             const QtUsb::FilterList &list) {
   for (int i = 0; i < list.length(); i++) {
     const QtUsb::DeviceFilter *d = &list.at(i);
@@ -192,10 +192,10 @@ int QUsbManager::findDevice(const QtUsb::DeviceFilter &filter,
   return -1;
 }
 
-void QUsbManager::setDebug(bool debug)
+void QUsbInfo::setDebug(bool debug)
 {
   UsbPrintFuncName();
-  Q_D(QUsbManager);
+  Q_D(QUsbInfo);
   m_debug = debug;
   if (m_debug)
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
@@ -203,7 +203,7 @@ void QUsbManager::setDebug(bool debug)
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 }
 
-QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev,
+QtUsb::DeviceStatus QUsbInfo::openDevice(QUsbDevice *dev,
                                             const QtUsb::DeviceFilter &filter,
                                             const QtUsb::DeviceConfig &config) {
   UsbPrintFuncName();
@@ -219,7 +219,7 @@ QtUsb::DeviceStatus QUsbManager::openDevice(QUsbDevice *dev,
     return QtUsb::deviceNotFound;
 }
 
-QtUsb::DeviceStatus QUsbManager::closeDevice(QUsbDevice *dev) {
+QtUsb::DeviceStatus QUsbInfo::closeDevice(QUsbDevice *dev) {
 
   UsbPrintFuncName();
   if (dev != Q_NULLPTR) {
@@ -231,7 +231,7 @@ QtUsb::DeviceStatus QUsbManager::closeDevice(QUsbDevice *dev) {
   return QtUsb::devicePgmError;
 }
 
-void QUsbManager::monitorDevices(const QtUsb::FilterList &list) {
+void QUsbInfo::monitorDevices(const QtUsb::FilterList &list) {
 
   UsbPrintFuncName();
   QtUsb::FilterList inserted, removed;

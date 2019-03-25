@@ -12,9 +12,13 @@
 
 QT_BEGIN_NAMESPACE
 
+class QUsbTransferHandlerPrivate;
+
 class QUsbDevicePrivate : public QObjectPrivate {
 
   Q_DECLARE_PUBLIC(QUsbDevice)
+  friend QUsbTransferHandler;
+  friend QUsbTransferHandlerPrivate;
 
 public:
   QUsbDevicePrivate();

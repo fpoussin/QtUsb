@@ -6,20 +6,24 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QString>
-#include <QtEndian>
 
 QT_BEGIN_NAMESPACE
 
 class QUsbDevicePrivate;
+class QUsbTransferHandler;
+class QUsbTransferHandlerPrivate;
 
 /**
  * @brief
  *
  */
-class Q_USB_EXPORT QUsbDevice : public QObject {
+class Q_USB_EXPORT QUsbDevice : public QObject
+{
   Q_OBJECT
-
   Q_DECLARE_PRIVATE(QUsbDevice)
+
+  friend QUsbTransferHandler;
+  friend QUsbTransferHandlerPrivate;
 
   Q_PROPERTY(bool debug READ debug WRITE setDebug)
   Q_PROPERTY(QtUsb::DeviceFilter filter READ filter WRITE setFilter)
@@ -74,12 +78,20 @@ public:
    * @return QtUsb::DeviceFilter
    */
   QtUsb::DeviceFilter filter(void) const { return m_filter; }
+
   /**
    * @brief Get current device config
    *
    * @return QtUsb::DeviceConfig
    */
   QtUsb::DeviceConfig config(void) const { return m_config; }
+
+  /**
+   * @brief Get connection status
+   *
+   * @return bool
+   */
+  bool isConnected(void) const { return m_connected; }
 
   /**
    * @brief Get current device pid
@@ -140,66 +152,13 @@ public slots:
   void close();
 
   /**
-   * @brief See base class
-   *
-   */
-  void flush(quint8 endpoint);
-
-  /**
-   * @brief See base class
-   *
-   * @param buf
-   * @param maxSize
-   * @return qint32
-   */
-  qint32 read(QtUsb::endpoint endpoint, QByteArray *buf, int len);
-
-  /**
-   * @brief See base class
-   *
-   * @param buf
-   * @param maxSize
-   * @return qint32
-   */
-  qint32 write(QtUsb::endpoint endpoint, const QByteArray *buf, int len);
-
-  /**
-   * @brief Read maximum amount of bytes to buffer, up to 4096 bytes
-   *
-   * @param buf data to write into
-   * @return qint32 actual number of bytes read on success, negative on error
-   */
-  qint32 read(QtUsb::endpoint endpoint, QByteArray *buf);
-
-  /**
-   * @brief Write full array to device
-   *
-   * @param buf data to write
-   * @return qint32 actual number of bytes written on success, negative on error
-   */
-  qint32 write(QtUsb::endpoint endpoint, const QByteArray &buf);
-
-  /**
-   * @brief Write a single char
-   *
-   * @param c char
-   * @return bool true on sucess
-   */
-  bool write(QtUsb::endpoint endpoint, char c);
-
-  /**
-   * @brief Read a single char
-   *
-   * @param c char
-   * @return bool true on sucess
-   */
-  bool read(QtUsb::endpoint endpoint, char *c);
-
-  /**
    * @brief Print settings to qDebug
    *
    */
   void showSettings(void);
+
+
+signals:
 
 private slots:
 
@@ -207,16 +166,12 @@ private:
   QUsbDevicePrivate * const d_dummy;
   Q_DISABLE_COPY(QUsbDevice)
 
-
   quint16 m_timeout;            /**< Device timeout */
   bool m_debug;                 /**< Debug enabled boolean */
   bool m_connected;             /**< Connected boolean */
   QtUsb::DeviceFilter m_filter; /**< Device filter */
   QtUsb::DeviceConfig m_config; /**< Device config */
   QtUsb::DeviceSpeed m_spd;     /**< Device speed */
-
-  QByteArray m_read_buffer;
-  int m_read_buffer_size;
 };
 
 QT_END_NAMESPACE
