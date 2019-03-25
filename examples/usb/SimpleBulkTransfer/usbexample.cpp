@@ -68,9 +68,9 @@ bool UsbExample::closeDevice() {
 }
 
 void UsbExample::read(QByteArray *buf) {
-  m_usb_dev->read(buf, 1, m_read_ep);
+  m_usb_dev->read(m_read_ep, buf, 1);
 }
 
 void UsbExample::write(QByteArray *buf) {
-  m_usb_dev->write(buf, static_cast<quint32>(buf->size()), m_write_ep);
+  m_usb_dev->write(m_write_ep, buf, buf->size());
 }

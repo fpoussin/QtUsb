@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QUsbDevice>
 
-const quint8 USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
-const quint8 USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
+const QtUsb::endpoint USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
+const QtUsb::endpoint USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
 const quint16 USB_TIMEOUT_MSEC = 300;
 
 class UsbExample : public QObject
