@@ -35,15 +35,11 @@ class Q_USB_EXPORT QUsbDevice : public QObject
 
 public:
   /**
-   * @brief See base class
+   * @brief constructor
    *
    * @param parent
    */
   explicit QUsbDevice(QObject *parent = Q_NULLPTR);
-  /**
-   * @brief See base class
-   *
-   */
   ~QUsbDevice();
 
   /**
@@ -139,14 +135,14 @@ public:
 
 public slots:
   /**
-   * @brief See base class
+   * @brief Open device
    *
-   * @return qint32
+   * @return qint32 return code == 0 if no errors
    */
   qint32 open();
 
   /**
-   * @brief See base class
+   * @brief Close device
    *
    */
   void close();

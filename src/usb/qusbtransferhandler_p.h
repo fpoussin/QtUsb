@@ -3,6 +3,7 @@
 
 #include "qusbtransferhandler.h"
 #include <private/qiodevice_p.h>
+#include <QMutexLocker>
 
 #ifdef Q_OS_UNIX
 #include <libusb-1.0/libusb.h>
@@ -21,13 +22,15 @@ public:
 
   void readyRead();
   void bytesWritten(qint64 bytes);
+  void error(QtUsb::TransferStatus error);
 
-  void prepareTransfer(libusb_transfer* tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep);
+  bool prepareTransfer(libusb_transfer* tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep);
 
   libusb_transfer * m_transfer_in;
   libusb_transfer * m_transfer_out;
 
   QByteArray m_write_buf;
+  QMutex m_mutex;
 };
 
 QT_END_NAMESPACE

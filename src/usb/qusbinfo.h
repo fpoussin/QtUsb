@@ -26,6 +26,7 @@ public:
    * @param parent
    */
   explicit QUsbInfo(QObject *parent = Q_NULLPTR);
+
   /**
    * @brief Destructor
    *
@@ -39,6 +40,7 @@ public:
    * @return QtUsb::FilterList
    */
   QtUsb::FilterList getPresentDevices(void);
+
   /**
    * @brief Check if device is present
    *
@@ -54,6 +56,7 @@ signals:
    * @param filters list of devices to match
    */
   void deviceInserted(QtUsb::FilterList filters);
+
   /**
    * @brief Signals a device from the given list has been removed
    *
@@ -69,6 +72,7 @@ public slots:
    * @return bool false if device was already in the list, else true
    */
   bool addDevice(const QtUsb::DeviceFilter &filter);
+
   /**
    * @brief Remove a device from the list
    *
@@ -76,6 +80,7 @@ public slots:
    * @return bool false if device was not in the list, else true
    */
   bool removeDevice(const QtUsb::DeviceFilter &filter);
+
   /**
    * @brief Search a device in a device list
    *
@@ -86,7 +91,17 @@ public slots:
   int findDevice(const QtUsb::DeviceFilter &filter,
                  const QtUsb::FilterList &list);
 
+  /**
+   * @brief set debug mode
+   *
+   * @param debug
+   */
   void setDebug(bool debug);
+
+  /**
+   * @brief get debug mode
+   *
+   */
   bool debug() {return m_debug;}
 
   /**
@@ -100,6 +115,7 @@ public slots:
   QtUsb::DeviceStatus openDevice(QUsbDevice *dev,
                                  const QtUsb::DeviceFilter &filter,
                                  const QtUsb::DeviceConfig &config);
+
   /**
    * @brief
    *

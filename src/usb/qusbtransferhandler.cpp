@@ -1,7 +1,6 @@
 #include "qusbtransferhandler.h"
 #include "qusbtransferhandler_p.h"
 #include "qusbdevice_p.h"
-#include <QElapsedTimer>
 
 #define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define UsbPrintFuncName() if (m_dev->debug()) qDebug() << "***[" << Q_FUNC_INFO << "]***"
@@ -11,7 +10,14 @@ static void cb_out(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
-  handler->bytesWritten(transfer->actual_length);
+  if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
+    handler->error(static_cast<QtUsb::TransferStatus>(transfer->status));
+  }
+  else {
+    handler->bytesWritten(transfer->actual_length);
+  }
+
+  handler->m_mutex.unlock();
   libusb_free_transfer(transfer);
 }
 
@@ -20,8 +26,15 @@ static void cb_in(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
+  if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
+    handler->error(static_cast<QtUsb::TransferStatus>(transfer->status));
+  }
+  else {
+    handler->readyRead();
+  }
+
+  handler->m_mutex.unlock();
   libusb_free_transfer(transfer);
-  handler->readyRead();
 }
 
 QUsbTransferHandlerPrivate::QUsbTransferHandlerPrivate()
@@ -40,7 +53,13 @@ void QUsbTransferHandlerPrivate::bytesWritten(qint64 bytes)
   emit q->bytesWritten(bytes);
 }
 
-void QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep)
+void QUsbTransferHandlerPrivate::error(QtUsb::TransferStatus error)
+{
+  Q_Q(QUsbTransferHandler);
+  emit q->error(error);
+}
+
+bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep)
 {
   Q_Q(QUsbTransferHandler);
 
@@ -49,8 +68,8 @@ void QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
   auto handle = q->m_dev->d_func()->m_devHandle;
   auto timeout = q->m_dev->timeout();
 
-
-  if (q->m_type == QtUsb::bulkTransfer)
+  if (q->m_type == QtUsb::bulkTransfer) {
+    tr = libusb_alloc_transfer(0);
     libusb_fill_bulk_transfer(tr,
                               handle,
                               ep,
@@ -59,7 +78,9 @@ void QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
                               cb,
                               this,
                               timeout);
-  else if (q->m_type == QtUsb::interruptTransfer)
+  }
+  else if (q->m_type == QtUsb::interruptTransfer) {
+    tr = libusb_alloc_transfer(0);
     libusb_fill_interrupt_transfer(tr,
                                    handle,
                                    ep,
@@ -68,8 +89,18 @@ void QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
                                    cb,
                                    this,
                                    timeout);
-
-  else if (q->m_type == QtUsb::isochronousTransfer)
+  }
+  else if (q->m_type == QtUsb::controlTransfer) {
+    tr = libusb_alloc_transfer(0);
+    libusb_fill_control_transfer(tr,
+                                 handle,
+                                 buf,
+                                 cb,
+                                 this,
+                                 timeout);
+  }
+  else if (q->m_type == QtUsb::isochronousTransfer) {
+    tr = libusb_alloc_transfer(1);
     libusb_fill_iso_transfer(tr,
                              handle,
                              ep,
@@ -79,9 +110,15 @@ void QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
                              cb_in,
                              this,
                              timeout);
+  }
+  else {
+    return false;
+  }
+
+  return true;
 }
 
-QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint out, QtUsb::Endpoint in, QObject* parent) :
+QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out, QObject* parent) :
   QIODevice(*(new QUsbTransferHandlerPrivate), parent), d_dummy(Q_NULLPTR), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
   Q_CHECK_PTR(dev);
@@ -92,13 +129,18 @@ QUsbTransferHandler::~QUsbTransferHandler()
 
 }
 
-void QUsbTransferHandler::flush(quint8 endpoint) {
+void QUsbTransferHandler::flush() {
+  Q_D(QUsbTransferHandler);
   QByteArray buf;
   int read_bytes;
 
+  // check it isn't closed already
+  if (!m_dev->d_func()->m_devHandle || !m_dev->isConnected()) return;
+
+  QMutexLocker(&d->m_mutex);
   buf.resize(4096);
   libusb_bulk_transfer(m_dev->d_func()->m_devHandle,
-                       endpoint,
+                       m_in_ep,
                        reinterpret_cast<uchar*>(buf.data()),
                        buf.size(),
                        &read_bytes, 25);
@@ -117,8 +159,8 @@ qint64 QUsbTransferHandler::readData(char *data, qint64 maxSize)
 
   if (maxSize == 0) return 0;
 
-  d->m_transfer_in = libusb_alloc_transfer(0);
-  d->prepareTransfer(d->m_transfer_in, cb_in, data, maxSize, m_in_ep);
+  d->m_mutex.lock();
+  if (!d->prepareTransfer(d->m_transfer_in, cb_in, data, maxSize, m_in_ep)) return -1;
   rc = libusb_submit_transfer(d->m_transfer_in);
 
   if (rc != LIBUSB_SUCCESS) {
@@ -139,12 +181,12 @@ qint64 QUsbTransferHandler::writeData(const char *data, qint64 maxSize)
   // check it isn't closed
   if (!m_dev->d_func()->m_devHandle || !m_dev->isConnected()) return -1;
 
+  d->m_mutex.lock();
   d->m_write_buf.resize(static_cast<int>(maxSize));
   memcpy(d->m_write_buf.data(), data, static_cast<ulong>(maxSize));
 
-  d->m_transfer_in = libusb_alloc_transfer(0);
-  d->prepareTransfer(d->m_transfer_in, cb_out, d->m_write_buf.data(), maxSize, m_out_ep);
-  rc = libusb_submit_transfer(d->m_transfer_in);
+  if (!d->prepareTransfer(d->m_transfer_out, cb_out, d->m_write_buf.data(), maxSize, m_out_ep)) return -1;
+  rc = libusb_submit_transfer(d->m_transfer_out);
 
   if (rc != LIBUSB_SUCCESS) {
     m_dev->d_func()->printUsbError(rc);

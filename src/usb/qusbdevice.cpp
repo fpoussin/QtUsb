@@ -7,22 +7,31 @@
 
 QUsbDevicePrivate::QUsbDevicePrivate()
 {
+  m_events = new QUsbEventsThread();
+  m_events->m_ctx = m_ctx;
+  m_events->start();
+}
 
+QUsbDevicePrivate::~QUsbDevicePrivate()
+{
+  m_events->exit();
+  m_events->wait();
+  m_events->deleteLater();
 }
 
 void QUsbDevicePrivate::setDefaults() {
-    Q_Q(QUsbDevice);
-    q->m_connected = false;
-    q->m_debug = false;
-    q->m_timeout = QtUsb::DefaultTimeout;
-    q->m_config.config = 0x01;
-    q->m_config.interface = 0x00;
-    q->m_config.alternate = 0x00;
+  Q_Q(QUsbDevice);
+  q->m_connected = false;
+  q->m_debug = false;
+  q->m_timeout = QtUsb::DefaultTimeout;
+  q->m_config.config = 0x01;
+  q->m_config.interface = 0x00;
+  q->m_config.alternate = 0x00;
 }
 
 void QUsbDevicePrivate::printUsbError(int error_code) const
 {
-    qWarning("libusb Error: %s", libusb_strerror(static_cast<enum libusb_error>(error_code)));
+  qWarning("libusb Error: %s", libusb_strerror(static_cast<enum libusb_error>(error_code)));
 }
 
 QUsbDevice::QUsbDevice(QObject* parent) : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR) {
@@ -45,30 +54,30 @@ QUsbDevice::~QUsbDevice() {
 
 
 QByteArray QUsbDevice::speedString() const {
-    switch (m_spd) {
-    case QtUsb::unknownSpeed:
-        return "Unknown speed";
-    case QtUsb::lowSpeed:
-        return "Low speed";
-    case QtUsb::fullSpeed:
-        return "Full speed";
-    case QtUsb::highSpeed:
-        return "High speed";
-    case QtUsb::superSpeed:
-        return "Super speed";
-    }
+  switch (m_spd) {
+  case QtUsb::unknownSpeed:
+      return "Unknown speed";
+  case QtUsb::lowSpeed:
+      return "Low speed";
+  case QtUsb::fullSpeed:
+      return "Full speed";
+  case QtUsb::highSpeed:
+      return "High speed";
+  case QtUsb::superSpeed:
+      return "Super speed";
+  }
 
-    return "Error";
+  return "Error";
 }
 
 void QUsbDevice::showSettings() {
-    qWarning() << "\n"
-               << "Debug" << m_debug << "\n"
-               << "Config" << m_config.config << "\n"
-               << "Timeout" << m_timeout << "\n"
-               << "Interface" << m_config.interface << "\n"
-               << "Device.pid" << QString::number(m_filter.pid, 16) << "\n"
-               << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
+  qWarning() << "\n"
+             << "Debug" << m_debug << "\n"
+             << "Config" << m_config.config << "\n"
+             << "Timeout" << m_timeout << "\n"
+             << "Interface" << m_config.interface << "\n"
+             << "Device.pid" << QString::number(m_filter.pid, 16) << "\n"
+             << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
 }
 
 QtUsb::FilterList QUsbDevice::availableDevices() {
@@ -220,4 +229,19 @@ void QUsbDevice::setDebug(bool enable) {
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
   else
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
+}
+
+void QUsbEventsThread::run() {
+
+  int r = -1;
+  struct timeval timeout = {0, 100000};
+  libusb_lock_events(m_ctx);
+
+  while (!this->isInterruptionRequested()) {
+    r = libusb_handle_events_locked(m_ctx, &timeout);
+    if (r < 0) {
+      break;
+    }
+  }
+  libusb_unlock_events(m_ctx);
 }

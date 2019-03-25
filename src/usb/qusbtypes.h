@@ -17,11 +17,33 @@ typedef quint8 Endpoint;
  *
  */
 enum TransferType {
-  unknownTransferType = -1,
   controlTransfer = 0,
   bulkTransfer,
   interruptTransfer,
   isochronousTransfer
+};
+
+/**
+ * @brief Basically a copy of libusb's transfer enum
+ *
+ */
+enum TransferStatus {
+        /** Transfer completed without error. Note that this does not indicate
+        * that the entire amount of requested data was transferred. */
+        transferCompleted,
+        /** Transfer failed */
+        transferError,
+        /** Transfer timed out */
+        transferTimeout,
+        /** Transfer was cancelled */
+        transferCanceled,
+        /** For bulk/interrupt endpoints: halt condition detected (endpoint
+         * stalled). For control endpoints: control request not supported. */
+        transferStall,
+        /** Device was disconnected */
+        transferNoDevice,
+        /** Device sent more data than requested */
+        transferOverflow,
 };
 
 /**

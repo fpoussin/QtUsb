@@ -59,10 +59,6 @@ QUsbDevice device;
 QUsbManager manager;
 ```
 
-## TODO
-- Interrupt transfer
-- isochronous transfer
-
 ## Documentation
 
 Doxygen documentation can be found here: http://fpoussin.github.io/doxygen/qtusb/
