@@ -142,7 +142,9 @@ QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d
 }
 
 QUsbInfo::~QUsbInfo() {
-
+  Q_D(QUsbInfo);
+  libusb_hotplug_deregister_callback(d->m_ctx, callback_handle);
+  libusb_exit(d->m_ctx);
 }
 
 QtUsb::FilterList QUsbInfo::getPresentDevices() {

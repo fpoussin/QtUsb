@@ -26,7 +26,11 @@ public:
    * @param out OUT endpoint
    * @param parent
    */
-  explicit QUsbTransferHandler(QUsbDevice * dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out);
+  explicit QUsbTransferHandler(QUsbDevice * dev,
+                               QtUsb::TransferType type,
+                               QtUsb::Endpoint in,
+                               QtUsb::Endpoint out);
+
   /**
    * @brief
    *
@@ -42,21 +46,42 @@ public:
    *
    * @return QtUsb::TransferType
    */
-  QtUsb::TransferType type(void) {return m_type;}
+  QtUsb::TransferType type(void) const {return m_type;}
+
   /**
    * @brief get IN endpoint
    *
    * @return QtUsb::Endpoint
    */
-  QtUsb::Endpoint endpointIn(void) {return m_in_ep;}
+  QtUsb::Endpoint endpointIn(void) const {return m_in_ep;}
+
   /**
    * @brief get OUT endpoint
    *
    * @return QtUsb::Endpoint
    */
-  QtUsb::Endpoint endpointOut(void) {return m_out_ep;}
+  QtUsb::Endpoint endpointOut(void) const {return m_out_ep;}
 
-  bool busy(void) {return m_busy;}
+  /**
+   * @brief
+   *
+   * @return bool
+   */
+  bool isSequential() const {return true;}
+
+   /**
+    * @brief
+    *
+    * @return QtUsb::TransferStatus
+    */
+   QtUsb::TransferStatus status(void) const {return m_status;}
+
+  /**
+   * @brief
+   *
+   * @return bool
+   */
+  bool busy(void) const;
 
   /**
    * @brief flush IN endpoint
@@ -64,9 +89,43 @@ public:
    */
   void flush();
 
-  bool isSequential() const {return true;}
+  /**
+   * @brief
+   *
+   * @param msecs
+   * @return bool
+   */
+  bool waitForBytesWritten(int msecs);
+  /**
+   * @brief
+   *
+   * @param msecs
+   * @return bool
+   */
+  bool waitForReadyRead(int msecs);
+
+  /**
+   * @brief Populate buffer with a control packet
+   *
+   * @param buffer
+   * @param bmRequestType
+   * @param bRequest
+   * @param wValue
+   * @param wIndex
+   * @param wLength
+   */
+  void makeControlPacket(char * 	buffer,
+                         quint8 	bmRequestType,
+                         quint8 	bRequest,
+                         quint16	wValue,
+                         quint16	wIndex,
+                         quint16	wLength ) const;
 
 public slots:
+  /**
+   * @brief Cancel ongoing async tranfer
+   *
+   */
   void cancelTransfer(void);
 
 signals:
@@ -89,8 +148,6 @@ protected:
   * @return qint64
   */
  qint64 writeData(const char* data, qint64 maxSize);
-
- QtUsb::TransferStatus status(void) {return m_status;}
 
 private:
   QUsbTransferHandlerPrivate * const d_dummy;

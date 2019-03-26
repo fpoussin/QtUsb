@@ -2,6 +2,8 @@
 #include "qusbtransferhandler_p.h"
 #include "qusbdevice_p.h"
 
+#include <QElapsedTimer>
+
 #define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define UsbPrintFuncName() if (m_dev->debug()) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
@@ -153,6 +155,10 @@ QUsbTransferHandler::~QUsbTransferHandler()
   cancelTransfer();
 }
 
+bool QUsbTransferHandler::busy() const {
+    return m_busy;
+}
+
 void QUsbTransferHandler::flush() {
   Q_D(QUsbTransferHandler);
   QByteArray buf;
@@ -162,12 +168,41 @@ void QUsbTransferHandler::flush() {
   if (!m_dev->d_func()->m_devHandle || !m_dev->isConnected()) return;
 
   QMutexLocker(&d->m_mutex);
+  m_busy = true;
   buf.resize(4096);
   libusb_bulk_transfer(m_dev->d_func()->m_devHandle,
                        m_in_ep,
                        reinterpret_cast<uchar*>(buf.data()),
                        buf.size(),
                        &read_bytes, 25);
+  m_busy = false;
+}
+
+bool QUsbTransferHandler::waitForBytesWritten(int msecs)
+{
+    QElapsedTimer timer;
+    timer.start();
+
+    do {
+        if (!this->bytesToWrite()) return true;
+    } while (timer.elapsed() < msecs);
+    return false;
+}
+
+bool QUsbTransferHandler::waitForReadyRead(int msecs)
+{
+    QElapsedTimer timer;
+    timer.start();
+
+    do {
+        if (this->bytesAvailable()) return true;
+    } while (timer.elapsed() < msecs);
+    return false;
+}
+
+void QUsbTransferHandler::makeControlPacket(char *buffer, quint8 bmRequestType, quint8 bRequest, quint16 wValue, quint16 wIndex, quint16 wLength) const
+{
+    libusb_fill_control_setup(reinterpret_cast<uchar*>(buffer), bmRequestType, bRequest, wValue, wIndex, wLength);
 }
 
 void QUsbTransferHandler::cancelTransfer()
@@ -175,7 +210,6 @@ void QUsbTransferHandler::cancelTransfer()
   Q_D(QUsbTransferHandler);
   d->stopTransfer();
 }
-
 
 qint64 QUsbTransferHandler::readData(char *data, qint64 maxSize)
 {
