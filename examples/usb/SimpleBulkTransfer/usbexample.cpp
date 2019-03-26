@@ -55,7 +55,7 @@ void UsbExample::setupDevice() {
 bool UsbExample::openDevice() {
   qDebug("Opening");
 
-  if (m_usb_dev->open() == QtUsb::deviceOK) {
+  if (m_usb_dev->open() == QtUsb::statusOK) {
     // Device is open
     m_transfer_handler = new QUsbTransferHandler(m_usb_dev, QtUsb::bulkTransfer, m_read_ep, m_write_ep);
 

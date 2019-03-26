@@ -195,6 +195,7 @@ qint64 QUsbTransferHandler::readData(char *data, qint64 maxSize)
 
   if (rc != LIBUSB_SUCCESS) {
     m_dev->d_func()->printUsbError(rc);
+    d->m_mutex.unlock();
     return rc;
   }
 
@@ -220,6 +221,7 @@ qint64 QUsbTransferHandler::writeData(const char *data, qint64 maxSize)
 
   if (rc != LIBUSB_SUCCESS) {
     m_dev->d_func()->printUsbError(rc);
+    d->m_mutex.unlock();
     return rc;
   }
 

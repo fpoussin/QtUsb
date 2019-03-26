@@ -18,9 +18,10 @@ typedef quint8 Endpoint;
  */
 enum TransferType {
   controlTransfer = 0,
+  isochronousTransfer,
   bulkTransfer,
   interruptTransfer,
-  isochronousTransfer
+  streamTransfer
 };
 
 /**
@@ -46,26 +47,53 @@ enum TransferStatus {
         transferOverflow,
 };
 
+
 /**
  * @brief USB speeds
  *
  */
 enum DeviceSpeed {
   unknownSpeed = -1,
-  lowSpeed = 0,
-  fullSpeed,
-  highSpeed,
-  superSpeed
+  lowSpeed = 0, /* USB 1.0 */
+  fullSpeed, /* USB 1.1/2.0 */
+  highSpeed, /* USB 2.0 */
+  superSpeed, /* USB 3.0/3.1G1 */
+  superSpeedPlus /* USB 3.1G2 */
 };
 /**
  * @brief Device status
  *
  */
+/* Mapped to libusb_error */
 enum DeviceStatus {
-  deviceOK = 0,
-  deviceBusy = -1,
-  deviceNotFound = -2,
-  devicePgmError = -3
+	/** Success (no error) */
+	statusOK = 0,
+	/** Input/output error */
+	statusIoError = -1,
+	/** Invalid parameter */
+	statusInvalidParam = -2,
+	/** Access denied (insufficient permissions) */
+	statusAccessDenied = -3,
+	/** No such device (it may have been disconnected) */
+	statusNoSuchDevice = -4,
+	/** Entity not found */
+	statusNotFound = -5,
+	/** Resource busy */
+	statusBusy = -6,
+	/** Operation timed out */
+	statusTimeout = -7,
+	/** Overflow */
+	statusOverflow = -8,
+	/** Pipe error */
+	statusPipeError = -9,
+	/** System call interrupted (perhaps due to signal) */
+	statusInterrupted = -10,
+	/** Insufficient memory */
+	statusNoMemory = -11,
+	/** Operation not supported or unimplemented on this platform */
+	statusNotSupported = -12,
+	/** Other error */
+	StatusUnknownError = -99,
 };
 
 /**
@@ -102,6 +130,12 @@ typedef QList<DeviceFilter> FilterList;
  */
 typedef QList<DeviceConfig> ConfigList;
 } // namespace QtUsb
+
+Q_DECLARE_METATYPE(QtUsb::TransferType)
+Q_DECLARE_METATYPE(QtUsb::TransferStatus)
+
+Q_DECLARE_METATYPE(QtUsb::DeviceSpeed)
+Q_DECLARE_METATYPE(QtUsb::DeviceStatus)
 
 Q_DECLARE_METATYPE(QtUsb::DeviceFilter)
 Q_DECLARE_METATYPE(QtUsb::DeviceConfig)

@@ -212,15 +212,15 @@ QtUsb::DeviceStatus QUsbInfo::openDevice(QUsbDevice *dev,
                                             const QtUsb::DeviceConfig &config) {
   UsbPrintFuncName();
   if (dev == Q_NULLPTR)
-    return QtUsb::devicePgmError;
+    return QtUsb::statusNoSuchDevice;
   dev->setConfig(config);
   dev->setFilter(filter);
 
   m_used_device_list.append(dev);
   if (dev->open() == 0)
-    return QtUsb::deviceOK;
+    return QtUsb::statusOK;
   else
-    return QtUsb::deviceNotFound;
+    return QtUsb::statusNotFound;
 }
 
 QtUsb::DeviceStatus QUsbInfo::closeDevice(QUsbDevice *dev) {
@@ -230,9 +230,9 @@ QtUsb::DeviceStatus QUsbInfo::closeDevice(QUsbDevice *dev) {
     int pos = m_used_device_list.indexOf(dev);
     m_used_device_list.removeAt(pos);
     dev->close();
-    return QtUsb::deviceOK;
+    return QtUsb::statusOK;
   }
-  return QtUsb::devicePgmError;
+  return QtUsb::statusNoSuchDevice;
 }
 
 void QUsbInfo::monitorDevices(const QtUsb::FilterList &list) {
