@@ -12,17 +12,21 @@ static void cb_out(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
-  handler->m_write_buf = handler->m_write_buf.mid(0, transfer->actual_length); // Remove what was sent
-  handler->setStatus(static_cast<QtUsb::TransferStatus>(transfer->status));
-  if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
-    handler->error(static_cast<QtUsb::TransferStatus>(transfer->status));
+  libusb_transfer_status s = transfer->status;
+  int sent = transfer->actual_length;
+
+  handler->m_write_buf = handler->m_write_buf.mid(0, sent); // Remove what was sent
+  handler->setStatus(static_cast<QtUsb::TransferStatus>(s));
+
+  libusb_free_transfer(transfer);
+  handler->m_write_buf_mutex.unlock();
+
+  if (s != LIBUSB_TRANSFER_COMPLETED) {
+    handler->error(static_cast<QtUsb::TransferStatus>(s));
   }
   else {
-    handler->bytesWritten(transfer->actual_length);
+    handler->bytesWritten(sent);
   }
-
-  handler->m_write_buf_mutex.unlock();
-  libusb_free_transfer(transfer);
 }
 
 /* Read callback */
@@ -30,20 +34,27 @@ static void cb_in(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
-  handler->setStatus(static_cast<QtUsb::TransferStatus>(transfer->status));
-  if (transfer->status != LIBUSB_TRANSFER_COMPLETED) {
-    handler->error(static_cast<QtUsb::TransferStatus>(transfer->status));
+  libusb_transfer_status s = transfer->status;
+  int received = transfer->actual_length;
+
+  handler->setStatus(static_cast<QtUsb::TransferStatus>(s));
+  if (s != LIBUSB_TRANSFER_COMPLETED) {
+    handler->error(static_cast<QtUsb::TransferStatus>(s));
   }
   else {
     handler->m_read_buf_mutex.lock();
-    handler->m_read_buf.resize(transfer->actual_length);
-    memcpy(handler->m_read_buf.data(), transfer->buffer, static_cast<ulong>(transfer->actual_length));
+    int previous_size = handler->m_read_buf.size();
+    handler->m_read_buf.resize(previous_size + received);
+    memcpy(handler->m_read_buf.data() + previous_size, transfer->buffer, static_cast<ulong>(received));
     handler->m_read_buf_mutex.unlock();
-    handler->readyRead();
   }
 
-  handler->m_read_transfer_mutex.unlock();
   libusb_free_transfer(transfer);
+  handler->m_read_transfer_buf.clear(); // it's in fact transfer->buffer
+  handler->m_read_transfer_mutex.unlock();
+
+  if (received)
+    handler->readyRead();
 
   // Start transfer over if polling is enabled
   if (handler->m_poll)
