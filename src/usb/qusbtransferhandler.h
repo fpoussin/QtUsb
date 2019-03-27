@@ -53,6 +53,7 @@ public:
    * @brief
    *
    */
+
   void close();
 
   /**

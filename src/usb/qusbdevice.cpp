@@ -61,19 +61,21 @@ QByteArray QUsbDevice::speedString() const {
       return "High speed";
   case QtUsb::superSpeed:
       return "Super speed";
+  case QtUsb::superSpeedPlus:
+      return "Super speed plus";
   }
 
   return "Error";
 }
 
 void QUsbDevice::showSettings() {
-  qWarning() << "\n"
-             << "Debug" << m_debug << "\n"
-             << "Config" << m_config.config << "\n"
-             << "Timeout" << m_timeout << "\n"
-             << "Interface" << m_config.interface << "\n"
-             << "Device.pid" << QString::number(m_filter.pid, 16) << "\n"
-             << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
+  qInfo() << "\n"
+          << "Debug" << m_debug << "\n"
+          << "Config" << m_config.config << "\n"
+          << "Timeout" << m_timeout << "\n"
+          << "Interface" << m_config.interface << "\n"
+          << "Device.pid" << QString::number(m_filter.pid, 16) << "\n"
+          << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
 }
 
 QtUsb::FilterList QUsbDevice::availableDevices() {
