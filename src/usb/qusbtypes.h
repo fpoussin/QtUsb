@@ -153,7 +153,6 @@ typedef struct {
   quint16 pid;      /**< Product ID */
   quint16 vid;      /**< Vendor ID */
   DeviceConfig cfg; /**< Configuration for a given device */
-  QString guid;     /**< GUID (Windows) */
 
 } DeviceFilter;
 
