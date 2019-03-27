@@ -45,7 +45,8 @@ static void cb_in(struct libusb_transfer *transfer)
   handler->m_read_transfer_mutex.unlock();
   libusb_free_transfer(transfer);
 
-  if (handler->polling())
+  // Start transfer over if polling is enabled
+  if (handler->m_poll)
   {
     handler->readUsb(handler->m_poll_size);
   }
@@ -257,6 +258,7 @@ bool QUsbTransferHandler::open(QIODevice::OpenMode mode)
 
 void QUsbTransferHandler::close()
 {
+  setPolling(false);
   QIODevice::close();
 }
 
