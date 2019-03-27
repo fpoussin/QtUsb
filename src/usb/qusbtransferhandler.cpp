@@ -152,7 +152,17 @@ QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType ty
 
 QUsbTransferHandler::~QUsbTransferHandler()
 {
-  cancelTransfer();
+    cancelTransfer();
+}
+
+bool QUsbTransferHandler::open(QIODevice::OpenMode mode)
+{
+    return QIODevice::open(mode);
+}
+
+void QUsbTransferHandler::close()
+{
+    QIODevice::close();
 }
 
 bool QUsbTransferHandler::busy() const {

@@ -17,6 +17,10 @@ class Q_USB_EXPORT QUsbTransferHandler : public QIODevice
   Q_DECLARE_PRIVATE(QUsbTransferHandler)
 
 public:
+  Q_PROPERTY(QtUsb::TransferType type READ type)
+  Q_PROPERTY(QtUsb::Endpoint endpointIn READ endpointIn)
+  Q_PROPERTY(QtUsb::Endpoint endpointOut READ endpointOut)
+
   /**
    * @brief
    *
@@ -37,9 +41,19 @@ public:
    */
   ~QUsbTransferHandler();
 
-  Q_PROPERTY(QtUsb::TransferType type READ type)
-  Q_PROPERTY(QtUsb::Endpoint endpointIn READ endpointIn)
-  Q_PROPERTY(QtUsb::Endpoint endpointOut READ endpointOut)
+  /**
+   * @brief
+   *
+   * @param mode
+   * @return bool
+   */
+  bool open(QIODevice::OpenMode mode);
+
+  /**
+   * @brief
+   *
+   */
+  void close();
 
   /**
    * @brief get transfer type
