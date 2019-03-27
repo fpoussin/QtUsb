@@ -7,10 +7,10 @@
 
 static libusb_hotplug_callback_handle callback_handle;
 
-static int hotplugCallback(libusb_context *ctx,
-                           libusb_device *device,
-                           libusb_hotplug_event event,
-                           void *user_data) {
+static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
+                                       libusb_device *device,
+                                       libusb_hotplug_event event,
+                                       void *user_data) {
 
   static libusb_device_handle *handle = Q_NULLPTR;
   struct libusb_device_descriptor desc;

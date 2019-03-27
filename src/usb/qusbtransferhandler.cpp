@@ -8,7 +8,7 @@
 #define UsbPrintFuncName() if (m_dev->debug()) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 /* Write callback */
-static void cb_out(struct libusb_transfer *transfer)
+static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
@@ -30,7 +30,7 @@ static void cb_out(struct libusb_transfer *transfer)
 }
 
 /* Read callback */
-static void cb_in(struct libusb_transfer *transfer)
+static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 

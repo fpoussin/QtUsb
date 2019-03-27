@@ -12,8 +12,6 @@ const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
 
 typedef quint8 Endpoint;
 
-
-
 namespace SetupPackets {
   /**
    * @brief bmRequestType field
