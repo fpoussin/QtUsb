@@ -87,7 +87,7 @@ void QUsbTransferHandlerPrivate::setStatus(QtUsb::TransferStatus status)
     case QtUsb::transferStall: q->setErrorString(QString::fromUtf8("transferStall")); break;
     case QtUsb::transferNoDevice: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
     case QtUsb::transferOverflow: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
-    }
+  }
 }
 
 bool QUsbTransferHandlerPrivate::isValid()
@@ -276,7 +276,7 @@ bool QUsbTransferHandler::waitForBytesWritten(int msecs)
     timer.start();
 
     do {
-        if (!this->bytesToWrite()) return true;
+      if (!this->bytesToWrite()) return true;
     } while (timer.elapsed() < msecs);
     return false;
 }
@@ -287,7 +287,7 @@ bool QUsbTransferHandler::waitForReadyRead(int msecs)
     timer.start();
 
     do {
-        if (this->bytesAvailable()) return true;
+      if (this->bytesAvailable()) return true;
     } while (timer.elapsed() < msecs);
     return false;
 }
@@ -312,12 +312,19 @@ bool QUsbTransferHandler::polling()
 void QUsbTransferHandler::poll()
 {
   Q_D(QUsbTransferHandler);
+
+  if (!(openMode() & ReadOnly))
+  {
+    qWarning("QUsbTransferHandler: Trying to poll without read mode. Ignoring.");
+    return;
+  }
+
   if (!polling()) {
     // Do nothing if auto polling is enabled
     d->readUsb(d->m_poll_size);
   }
   else {
-    qWarning("Trying to poll with automatic polling enabled");
+    qWarning("QUsbTransferHandler: Trying to poll with automatic polling enabled. Ignoring.");
   }
 }
 
