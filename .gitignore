@@ -1,5 +1,7 @@
 build
-package/libqt5usb5*
+debian/changelog
+debian/files
+doc/
 *.user
 .directory
 .qmake.cache
