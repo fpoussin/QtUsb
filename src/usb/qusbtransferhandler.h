@@ -89,20 +89,21 @@ public:
     *
     * @return QtUsb::TransferStatus
     */
-   QtUsb::TransferStatus status(void) const {return m_status;}
+  QtUsb::TransferStatus status(void) const {return m_status;}
 
   /**
    * @brief
    *
-   * @return bool
+   * @return qint64
    */
-  bool busy(void) const;
+  qint64 bytesAvailable() const;
 
   /**
-   * @brief flush IN endpoint
+   * @brief
    *
+   * @return qint64
    */
-  void flush();
+  qint64 bytesToWrite() const;
 
   /**
    * @brief
@@ -135,6 +136,27 @@ public:
                          quint16	wValue,
                          quint16	wIndex,
                          quint16	wLength ) const;
+
+  /**
+   * @brief Enable automatic IN polling (recuring read read)
+   * This is enabled by default on interrupt endpoints
+   *
+   * @param enable
+   */
+  void setPolling(bool enable);
+
+  /**
+   * @brief Polling status
+   *
+   * @return bool
+   */
+  bool polling();
+
+  /**
+   * @brief Poll IN endpoint for data
+   *
+   */
+  void poll();
 
 public slots:
   /**
@@ -173,9 +195,8 @@ private:
    */
   Q_DISABLE_COPY(QUsbTransferHandler)
 
-  bool m_busy;
   QtUsb::TransferStatus m_status;
-  const QUsbDevice * m_dev; /**< parent USB Device */
+  const QUsbDevice *m_dev; /**< parent USB Device */
   const QtUsb::TransferType m_type; /**< Transfer type */
   const QtUsb::Endpoint m_in_ep; /**< IN endpoint */
   const QtUsb::Endpoint m_out_ep; /**< OUT endpoint */

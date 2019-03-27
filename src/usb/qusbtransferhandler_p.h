@@ -24,13 +24,23 @@ public:
   void bytesWritten(qint64 bytes);
   void error(QtUsb::TransferStatus error);
   void setStatus(QtUsb::TransferStatus status);
+  bool isValid();
 
   bool prepareTransfer(libusb_transfer* tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep);
   void stopTransfer();
 
-  libusb_transfer * m_transfer;
-  QByteArray m_write_buf;
-  QMutex m_mutex;
+  int readUsb(qint64 maxSize);
+  int writeUsb(const char *data, qint64 maxSize);
+
+  void setPolling(bool enable);
+  bool polling() {return m_poll;}
+
+  bool m_poll;
+  int m_poll_size;
+
+  libusb_transfer *m_transfer_in, *m_transfer_out;
+  QByteArray m_write_buf, m_read_buf, m_read_transfer_buf;
+  QMutex m_read_transfer_mutex, m_read_buf_mutex, m_write_buf_mutex;
 };
 
 QT_END_NAMESPACE

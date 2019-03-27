@@ -12,6 +12,46 @@ const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
 
 typedef quint8 Endpoint;
 
+
+
+namespace SetupPackets {
+  /**
+   * @brief bmRequestType field
+   *
+   */
+  enum bmRequestType {
+    requestStandard    = (0x00 < 5),
+    requestClass       = (0x01 < 5),
+    requestVendor      = (0x02 < 5),
+    requestReserved    = (0x03 < 5),
+    recipientDevice    = 0x00,
+    recipientInterface = 0x01,
+    recipientEndpoint  = 0x02,
+    recipientOther     = 0x03
+  };
+
+  /**
+   * @brief bRequest field
+   *
+   */
+  enum bRequest {
+    requestGetStatus = 0x00,
+    requestClearFeature = 0x01,
+    requestSetFeature = 0x03,
+    requestSetAddress = 0x05,
+    requestGetDescriptor = 0x06,
+    requestSetDescriptor = 0x07,
+    requestGetConfiguration = 0x08,
+    requestSetConfiguration = 0x09,
+    requestGetInterface = 0x0A,
+    requestSetInterface = 0x0B,
+    requestSynchFrame = 0x0C,
+    requestSetSel = 0x30,
+    requestIsochDelay = 0x31
+  };
+
+}
+
 /**
  * @brief Transfer types
  *

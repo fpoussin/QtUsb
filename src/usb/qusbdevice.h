@@ -102,7 +102,7 @@ public:
    */
   quint16 vid(void) const { return m_filter.vid; }
   /**
-   * @brief Get current read (IN) endpoint
+   * @brief Get current timeout
    *
    * @return quint8
    */
