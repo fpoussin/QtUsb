@@ -22,12 +22,10 @@ public:
     void write(QByteArray *buf);
 
 public slots:
-    void onReadComplete(void);
+    void onReadyRead(void);
     void onWriteComplete(qint64 bytes);
 
 signals:
-
-public slots:
 
 private:
     QUsbDevice* m_usb_dev;
