@@ -209,6 +209,7 @@ void QUsbDevice::close() {
 
   if (d->m_devHandle && m_connected) {
     // stop any further write attempts whilst we close down
+    qDebug("Closing USB connection...");
 
     libusb_release_interface(d->m_devHandle, 0);  // release the claimed interface
     libusb_close(d->m_devHandle);                 // close the device we opened
