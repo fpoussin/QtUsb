@@ -4,7 +4,7 @@
 #undef interface
 #endif
 
-UsbExample::UsbExample(QObject *parent) : QObject(parent), m_usb_dev(new QUsbDevice()) {
+UsbExample::UsbExample(QObject *parent) : QObject(parent), m_usb_dev(new QUsbDevice()), m_transfer_handler(Q_NULLPTR) {
   this->setupDevice();
 
   m_send.append(static_cast<char>(0xAB));
@@ -71,10 +71,14 @@ bool UsbExample::openDevice() {
 bool UsbExample::closeDevice() {
   qDebug("Closing");
 
-  m_transfer_handler->close();
-  m_transfer_handler->disconnect();
-  delete m_transfer_handler;
-  m_usb_dev->close();
+  if (m_transfer_handler != Q_NULLPTR) {
+    m_transfer_handler->close();
+    m_transfer_handler->disconnect();
+    delete m_transfer_handler;
+    m_transfer_handler = Q_NULLPTR;
+  }
+  if (m_usb_dev->isConnected())
+    m_usb_dev->close();
   return false;
 }
 
