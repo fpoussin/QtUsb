@@ -59,7 +59,7 @@ after_build:
   - 7z a qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
   - cd tests
   - nmake check TESTARGS="-o result.xml,xunitxml"
-  - ps: >-
+  - ps: |
       $wc = New-Object 'System.Net.WebClient'
       Get-ChildItem -Recurse -Filter "*.xml" | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }
 
