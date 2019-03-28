@@ -23,6 +23,7 @@ pipeline {
                        sh '''
                        cd build/tests
                        make check TESTARGS="-o result.xml,xunitxml"
+                       ls -l build/tests/*/*/result.xml
                        '''
                    }
                }
@@ -31,7 +32,7 @@ pipeline {
     }
     post {
         always {
-            junit 'build/tests/*/*/result.xml'
+            junit 'build/tests/**/result.xml'
         }
     }
 }
