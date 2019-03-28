@@ -1,9 +1,8 @@
 pipeline {
-    agent any
+    agent { docker { image 'fpoussin/jenkins:ubuntu-18.04-qt5' } }
 
     stages {
         stage("Build and Test") {
-            agent { docker { image 'fpoussin/jenkins:ubuntu-18.04-qt5' } }
             stages {
                stage("Build") {
                    steps {
@@ -33,7 +32,7 @@ pipeline {
     }
     post {
         always {
-            junit 'build/tests/**/result.xml'
+            junit 'build/tests/*/*/result.xml'
         }
     }
 }
