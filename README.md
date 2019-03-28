@@ -19,7 +19,7 @@ sudo apt install libqt5usb5 libqt5usb5-dev
 ```
 
 **Windows**  
-Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appveyor builds artifacts](https://ci.appveyor.com/project/fpoussin/qtusb) for binary archives  
+Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appveyor build artifacts](https://ci.appveyor.com/project/fpoussin/qtusb) for binary archives  
 
 ## Build
 
@@ -53,17 +53,15 @@ Then include it into your headers:
 
 ```
 #include <QUsbDevice>
-#include <QUsbManager>
-
-QUsbDevice device;
-QUsbManager manager;
+#include <QUsbInfo>
+#include <QUsbTransferHandler>
 ```
 
 ## Documentation
 
-Doxygen documentation can be found here: http://fpoussin.github.io/doxygen/qtusb/
+Doxygen documentation can be found [here](http://fpoussin.github.io/doxygen/qtusb/0.5.x)  
 
 ## Downloads
 
-Ubuntu PPA: https://launchpad.net/~fpoussin/+archive/ubuntu/ppa 
-Windows libraries are coming soon.
+[Ubuntu PPA](https://launchpad.net/~fpoussin/+archive/ubuntu/ppa)  
+Windows binaries are [in the releases section](https://github.com/fpoussin/QtUsb/releases).  
