@@ -12,7 +12,7 @@ UsbExample::UsbExample(QObject *parent) : QObject(parent) {
 }
 
 UsbExample::~UsbExample() {
-
+  qInfo("Closing...");
 }
 
 void UsbExample::onDevInserted(QUsbDevice::FilterList list) {
