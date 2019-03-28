@@ -22,8 +22,8 @@ public:
 
   void readyRead();
   void bytesWritten(qint64 bytes);
-  void error(QUsbTransferHandler::TransferStatus error);
-  void setStatus(QUsbTransferHandler::TransferStatus status);
+  void error(QUsbTransferHandler::Status error);
+  void setStatus(QUsbTransferHandler::Status status);
   bool isValid();
 
   bool prepareTransfer(libusb_transfer **tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QUsbDevice::Endpoint ep);

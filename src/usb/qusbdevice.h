@@ -69,34 +69,46 @@ public:
    * @brief Device configuration
    *
    */
-  typedef struct {
+  typedef struct Config {
     quint8 config;    /**< Configuration index */
     quint8 interface; /**< Interface index */
     quint8 alternate; /**< Alternate configuration index */
 
-  } DeviceConfig;
+    bool operator == (const QUsbDevice::Config& o) const
+    {
+        return o.config == this->config &&
+            o.interface == this->interface &&
+            o.alternate == this->alternate;
+    }
+
+  } Config;
 
   /**
    * @brief Device filter
    *
    */
-  typedef struct {
+  typedef struct Filter {
     quint16 pid;      /**< Product ID */
     quint16 vid;      /**< Vendor ID */
-    DeviceConfig cfg; /**< Configuration for a given device */
 
-  } DeviceFilter;
+    bool operator == (const QUsbDevice::Filter& o) const
+    {
+        return o.pid == this->pid &&
+               o.vid == this->vid;
+    }
+
+  } Filter;
 
   /**
    * @brief List of device filters
    *
    */
-  typedef QList<DeviceFilter> FilterList;
+  typedef QList<Filter> FilterList;
   /**
    * @brief List of device configs
    *
    */
-  typedef QList<DeviceConfig> ConfigList;
+  typedef QList<Config> ConfigList;
 
   /**
    * @brief USB speeds
@@ -150,8 +162,8 @@ public:
   Q_ENUM(DeviceStatus)
 
   Q_PROPERTY(bool debug READ debug WRITE setDebug)
-  Q_PROPERTY(DeviceFilter filter READ filter WRITE setFilter)
-  Q_PROPERTY(DeviceConfig config READ config WRITE setConfig)
+  Q_PROPERTY(Filter filter READ filter WRITE setFilter)
+  Q_PROPERTY(Config config READ config WRITE setConfig)
   Q_PROPERTY(quint16 pid READ pid)
   Q_PROPERTY(quint16 vid READ vid)
   Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
@@ -176,13 +188,13 @@ public:
    *
    * @param Filter Filter to apply
    */
-  void setFilter(const DeviceFilter &filter) { m_filter = filter; }
+  void setFilter(const Filter &filter) { m_filter = filter; }
   /**
    * @brief Set device config
    *
    * @param Config config to apply
    */
-  void setConfig(const DeviceConfig &config) { m_config = config; }
+  void setConfig(const Config &config) { m_config = config; }
 
   /**
    * @brief Set device timeout
@@ -196,14 +208,14 @@ public:
    *
    * @return DeviceFilter
    */
-  DeviceFilter filter(void) const { return m_filter; }
+  Filter filter(void) const { return m_filter; }
 
   /**
    * @brief Get current device config
    *
    * @return DeviceConfig
    */
-  DeviceConfig config(void) const { return m_config; }
+  Config config(void) const { return m_config; }
 
   /**
    * @brief Get connection status
@@ -288,8 +300,8 @@ private:
   quint16 m_timeout;            /**< Device timeout */
   bool m_debug;                 /**< Debug enabled boolean */
   bool m_connected;             /**< Connected boolean */
-  DeviceFilter m_filter; /**< Device filter */
-  DeviceConfig m_config; /**< Device config */
+  Filter m_filter; /**< Device filter */
+  Config m_config; /**< Device config */
   DeviceSpeed m_spd;     /**< Device speed */
 };
 

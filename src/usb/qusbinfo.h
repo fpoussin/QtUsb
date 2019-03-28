@@ -46,7 +46,7 @@ public:
    * @param filter Device to search
    * @return bool true if present
    */
-  bool isPresent(const QUsbDevice::DeviceFilter &filter);
+  bool isPresent(const QUsbDevice::Filter &filter);
 
 signals:
   /**
@@ -70,7 +70,7 @@ public slots:
    * @param filter device filter
    * @return bool false if device was already in the list, else true
    */
-  bool addDevice(const QUsbDevice::DeviceFilter &filter);
+  bool addDevice(const QUsbDevice::Filter &filter);
 
   /**
    * @brief Remove a device from the list
@@ -78,7 +78,7 @@ public slots:
    * @param filter device filter
    * @return bool false if device was not in the list, else true
    */
-  bool removeDevice(const QUsbDevice::DeviceFilter &filter);
+  bool removeDevice(const QUsbDevice::Filter &filter);
 
   /**
    * @brief Search a device in a device list
@@ -87,7 +87,7 @@ public slots:
    * @param list the device filter list
    * @return int index of the filter, returns -1 if not found
    */
-  int findDevice(const QUsbDevice::DeviceFilter &filter,
+  int findDevice(const QUsbDevice::Filter &filter,
                  const QUsbDevice::FilterList &list);
 
   /**
@@ -103,26 +103,6 @@ public slots:
    */
   bool debug() {return m_debug;}
 
-  /**
-   * @brief
-   *
-   * @param dev QUsbDevice object pointer
-   * @param filter Device filter
-   * @param config Device configuration
-   * @return QUsbDevice::DeviceStatus deviceOK on success
-   */
-  QUsbDevice::DeviceStatus openDevice(QUsbDevice *dev,
-                                 const QUsbDevice::DeviceFilter &filter,
-                                 const QUsbDevice::DeviceConfig &config);
-
-  /**
-   * @brief
-   *
-   * @param dev QUsbDevice object pointer
-   * @return QUsbDevice::DeviceStatus deviceOK on success
-   */
-  QUsbDevice::DeviceStatus closeDevice(QUsbDevice *dev);
-
 protected slots:
   /**
    * @brief Checks for new events (insertions/removal) in the given list
@@ -135,7 +115,6 @@ protected slots:
 
 protected:
   bool m_debug;
-  QList<QUsbDevice *> m_used_device_list; /**< List of devices in use */
   QUsbDevice::FilterList m_filter_list;        /**< List of filters we are using */
   QUsbDevice::FilterList m_system_list; /**< List of all filters in the system */
 

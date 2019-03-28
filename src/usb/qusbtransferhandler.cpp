@@ -16,7 +16,7 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
   int sent = transfer->actual_length;
 
   handler->m_write_buf = handler->m_write_buf.mid(0, sent); // Remove what was sent
-  handler->setStatus(static_cast<QUsbTransferHandler::TransferStatus>(s));
+  handler->setStatus(static_cast<QUsbTransferHandler::Status>(s));
 
   libusb_free_transfer(transfer);
 
@@ -26,7 +26,7 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
   handler->m_write_buf_mutex.unlock();
 
   if (s != LIBUSB_TRANSFER_COMPLETED) {
-    handler->error(static_cast<QUsbTransferHandler::TransferStatus>(s));
+    handler->error(static_cast<QUsbTransferHandler::Status>(s));
   }
   else {
     handler->bytesWritten(sent);
@@ -41,9 +41,9 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   libusb_transfer_status s = transfer->status;
   int received = transfer->actual_length;
 
-  handler->setStatus(static_cast<QUsbTransferHandler::TransferStatus>(s));
+  handler->setStatus(static_cast<QUsbTransferHandler::Status>(s));
   if (s != LIBUSB_TRANSFER_COMPLETED) {
-    handler->error(static_cast<QUsbTransferHandler::TransferStatus>(s));
+    handler->error(static_cast<QUsbTransferHandler::Status>(s));
   }
   else {
     handler->m_read_buf_mutex.lock();
@@ -70,7 +70,7 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   }
 }
 
-QUsbTransferHandlerPrivate::QUsbTransferHandlerPrivate() : m_poll_size(64), m_transfer_in(Q_NULLPTR), m_transfer_out(Q_NULLPTR)
+QUsbTransferHandlerPrivate::QUsbTransferHandlerPrivate() : m_poll(false), m_poll_size(64), m_transfer_in(Q_NULLPTR), m_transfer_out(Q_NULLPTR)
 {
 
 }
@@ -87,13 +87,13 @@ void QUsbTransferHandlerPrivate::bytesWritten(qint64 bytes)
   emit q->bytesWritten(bytes);
 }
 
-void QUsbTransferHandlerPrivate::error(QUsbTransferHandler::TransferStatus error)
+void QUsbTransferHandlerPrivate::error(QUsbTransferHandler::Status error)
 {
   Q_Q(QUsbTransferHandler);
   emit q->error(error);
 }
 
-void QUsbTransferHandlerPrivate::setStatus(QUsbTransferHandler::TransferStatus status)
+void QUsbTransferHandlerPrivate::setStatus(QUsbTransferHandler::Status status)
 {
   Q_Q(QUsbTransferHandler);
 
@@ -248,7 +248,7 @@ void QUsbTransferHandlerPrivate::setPolling(bool enable)
   }
 }
 
-QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QUsbTransferHandler::TransferType type, QUsbDevice::Endpoint in, QUsbDevice::Endpoint out) :
+QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QUsbTransferHandler::Type type, QUsbDevice::Endpoint in, QUsbDevice::Endpoint out) :
   QIODevice(*(new QUsbTransferHandlerPrivate)), d_dummy(Q_NULLPTR), m_status(QUsbTransferHandler::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
   Q_CHECK_PTR(dev);
@@ -340,23 +340,30 @@ bool QUsbTransferHandler::polling()
   return d->polling();
 }
 
-void QUsbTransferHandler::poll()
+bool QUsbTransferHandler::poll()
 {
   Q_D(QUsbTransferHandler);
+
+  if (!isOpen())
+  {
+    qWarning("Handle not open. Ignoring.");
+    return false;
+  }
 
   if (!(openMode() & ReadOnly))
   {
     qWarning("QUsbTransferHandler: Trying to poll without read mode. Ignoring.");
-    return;
+    return false;
   }
 
-  if (!polling()) {
-    // Do nothing if auto polling is enabled
-    d->readUsb(d->m_poll_size);
-  }
-  else {
+  if (polling()) {
     qWarning("QUsbTransferHandler: Trying to poll with automatic polling enabled. Ignoring.");
+    return false;
   }
+
+  d->readUsb(d->m_poll_size);
+
+  return true;
 }
 
 void QUsbTransferHandler::cancelTransfer()

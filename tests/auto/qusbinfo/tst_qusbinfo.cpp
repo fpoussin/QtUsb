@@ -8,33 +8,41 @@ public:
     explicit tst_QUsbInfo();
 
 private slots:
-    void initTestCase();
     void constructors();
     void assignment();
+    void features();
 
 private:
 
 };
-
 
 tst_QUsbInfo::tst_QUsbInfo()
 {
 
 }
 
-void tst_QUsbInfo::initTestCase()
-{
-
-}
-
 void tst_QUsbInfo::constructors()
 {
+  QUsbInfo info;
+
+  QVERIFY(!info.debug());
 
 }
 
 void tst_QUsbInfo::assignment()
 {
+  QUsbInfo info;
 
+  info.setDebug(true);
+  QVERIFY(info.debug());
+  info.setDebug(false);
+  QVERIFY(!info.debug());
+}
+
+void tst_QUsbInfo::features()
+{
+  QUsbInfo info;
+  info.getPresentDevices();
 }
 
 QTEST_MAIN(tst_QUsbInfo)

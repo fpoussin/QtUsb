@@ -35,8 +35,8 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
 }
 
 QUsbDevice::QUsbDevice(QObject* parent) : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR) {
-  m_spd = unknownSpeed;
 
+  m_spd = unknownSpeed;
   m_connected = false;
   m_debug = false;
   m_timeout = DefaultTimeout;
@@ -97,7 +97,7 @@ QUsbDevice::FilterList QUsbDevice::availableDevices() {
     libusb_device_descriptor desc;
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
-      DeviceFilter filter;
+      Filter filter;
       filter.pid = desc.idProduct;
       filter.vid = desc.idVendor;
 

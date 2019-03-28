@@ -18,7 +18,7 @@ UsbExample::~UsbExample() {
 void UsbExample::onDevInserted(QUsbDevice::FilterList list) {
   qInfo("devices inserted");
   for (int i = 0; i < list.length(); i++) {
-    QUsbDevice::DeviceFilter f = list.at(i);
+    QUsbDevice::Filter f = list.at(i);
     qInfo("V%04x:P%04x", f.vid, f.pid);
   }
 }
@@ -26,7 +26,7 @@ void UsbExample::onDevInserted(QUsbDevice::FilterList list) {
 void UsbExample::onDevRemoved(QUsbDevice::FilterList list) {
   qInfo("devices removed");
   for (int i = 0; i < list.length(); i++) {
-    QUsbDevice::DeviceFilter f = list.at(i);
+    QUsbDevice::Filter f = list.at(i);
     qInfo("V%04x:P%04x", f.vid, f.pid);
   }
 }

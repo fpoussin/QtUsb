@@ -17,7 +17,7 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
   int rc;
   (void)ctx;
   QUsbDevice::FilterList device_list;
-  QUsbDevice::DeviceFilter dev;
+  QUsbDevice::Filter dev;
   QUsbInfo *manager = reinterpret_cast<QUsbInfo*>(user_data);
 
   if (manager->debug())
@@ -100,8 +100,8 @@ QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d
   m_debug = false;
   int rc;
 
-  qRegisterMetaType<QUsbDevice::DeviceFilter>("QUsbDevice::DeviceFilter");
-  qRegisterMetaType<QUsbDevice::DeviceConfig>("QUsbDevice::DeviceConfig");
+  qRegisterMetaType<QUsbDevice::Filter>("QUsbDevice::DeviceFilter");
+  qRegisterMetaType<QUsbDevice::Config>("QUsbDevice::DeviceConfig");
 
   qRegisterMetaType<QUsbDevice::FilterList>("QUsbDevice::FilterList");
   qRegisterMetaType<QUsbDevice::ConfigList>("QUsbDevice::ConfigList");
@@ -150,7 +150,7 @@ QUsbInfo::~QUsbInfo() {
 QUsbDevice::FilterList QUsbInfo::getPresentDevices() {
   UsbPrintFuncName();
   QUsbDevice::FilterList list;
-  QUsbDevice::DeviceFilter filter;
+  QUsbDevice::Filter filter;
 
   /* Search the system list with our own list */
   for (int i = 0; i < m_filter_list.length(); i++) {
@@ -162,12 +162,12 @@ QUsbDevice::FilterList QUsbInfo::getPresentDevices() {
   return list;
 }
 
-bool QUsbInfo::isPresent(const QUsbDevice::DeviceFilter &filter) {
+bool QUsbInfo::isPresent(const QUsbDevice::Filter &filter) {
 
   return this->findDevice(filter, m_system_list) >= 0;
 }
 
-bool QUsbInfo::addDevice(const QUsbDevice::DeviceFilter &filter) {
+bool QUsbInfo::addDevice(const QUsbDevice::Filter &filter) {
 
   if (this->findDevice(filter, m_filter_list) == -1) {
     m_filter_list.append(filter);
@@ -176,7 +176,7 @@ bool QUsbInfo::addDevice(const QUsbDevice::DeviceFilter &filter) {
   return false;
 }
 
-bool QUsbInfo::removeDevice(const QUsbDevice::DeviceFilter &filter) {
+bool QUsbInfo::removeDevice(const QUsbDevice::Filter &filter) {
 
   const int pos = this->findDevice(filter, m_filter_list);
   if (pos > 0) {
@@ -186,10 +186,10 @@ bool QUsbInfo::removeDevice(const QUsbDevice::DeviceFilter &filter) {
   return true;
 }
 
-int QUsbInfo::findDevice(const QUsbDevice::DeviceFilter &filter,
+int QUsbInfo::findDevice(const QUsbDevice::Filter &filter,
                             const QUsbDevice::FilterList &list) {
   for (int i = 0; i < list.length(); i++) {
-    const QUsbDevice::DeviceFilter *d = &list.at(i);
+    const QUsbDevice::Filter *d = &list.at(i);
 
     if (d->pid == filter.pid && d->vid == filter.vid) {
       return i;
@@ -209,39 +209,11 @@ void QUsbInfo::setDebug(bool debug)
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 }
 
-QUsbDevice::DeviceStatus QUsbInfo::openDevice(QUsbDevice *dev,
-                                            const QUsbDevice::DeviceFilter &filter,
-                                            const QUsbDevice::DeviceConfig &config) {
-  UsbPrintFuncName();
-  if (dev == Q_NULLPTR)
-    return QUsbDevice::statusNoSuchDevice;
-  dev->setConfig(config);
-  dev->setFilter(filter);
-
-  m_used_device_list.append(dev);
-  if (dev->open() == 0)
-    return QUsbDevice::statusOK;
-  else
-    return QUsbDevice::statusNotFound;
-}
-
-QUsbDevice::DeviceStatus QUsbInfo::closeDevice(QUsbDevice *dev) {
-
-  UsbPrintFuncName();
-  if (dev != Q_NULLPTR) {
-    int pos = m_used_device_list.indexOf(dev);
-    m_used_device_list.removeAt(pos);
-    dev->close();
-    return QUsbDevice::statusOK;
-  }
-  return QUsbDevice::statusNoSuchDevice;
-}
-
 void QUsbInfo::monitorDevices(const QUsbDevice::FilterList &list) {
 
   UsbPrintFuncName();
   QUsbDevice::FilterList inserted, removed;
-  QUsbDevice::DeviceFilter filter;
+  QUsbDevice::Filter filter;
 
   for (int i = 0; i < list.length(); i++) {
     filter = list.at(i);

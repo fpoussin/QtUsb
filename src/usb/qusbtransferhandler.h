@@ -21,20 +21,20 @@ public:
    * @brief Transfer types
    *
    */
-  enum TransferType {
+  enum Type {
     controlTransfer = 0,
     isochronousTransfer,
     bulkTransfer,
     interruptTransfer,
     streamTransfer
   };
-  Q_ENUM(TransferType)
+  Q_ENUM(Type)
 
   /**
    * @brief Basically a copy of libusb's transfer enum
    *
    */
-  enum TransferStatus {
+  enum Status {
           /** Transfer completed without error. Note that this does not indicate
           * that the entire amount of requested data was transferred. */
           transferCompleted,
@@ -52,9 +52,9 @@ public:
           /** Device sent more data than requested */
           transferOverflow,
   };
-  Q_ENUM(TransferStatus)
+  Q_ENUM(Status)
 
-  Q_PROPERTY(TransferType type READ type)
+  Q_PROPERTY(Type type READ type)
   Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn)
   Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut)
 
@@ -68,7 +68,7 @@ public:
    * @param parent
    */
   explicit QUsbTransferHandler(QUsbDevice * dev,
-                               TransferType type,
+                               Type type,
                                QUsbDevice::Endpoint in,
                                QUsbDevice::Endpoint out);
 
@@ -98,7 +98,7 @@ public:
    *
    * @return TransferType
    */
-  TransferType type(void) const {return m_type;}
+  Type type(void) const {return m_type;}
 
   /**
    * @brief get IN endpoint
@@ -126,7 +126,7 @@ public:
     *
     * @return TransferStatus
     */
-  TransferStatus status(void) const {return m_status;}
+  Status status(void) const {return m_status;}
 
   /**
    * @brief
@@ -193,7 +193,7 @@ public:
    * @brief Poll IN endpoint for data
    *
    */
-  void poll();
+  bool poll();
 
 public slots:
   /**
@@ -203,7 +203,7 @@ public slots:
   void cancelTransfer(void);
 
 signals:
-  void error(TransferStatus);
+  void error(Status);
 
 protected:
  /**
@@ -232,9 +232,9 @@ private:
    */
   Q_DISABLE_COPY(QUsbTransferHandler)
 
-  TransferStatus m_status;
+  Status m_status;
   const QUsbDevice *m_dev; /**< parent USB Device */
-  const TransferType m_type; /**< Transfer type */
+  const Type m_type; /**< Transfer type */
   const QUsbDevice::Endpoint m_in_ep; /**< IN endpoint */
   const QUsbDevice::Endpoint m_out_ep; /**< OUT endpoint */
 };
