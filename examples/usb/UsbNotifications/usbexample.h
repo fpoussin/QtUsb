@@ -15,8 +15,8 @@ public:
 signals:
 
 public slots:
-    void onDevInserted(QtUsb::FilterList list);
-    void onDevRemoved(QtUsb::FilterList list);
+    void onDevInserted(QUsbDevice::FilterList list);
+    void onDevRemoved(QUsbDevice::FilterList list);
 
 private:
     QUsbInfo m_usb_manager;

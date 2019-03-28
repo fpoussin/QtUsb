@@ -17,9 +17,46 @@ class Q_USB_EXPORT QUsbTransferHandler : public QIODevice
   Q_DECLARE_PRIVATE(QUsbTransferHandler)
 
 public:
-  Q_PROPERTY(QtUsb::TransferType type READ type)
-  Q_PROPERTY(QtUsb::Endpoint endpointIn READ endpointIn)
-  Q_PROPERTY(QtUsb::Endpoint endpointOut READ endpointOut)
+  /**
+   * @brief Transfer types
+   *
+   */
+  enum TransferType {
+    controlTransfer = 0,
+    isochronousTransfer,
+    bulkTransfer,
+    interruptTransfer,
+    streamTransfer
+  };
+  Q_ENUM(TransferType)
+
+  /**
+   * @brief Basically a copy of libusb's transfer enum
+   *
+   */
+  enum TransferStatus {
+          /** Transfer completed without error. Note that this does not indicate
+          * that the entire amount of requested data was transferred. */
+          transferCompleted,
+          /** Transfer failed */
+          transferError,
+          /** Transfer timed out */
+          transferTimeout,
+          /** Transfer was cancelled */
+          transferCanceled,
+          /** For bulk/interrupt endpoints: halt condition detected (endpoint
+           * stalled). For control endpoints: control request not supported. */
+          transferStall,
+          /** Device was disconnected */
+          transferNoDevice,
+          /** Device sent more data than requested */
+          transferOverflow,
+  };
+  Q_ENUM(TransferStatus)
+
+  Q_PROPERTY(TransferType type READ type)
+  Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn)
+  Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut)
 
   /**
    * @brief
@@ -31,9 +68,9 @@ public:
    * @param parent
    */
   explicit QUsbTransferHandler(QUsbDevice * dev,
-                               QtUsb::TransferType type,
-                               QtUsb::Endpoint in,
-                               QtUsb::Endpoint out);
+                               TransferType type,
+                               QUsbDevice::Endpoint in,
+                               QUsbDevice::Endpoint out);
 
   /**
    * @brief
@@ -59,23 +96,23 @@ public:
   /**
    * @brief get transfer type
    *
-   * @return QtUsb::TransferType
+   * @return TransferType
    */
-  QtUsb::TransferType type(void) const {return m_type;}
+  TransferType type(void) const {return m_type;}
 
   /**
    * @brief get IN endpoint
    *
-   * @return QtUsb::Endpoint
+   * @return QUsbDevice::Endpoint
    */
-  QtUsb::Endpoint endpointIn(void) const {return m_in_ep;}
+  QUsbDevice::Endpoint endpointIn(void) const {return m_in_ep;}
 
   /**
    * @brief get OUT endpoint
    *
-   * @return QtUsb::Endpoint
+   * @return QUsbDevice::Endpoint
    */
-  QtUsb::Endpoint endpointOut(void) const {return m_out_ep;}
+  QUsbDevice::Endpoint endpointOut(void) const {return m_out_ep;}
 
   /**
    * @brief
@@ -87,9 +124,9 @@ public:
    /**
     * @brief
     *
-    * @return QtUsb::TransferStatus
+    * @return TransferStatus
     */
-  QtUsb::TransferStatus status(void) const {return m_status;}
+  TransferStatus status(void) const {return m_status;}
 
   /**
    * @brief
@@ -166,7 +203,7 @@ public slots:
   void cancelTransfer(void);
 
 signals:
-  void error(QtUsb::TransferStatus);
+  void error(TransferStatus);
 
 protected:
  /**
@@ -195,11 +232,11 @@ private:
    */
   Q_DISABLE_COPY(QUsbTransferHandler)
 
-  QtUsb::TransferStatus m_status;
+  TransferStatus m_status;
   const QUsbDevice *m_dev; /**< parent USB Device */
-  const QtUsb::TransferType m_type; /**< Transfer type */
-  const QtUsb::Endpoint m_in_ep; /**< IN endpoint */
-  const QtUsb::Endpoint m_out_ep; /**< OUT endpoint */
+  const TransferType m_type; /**< Transfer type */
+  const QUsbDevice::Endpoint m_in_ep; /**< IN endpoint */
+  const QUsbDevice::Endpoint m_out_ep; /**< OUT endpoint */
 };
 
 #endif // QUSBTRANSFERHANDLER_H

@@ -5,8 +5,8 @@
 #include <QUsbDevice>
 #include <QUsbTransferHandler>
 
-const QtUsb::Endpoint USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
-const QtUsb::Endpoint USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
+const QUsbDevice::Endpoint USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
+const QUsbDevice::Endpoint USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
 const quint16 USB_TIMEOUT_MSEC = 300;
 
 class UsbExample : public QObject
@@ -17,7 +17,9 @@ public:
     ~UsbExample(void);
     void setupDevice(void);
     bool openDevice(void);
-    bool closeDevice(void);
+    void closeDevice(void);
+    bool openHandle(void);
+    void closeHandle(void);
     void read(QByteArray *buf);
     void write(QByteArray *buf);
 
@@ -33,10 +35,10 @@ private:
 
     QByteArray m_send, m_recv;
 
-    QtUsb::DeviceFilter m_filter;
-    QtUsb::DeviceConfig m_config;
+    QUsbDevice::DeviceFilter m_filter;
+    QUsbDevice::DeviceConfig m_config;
 
-    QtUsb::Endpoint m_read_ep, m_write_ep;
+    QUsbDevice::Endpoint m_read_ep, m_write_ep;
 };
 
 #endif // USBEXAMPLE_H

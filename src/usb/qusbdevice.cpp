@@ -35,11 +35,11 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
 }
 
 QUsbDevice::QUsbDevice(QObject* parent) : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR) {
-  m_spd = QtUsb::unknownSpeed;
+  m_spd = unknownSpeed;
 
   m_connected = false;
   m_debug = false;
-  m_timeout = QtUsb::DefaultTimeout;
+  m_timeout = DefaultTimeout;
   m_config.config = 0x01;
   m_config.interface = 0x00;
   m_config.alternate = 0x00;
@@ -51,17 +51,17 @@ QUsbDevice::~QUsbDevice() {
 
 QByteArray QUsbDevice::speedString() const {
   switch (m_spd) {
-  case QtUsb::unknownSpeed:
+  case unknownSpeed:
       return "Unknown speed";
-  case QtUsb::lowSpeed:
+  case lowSpeed:
       return "Low speed";
-  case QtUsb::fullSpeed:
+  case fullSpeed:
       return "Full speed";
-  case QtUsb::highSpeed:
+  case highSpeed:
       return "High speed";
-  case QtUsb::superSpeed:
+  case superSpeed:
       return "Super speed";
-  case QtUsb::superSpeedPlus:
+  case superSpeedPlus:
       return "Super speed plus";
   }
 
@@ -78,8 +78,8 @@ void QUsbDevice::showSettings() {
           << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
 }
 
-QtUsb::FilterList QUsbDevice::availableDevices() {
-  QtUsb::FilterList list;
+QUsbDevice::FilterList QUsbDevice::availableDevices() {
+  FilterList list;
   ssize_t cnt;  // holding number of devices in list
   libusb_device** devs;
   libusb_context* ctx;
@@ -97,7 +97,7 @@ QtUsb::FilterList QUsbDevice::availableDevices() {
     libusb_device_descriptor desc;
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
-      QtUsb::DeviceFilter filter;
+      DeviceFilter filter;
       filter.pid = desc.idProduct;
       filter.vid = desc.idVendor;
 
@@ -136,7 +136,7 @@ qint32 QUsbDevice::open() {
         if (m_debug) {
           qDebug("Found device.");
         }
-        
+
         rc = libusb_open(dev, &d->m_devHandle);
         if (rc == 0) break;
         else {
@@ -182,19 +182,19 @@ qint32 QUsbDevice::open() {
 
   switch (libusb_get_device_speed(dev)) {
     case LIBUSB_SPEED_LOW:
-      this->m_spd = QtUsb::lowSpeed;
+      this->m_spd = lowSpeed;
       break;
     case LIBUSB_SPEED_FULL:
-      this->m_spd = QtUsb::fullSpeed;
+      this->m_spd = fullSpeed;
       break;
     case LIBUSB_SPEED_HIGH:
-      this->m_spd = QtUsb::highSpeed;
+      this->m_spd = highSpeed;
       break;
     case LIBUSB_SPEED_SUPER:
-      this->m_spd = QtUsb::superSpeed;
+      this->m_spd = superSpeed;
       break;
     default:
-      this->m_spd = QtUsb::unknownSpeed;
+      this->m_spd = unknownSpeed;
       break;
   }
 

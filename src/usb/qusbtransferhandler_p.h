@@ -22,11 +22,11 @@ public:
 
   void readyRead();
   void bytesWritten(qint64 bytes);
-  void error(QtUsb::TransferStatus error);
-  void setStatus(QtUsb::TransferStatus status);
+  void error(QUsbTransferHandler::TransferStatus error);
+  void setStatus(QUsbTransferHandler::TransferStatus status);
   bool isValid();
 
-  bool prepareTransfer(libusb_transfer* tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep);
+  bool prepareTransfer(libusb_transfer **tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QUsbDevice::Endpoint ep);
   void stopTransfer();
 
   int readUsb(qint64 maxSize);

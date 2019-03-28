@@ -2,7 +2,6 @@
 #define QUSBINFO_H
 
 #include "qusbdevice.h"
-#include "qusbtypes.h"
 #include <QList>
 
 QT_BEGIN_NAMESPACE
@@ -37,9 +36,9 @@ public:
    * @brief Gets a list of devices present in the system
    * You have to add these devices to the list using addDevice beforehand
    *
-   * @return QtUsb::FilterList
+   * @return QUsbDevice::FilterList
    */
-  QtUsb::FilterList getPresentDevices(void);
+  QUsbDevice::FilterList getPresentDevices(void);
 
   /**
    * @brief Check if device is present
@@ -47,7 +46,7 @@ public:
    * @param filter Device to search
    * @return bool true if present
    */
-  bool isPresent(const QtUsb::DeviceFilter &filter);
+  bool isPresent(const QUsbDevice::DeviceFilter &filter);
 
 signals:
   /**
@@ -55,14 +54,14 @@ signals:
    *
    * @param filters list of devices to match
    */
-  void deviceInserted(QtUsb::FilterList filters);
+  void deviceInserted(QUsbDevice::FilterList filters);
 
   /**
    * @brief Signals a device from the given list has been removed
    *
    * @param filters list of devices to match
    */
-  void deviceRemoved(QtUsb::FilterList filters);
+  void deviceRemoved(QUsbDevice::FilterList filters);
 
 public slots:
   /**
@@ -71,7 +70,7 @@ public slots:
    * @param filter device filter
    * @return bool false if device was already in the list, else true
    */
-  bool addDevice(const QtUsb::DeviceFilter &filter);
+  bool addDevice(const QUsbDevice::DeviceFilter &filter);
 
   /**
    * @brief Remove a device from the list
@@ -79,7 +78,7 @@ public slots:
    * @param filter device filter
    * @return bool false if device was not in the list, else true
    */
-  bool removeDevice(const QtUsb::DeviceFilter &filter);
+  bool removeDevice(const QUsbDevice::DeviceFilter &filter);
 
   /**
    * @brief Search a device in a device list
@@ -88,8 +87,8 @@ public slots:
    * @param list the device filter list
    * @return int index of the filter, returns -1 if not found
    */
-  int findDevice(const QtUsb::DeviceFilter &filter,
-                 const QtUsb::FilterList &list);
+  int findDevice(const QUsbDevice::DeviceFilter &filter,
+                 const QUsbDevice::FilterList &list);
 
   /**
    * @brief set debug mode
@@ -110,19 +109,19 @@ public slots:
    * @param dev QUsbDevice object pointer
    * @param filter Device filter
    * @param config Device configuration
-   * @return QtUsb::DeviceStatus deviceOK on success
+   * @return QUsbDevice::DeviceStatus deviceOK on success
    */
-  QtUsb::DeviceStatus openDevice(QUsbDevice *dev,
-                                 const QtUsb::DeviceFilter &filter,
-                                 const QtUsb::DeviceConfig &config);
+  QUsbDevice::DeviceStatus openDevice(QUsbDevice *dev,
+                                 const QUsbDevice::DeviceFilter &filter,
+                                 const QUsbDevice::DeviceConfig &config);
 
   /**
    * @brief
    *
    * @param dev QUsbDevice object pointer
-   * @return QtUsb::DeviceStatus deviceOK on success
+   * @return QUsbDevice::DeviceStatus deviceOK on success
    */
-  QtUsb::DeviceStatus closeDevice(QUsbDevice *dev);
+  QUsbDevice::DeviceStatus closeDevice(QUsbDevice *dev);
 
 protected slots:
   /**
@@ -130,15 +129,15 @@ protected slots:
    *
    * @param list Lists of devices to monitor
    */
-  void monitorDevices(const QtUsb::FilterList &list);
+  void monitorDevices(const QUsbDevice::FilterList &list);
 
   void checkDevices();
 
 protected:
   bool m_debug;
   QList<QUsbDevice *> m_used_device_list; /**< List of devices in use */
-  QtUsb::FilterList m_filter_list;        /**< List of filters we are using */
-  QtUsb::FilterList m_system_list; /**< List of all filters in the system */
+  QUsbDevice::FilterList m_filter_list;        /**< List of filters we are using */
+  QUsbDevice::FilterList m_system_list; /**< List of all filters in the system */
 
 private:
   QUsbInfoPrivate * const d_dummy;

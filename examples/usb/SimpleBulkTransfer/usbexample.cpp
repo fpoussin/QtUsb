@@ -16,7 +16,6 @@ UsbExample::UsbExample(QObject *parent) : QObject(parent), m_usb_dev(new QUsbDev
   else {
     qWarning("Could not open device!");
   }
-
 }
 
 UsbExample::~UsbExample() {
@@ -39,8 +38,8 @@ void UsbExample::setupDevice() {
 
   //
   m_config.alternate = 0;
-  m_config.config = 0;
-  m_config.interface = 1;
+  m_config.config = 1;
+  m_config.interface = 0;
 
   //
   m_read_ep = 0x81;
@@ -54,32 +53,49 @@ void UsbExample::setupDevice() {
 bool UsbExample::openDevice() {
   qDebug("Opening");
 
-  if (m_usb_dev->open() == QtUsb::statusOK) {
+  if (m_usb_dev->open() == QUsbDevice::statusOK) {
     // Device is open
-    m_transfer_handler = new QUsbTransferHandler(m_usb_dev, QtUsb::bulkTransfer, m_read_ep, m_write_ep);
-
-    connect(m_transfer_handler, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    connect(m_transfer_handler, SIGNAL(bytesWritten(qint64)), this, SLOT(onWriteComplete(qint64)));
-
-    if (m_transfer_handler->open(QIODevice::ReadWrite))
-      m_transfer_handler->setPolling(true);
-    return true;
+    return this->openHandle();
   }
   return false;
 }
 
-bool UsbExample::closeDevice() {
+void UsbExample::closeDevice() {
   qDebug("Closing");
 
+  if (m_usb_dev->isConnected()) {
+    this->closeHandle();
+    m_usb_dev->close();
+  }
+}
+
+bool UsbExample::openHandle()
+{
+  qDebug("Opening Handle");
+  bool b = false;
+  m_transfer_handler = new QUsbTransferHandler(m_usb_dev, QUsbTransferHandler::bulkTransfer, m_read_ep, m_write_ep);
+
+  connect(m_transfer_handler, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+  connect(m_transfer_handler, SIGNAL(bytesWritten(qint64)), this, SLOT(onWriteComplete(qint64)));
+
+  b = m_transfer_handler->open(QIODevice::ReadWrite);
+  if (b) {
+    m_transfer_handler->setPolling(true);
+  }
+
+  return b;
+}
+
+void UsbExample::closeHandle()
+{
+  qDebug("Closing Handle");
   if (m_transfer_handler != Q_NULLPTR) {
     m_transfer_handler->close();
     m_transfer_handler->disconnect();
+    qInfo() << m_transfer_handler->errorString();
     delete m_transfer_handler;
     m_transfer_handler = Q_NULLPTR;
   }
-  if (m_usb_dev->isConnected())
-    m_usb_dev->close();
-  return false;
 }
 
 void UsbExample::read(QByteArray *buf) {

@@ -16,13 +16,17 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
   int sent = transfer->actual_length;
 
   handler->m_write_buf = handler->m_write_buf.mid(0, sent); // Remove what was sent
-  handler->setStatus(static_cast<QtUsb::TransferStatus>(s));
+  handler->setStatus(static_cast<QUsbTransferHandler::TransferStatus>(s));
 
   libusb_free_transfer(transfer);
+
+  if (transfer == handler->m_transfer_out)
+    handler->m_transfer_out = Q_NULLPTR;
+
   handler->m_write_buf_mutex.unlock();
 
   if (s != LIBUSB_TRANSFER_COMPLETED) {
-    handler->error(static_cast<QtUsb::TransferStatus>(s));
+    handler->error(static_cast<QUsbTransferHandler::TransferStatus>(s));
   }
   else {
     handler->bytesWritten(sent);
@@ -37,9 +41,9 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   libusb_transfer_status s = transfer->status;
   int received = transfer->actual_length;
 
-  handler->setStatus(static_cast<QtUsb::TransferStatus>(s));
+  handler->setStatus(static_cast<QUsbTransferHandler::TransferStatus>(s));
   if (s != LIBUSB_TRANSFER_COMPLETED) {
-    handler->error(static_cast<QtUsb::TransferStatus>(s));
+    handler->error(static_cast<QUsbTransferHandler::TransferStatus>(s));
   }
   else {
     handler->m_read_buf_mutex.lock();
@@ -50,6 +54,9 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   }
 
   libusb_free_transfer(transfer);
+  if (transfer == handler->m_transfer_in)
+    handler->m_transfer_in = Q_NULLPTR;
+
   handler->m_read_transfer_buf.clear(); // it's in fact transfer->buffer
   handler->m_read_transfer_mutex.unlock();
 
@@ -63,9 +70,9 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   }
 }
 
-QUsbTransferHandlerPrivate::QUsbTransferHandlerPrivate()
+QUsbTransferHandlerPrivate::QUsbTransferHandlerPrivate() : m_poll_size(64), m_transfer_in(Q_NULLPTR), m_transfer_out(Q_NULLPTR)
 {
-  m_poll_size = 64;
+
 }
 
 void QUsbTransferHandlerPrivate::readyRead()
@@ -80,25 +87,25 @@ void QUsbTransferHandlerPrivate::bytesWritten(qint64 bytes)
   emit q->bytesWritten(bytes);
 }
 
-void QUsbTransferHandlerPrivate::error(QtUsb::TransferStatus error)
+void QUsbTransferHandlerPrivate::error(QUsbTransferHandler::TransferStatus error)
 {
   Q_Q(QUsbTransferHandler);
   emit q->error(error);
 }
 
-void QUsbTransferHandlerPrivate::setStatus(QtUsb::TransferStatus status)
+void QUsbTransferHandlerPrivate::setStatus(QUsbTransferHandler::TransferStatus status)
 {
   Q_Q(QUsbTransferHandler);
 
   q->m_status = status;
   switch (status) {
-    case QtUsb::transferCompleted: q->setErrorString(QString::fromUtf8("transferCompleted")); break;
-    case QtUsb::transferError: q->setErrorString(QString::fromUtf8("transferError")); break;
-    case QtUsb::transferTimeout: q->setErrorString(QString::fromUtf8("transferTimeout")); break;
-    case QtUsb::transferCanceled: q->setErrorString(QString::fromUtf8("transferCanceled")); break;
-    case QtUsb::transferStall: q->setErrorString(QString::fromUtf8("transferStall")); break;
-    case QtUsb::transferNoDevice: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
-    case QtUsb::transferOverflow: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
+    case QUsbTransferHandler::transferCompleted: q->setErrorString(QString::fromUtf8("transferCompleted")); break;
+    case QUsbTransferHandler::transferError: q->setErrorString(QString::fromUtf8("transferError")); break;
+    case QUsbTransferHandler::transferTimeout: q->setErrorString(QString::fromUtf8("transferTimeout")); break;
+    case QUsbTransferHandler::transferCanceled: q->setErrorString(QString::fromUtf8("transferCanceled")); break;
+    case QUsbTransferHandler::transferStall: q->setErrorString(QString::fromUtf8("transferStall")); break;
+    case QUsbTransferHandler::transferNoDevice: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
+    case QUsbTransferHandler::transferOverflow: q->setErrorString(QString::fromUtf8("transferOverflow")); break;
   }
 }
 
@@ -108,7 +115,7 @@ bool QUsbTransferHandlerPrivate::isValid()
   return q->m_dev->d_func()->m_devHandle && q->m_dev->isConnected();
 }
 
-bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QtUsb::Endpoint ep)
+bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer **tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QUsbDevice::Endpoint ep)
 {
   Q_Q(QUsbTransferHandler);
 
@@ -117,9 +124,9 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
   auto handle = q->m_dev->d_func()->m_devHandle;
   auto timeout = q->m_dev->timeout();
 
-  if (q->m_type == QtUsb::bulkTransfer) {
-    tr = libusb_alloc_transfer(0);
-    libusb_fill_bulk_transfer(tr,
+  if (q->m_type == QUsbTransferHandler::bulkTransfer) {
+    *tr = libusb_alloc_transfer(0);
+    libusb_fill_bulk_transfer(*tr,
                               handle,
                               ep,
                               buf,
@@ -128,9 +135,9 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
                               this,
                               timeout);
   }
-  else if (q->m_type == QtUsb::interruptTransfer) {
-    tr = libusb_alloc_transfer(0);
-    libusb_fill_interrupt_transfer(tr,
+  else if (q->m_type == QUsbTransferHandler::interruptTransfer) {
+    *tr = libusb_alloc_transfer(0);
+    libusb_fill_interrupt_transfer(*tr,
                                    handle,
                                    ep,
                                    buf,
@@ -139,18 +146,18 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
                                    this,
                                    timeout);
   }
-  else if (q->m_type == QtUsb::controlTransfer) {
-    tr = libusb_alloc_transfer(0);
-    libusb_fill_control_transfer(tr,
+  else if (q->m_type == QUsbTransferHandler::controlTransfer) {
+    *tr = libusb_alloc_transfer(0);
+    libusb_fill_control_transfer(*tr,
                                  handle,
                                  buf,
                                  cb,
                                  this,
                                  timeout);
   }
-  else if (q->m_type == QtUsb::isochronousTransfer) { // Todo: Proper handling
-    tr = libusb_alloc_transfer(1);
-    libusb_fill_iso_transfer(tr,
+  else if (q->m_type == QUsbTransferHandler::isochronousTransfer) { // Todo: Proper handling
+    *tr = libusb_alloc_transfer(1);
+    libusb_fill_iso_transfer(*tr,
                              handle,
                              ep,
                              buf,
@@ -164,13 +171,20 @@ bool QUsbTransferHandlerPrivate::prepareTransfer(libusb_transfer *tr, libusb_tra
     return false;
   }
 
+  if (tr == Q_NULLPTR) {
+    qWarning("QUsbTransferHandler: Transfer buffer allocation failed");
+    return false;
+  }
+
   return true;
 }
 
 void QUsbTransferHandlerPrivate::stopTransfer()
 {
-  libusb_cancel_transfer(m_transfer_in);
-  libusb_cancel_transfer(m_transfer_out);
+  if (m_transfer_in != Q_NULLPTR)
+    libusb_cancel_transfer(m_transfer_in);
+  if (m_transfer_out != Q_NULLPTR)
+    libusb_cancel_transfer(m_transfer_out);
 }
 
 int QUsbTransferHandlerPrivate::readUsb(qint64 maxSize)
@@ -185,7 +199,7 @@ int QUsbTransferHandlerPrivate::readUsb(qint64 maxSize)
 
   m_read_transfer_mutex.lock();
   m_read_transfer_buf.resize(static_cast<int>(maxSize));
-  if (!prepareTransfer(m_transfer_in, cb_in, m_read_transfer_buf.data(), maxSize, q->m_in_ep)) return -1;
+  if (!prepareTransfer(&m_transfer_in, cb_in, m_read_transfer_buf.data(), maxSize, q->m_in_ep)) return -1;
   rc = libusb_submit_transfer(m_transfer_in);
 
   if (rc != LIBUSB_SUCCESS) {
@@ -206,7 +220,7 @@ int QUsbTransferHandlerPrivate::writeUsb(const char *data, qint64 maxSize)
   m_write_buf.resize(static_cast<int>(maxSize));
   memcpy(m_write_buf.data(), data, static_cast<ulong>(maxSize));
 
-  if (!prepareTransfer(m_transfer_out, cb_out, m_write_buf.data(), maxSize, q->m_out_ep)) return -1;
+  if (!prepareTransfer(&m_transfer_out, cb_out, m_write_buf.data(), maxSize, q->m_out_ep)) return -1;
   rc = libusb_submit_transfer(m_transfer_out);
 
   if (rc != LIBUSB_SUCCESS) {
@@ -234,8 +248,8 @@ void QUsbTransferHandlerPrivate::setPolling(bool enable)
   }
 }
 
-QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType type, QtUsb::Endpoint in, QtUsb::Endpoint out) :
-  QIODevice(*(new QUsbTransferHandlerPrivate)), d_dummy(Q_NULLPTR), m_status(QtUsb::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
+QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QUsbTransferHandler::TransferType type, QUsbDevice::Endpoint in, QUsbDevice::Endpoint out) :
+  QIODevice(*(new QUsbTransferHandlerPrivate)), d_dummy(Q_NULLPTR), m_status(QUsbTransferHandler::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
   Q_CHECK_PTR(dev);
   Q_D(QUsbTransferHandler);
@@ -243,8 +257,8 @@ QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QtUsb::TransferType ty
 
   // Set polling size to max packet size
   switch (type) {
-  case QtUsb::bulkTransfer:
-    if (m_dev->speed() >= QtUsb::highSpeed)
+  case bulkTransfer:
+    if (m_dev->speed() >= QUsbDevice::highSpeed)
       d->m_poll_size = 512;
     break;
   default:
@@ -260,7 +274,7 @@ QUsbTransferHandler::~QUsbTransferHandler()
 bool QUsbTransferHandler::open(QIODevice::OpenMode mode)
 {
     bool b = QIODevice::open(mode);
-    if (openMode() & ReadOnly && m_type == QtUsb::interruptTransfer)
+    if (openMode() & ReadOnly && m_type == interruptTransfer)
     {
       setPolling(true);
     }
@@ -271,6 +285,10 @@ void QUsbTransferHandler::close()
 {
   setPolling(false);
   QIODevice::close();
+
+  // Wait for (canceled) transfers to finish
+  while (d_func()->m_transfer_in != Q_NULLPTR || d_func()->m_transfer_out != Q_NULLPTR)
+    QThread::msleep(10);
 }
 
 qint64 QUsbTransferHandler::bytesAvailable() const
