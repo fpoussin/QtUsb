@@ -1,7 +1,22 @@
+@echo off
+setlocal
+
+IF "%1"=="" (
+  echo "Missing architecture [x86|x64]"
+  pause
+  exit /b 1c
+)
+
+IF "%2"=="" (
+  echo "Missing QT path ie: C:\Qt\5.12.2\msvc2017"
+  pause
+  exit /b 1c
+)
 
 SET ARCH=%1
 SET QTDIR=%2
 
+SET BUILDTOOL=jom
 SET vcarch=%ARCH%
 SET usbarch=%ARCH%
 IF "%ARCH%" == "x64" SET vcarch=amd64
@@ -9,7 +24,10 @@ IF "%ARCH%" == "x86" SET usbarch=Win32
 
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
 
-SET PATH=%QTDIR%\bin;%PATH%
+SET PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
+
+WHERE /Q jom
+IF %errorlevel% NEQ 0 set BUILDTOOL=nmake
 
 git submodule update --init --recursive
 CD libusb
@@ -23,4 +41,8 @@ RMDIR /S /Q build
 MKDIR build
 CD build
 qmake ..
-nmake install
+%BUILDTOOL% install sub-tests
+CD tests\auto
+nmake check
+
+endlocal
