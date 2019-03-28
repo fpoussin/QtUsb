@@ -64,18 +64,18 @@ QUsbInfoPrivate::QUsbInfoPrivate() : m_refresh_timer(new QTimer)
   m_refresh_timer->setInterval(250);
 
   m_refresh_timer->connect(t, SIGNAL(started()), SLOT(start()));
+  m_refresh_timer->connect(t, SIGNAL(finished()), SLOT(stop()));
   t->start();
 }
 
 QUsbInfoPrivate::~QUsbInfoPrivate()
 {
-  m_refresh_timer->stop();
-  m_refresh_timer->disconnect();
-  m_refresh_timer->deleteLater();
-
   m_refresh_timer->thread()->exit();
   m_refresh_timer->thread()->wait();
   m_refresh_timer->thread()->deleteLater();
+
+  m_refresh_timer->disconnect();
+  m_refresh_timer->deleteLater();
 }
 
 void QUsbInfo::checkDevices()
