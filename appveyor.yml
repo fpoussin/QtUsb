@@ -53,7 +53,7 @@ build_script:
   - cd build
   - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/" ..
   - jom INSTALL_ROOT=\projects\install install
-  - jom sub-tests
+  - nmake sub-tests
 
 after_build:
   - cd %APPVEYOR_BUILD_FOLDER%
