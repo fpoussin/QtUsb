@@ -23,6 +23,7 @@ pipeline {
                        sh '''
                        cd build/tests
                        make check TESTARGS="-o result.xml,xunitxml"
+                       cd $WORKSPACE
                        ls -l build/tests/*/*/result.xml
                        '''
                    }
