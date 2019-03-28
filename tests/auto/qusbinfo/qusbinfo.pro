@@ -1,6 +1,6 @@
 QT = core testlib
 TARGET = tst_qusbinfo
-#CONFIG += testcase
+CONFIG += testcase
 
 QT += usb
 
