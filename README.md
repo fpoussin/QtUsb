@@ -65,9 +65,9 @@ QUsbManager manager;
 
 ## Documentation
 
-Doxygen documentation can be found here: http://fpoussin.github.io/doxygen/qtusb/
+Doxygen documentation can be found [here](http://fpoussin.github.io/doxygen/qtusb/0.4.x)  
 
 ## Downloads
 
-Ubuntu PPA: https://launchpad.net/~fpoussin/+archive/ubuntu/ppa 
-Windows libraries are coming soon.
+[Ubuntu PPA](https://launchpad.net/~fpoussin/+archive/ubuntu/ppa)  
+Windows binaries are [in the releases section](https://github.com/fpoussin/QtUsb/releases).  
