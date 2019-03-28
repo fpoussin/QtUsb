@@ -14,7 +14,6 @@ environment:
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    APPVEYOR_JOB_NAME: msvc-x64
 
   - arch: x86
     qt: 5.12
@@ -22,7 +21,6 @@ environment:
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    APPVEYOR_JOB_NAME: msvc-x86
 
 init:
   - set vcarch=%arch%
@@ -61,7 +59,9 @@ after_build:
   - 7z a qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
   - cd tests
   - nmake check TESTARGS="-o result.xml,xunitxml"
-  - sh: find "$APPVEYOR_BUILD_FOLDER" -type f -name 'result.xml' -print0 | xargs -0 -I '{}' curl -F 'file=@{}' "https://ci.appveyor.com/api/testresults/junit/$APPVEYOR_JOB_ID"
+  - ps: >-
+      $wc = New-Object 'System.Net.WebClient'
+      Get-ChildItem -Recurse -Filter "*.xml" | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }
 
 artifacts:
   - path: build\*.7z
