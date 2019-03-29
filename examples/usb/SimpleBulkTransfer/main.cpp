@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
 
   QObject::connect(&timer, SIGNAL(timeout()), &a, SLOT(quit()));
 
-  timer.setInterval(1000);
+  timer.setInterval(3000);
   timer.setSingleShot(true);
   timer.start();
 

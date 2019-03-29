@@ -7,7 +7,7 @@
 UsbExample::UsbExample(QObject *parent) : QObject(parent), m_usb_dev(new QUsbDevice()), m_transfer_handler(Q_NULLPTR) {
   this->setupDevice();
 
-  m_send.append(static_cast<char>(0xAB));
+  m_send.append("Hello");
 
   if (this->openDevice()) {
     qInfo("Device open!");
@@ -30,7 +30,7 @@ void UsbExample::setupDevice() {
 
   qDebug("setupDevice");
 
-  m_usb_dev->setDebug(false);
+  m_usb_dev->setDebug(true);
 
   //
   m_filter.pid = 0x3748;
@@ -80,7 +80,7 @@ bool UsbExample::openHandle()
 
   b = m_transfer_handler->open(QIODevice::ReadWrite);
   if (b) {
-    m_transfer_handler->setPolling(true);
+//    m_transfer_handler->setPolling(true);
   }
 
   return b;
@@ -99,23 +99,30 @@ void UsbExample::closeHandle()
 }
 
 void UsbExample::read(QByteArray *buf) {
-  *buf = m_transfer_handler->readAll();
+  QByteArray b(m_transfer_handler->readAll());
+  qDebug() << "Reading" << b;
+  buf->append(b);
 }
 
 void UsbExample::write(QByteArray *buf) {
-  m_transfer_handler->write(buf->constData(), buf->size());
+  qDebug() << "Writing" << *buf;
+  if (m_transfer_handler->write(buf->constData(), buf->size()) < 0)
+  {
+    qWarning("write failed");
+  }
 }
 
 void UsbExample::onReadyRead()
 {
   qDebug("Data received");
+//  this->write(&m_send);
   this->read(&m_recv);
   qDebug() << m_recv;
 }
 
 void UsbExample::onWriteComplete(qint64 bytes)
 {
-  qDebug("Data written");
-  qDebug() << bytes;
+  qDebug() << "Written" << bytes << "bytes";
+  m_transfer_handler->poll();
 }
 

@@ -13,22 +13,43 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
   libusb_transfer_status s = transfer->status;
-  int sent = transfer->actual_length;
-
-  handler->m_write_buf = handler->m_write_buf.mid(0, sent); // Remove what was sent
+  const int sent = transfer->actual_length;
+  const int total = transfer->length;
   handler->setStatus(static_cast<QUsbTransferHandler::Status>(s));
 
-  libusb_free_transfer(transfer);
+  if (handler->debug())
+    qDebug("cb_out(): status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
+            transfer->status,
+            transfer->timeout,
+            transfer->endpoint,
+            transfer->actual_length,
+            transfer->length);
 
-  if (transfer == handler->m_transfer_out)
+  if (sent > 0) {
+    handler->m_write_buf = handler->m_write_buf.mid(0, total-sent); // Remove what was sent
+  }
+
+  // Send remaining data
+  if (total > sent) {
+    transfer->buffer = reinterpret_cast<uchar*>(handler->m_write_buf.data()); // New data pointer
+    transfer->length = handler->m_write_buf.size(); // New size
+    libusb_submit_transfer(transfer);
+    return;
+  }
+
+  if (transfer == handler->m_transfer_out) {
+    libusb_free_transfer(transfer);
     handler->m_transfer_out = Q_NULLPTR;
-
+  }
+  else {
+    qWarning("Wrong transfer");
+  }
   handler->m_write_buf_mutex.unlock();
 
   if (s != LIBUSB_TRANSFER_COMPLETED) {
     handler->error(static_cast<QUsbTransferHandler::Status>(s));
   }
-  else {
+  if (sent > 0) {
     handler->bytesWritten(sent);
   }
 }
@@ -39,7 +60,16 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
 
   libusb_transfer_status s = transfer->status;
-  int received = transfer->actual_length;
+  const int received = transfer->actual_length;
+  const int total = transfer->length;
+
+  if (handler->debug())
+    qDebug("cb_in(): status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
+            transfer->status,
+            transfer->timeout,
+            transfer->endpoint,
+            transfer->actual_length,
+            transfer->length);
 
   handler->setStatus(static_cast<QUsbTransferHandler::Status>(s));
   if (s != LIBUSB_TRANSFER_COMPLETED) {
@@ -54,8 +84,12 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   }
 
   libusb_free_transfer(transfer);
-  if (transfer == handler->m_transfer_in)
+  if (transfer == handler->m_transfer_in) {
     handler->m_transfer_in = Q_NULLPTR;
+  }
+  else {
+    qWarning("Wrong transfer");
+  }
 
   handler->m_read_transfer_buf.clear(); // it's in fact transfer->buffer
   handler->m_read_transfer_mutex.unlock();
@@ -204,6 +238,8 @@ int QUsbTransferHandlerPrivate::readUsb(qint64 maxSize)
 
   if (rc != LIBUSB_SUCCESS) {
     q->m_dev->d_func()->printUsbError(rc);
+    libusb_free_transfer(m_transfer_in);
+    m_transfer_in = Q_NULLPTR;
     m_read_transfer_mutex.unlock();
     return rc;
   }
@@ -225,6 +261,8 @@ int QUsbTransferHandlerPrivate::writeUsb(const char *data, qint64 maxSize)
 
   if (rc != LIBUSB_SUCCESS) {
     q->m_dev->d_func()->printUsbError(rc);
+    libusb_free_transfer(m_transfer_out);
+    m_transfer_out = Q_NULLPTR;
     m_write_buf_mutex.unlock();
     return rc;
   }
@@ -245,7 +283,13 @@ void QUsbTransferHandlerPrivate::setPolling(bool enable)
       // Read once, loop will continue on its own as long as polling is enabled.
       this->readUsb(m_poll_size);
     }
-  }
+    }
+}
+
+bool QUsbTransferHandlerPrivate::debug()
+{
+  Q_Q(QUsbTransferHandler);
+  return q->m_dev->debug();
 }
 
 QUsbTransferHandler::QUsbTransferHandler(QUsbDevice *dev, QUsbTransferHandler::Type type, QUsbDevice::Endpoint in, QUsbDevice::Endpoint out) :
