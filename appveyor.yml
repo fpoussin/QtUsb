@@ -58,10 +58,7 @@ after_build:
   - cd build
   - 7z a qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
   - cd tests
-  - nmake check TESTARGS="-o result.xml,xunitxml"
-  - ps: |
-      $wc = New-Object 'System.Net.WebClient'
-      Get-ChildItem -Recurse -Filter "*.xml" | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }
+  - nmake check TESTARGS="-o xunit.xml,xunitxml"
 
 artifacts:
   - path: build\*.7z
@@ -78,3 +75,8 @@ deploy:
       APPVEYOR_REPO_TAG: true
 
 test: off
+
+on_success:
+  - ps: |
+      $wc = New-Object 'System.Net.WebClient'
+      Get-ChildItem -Recurse -Filter "xunit.xml" | ForEach-Object { $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }
