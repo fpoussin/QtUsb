@@ -1,7 +1,7 @@
 #ifndef QUSBTRANSFER_P_H
 #define QUSBTRANSFER_P_H
 
-#include "QUsbTransfer.h"
+#include "qusbtransfer.h"
 #include <private/qiodevice_p.h>
 #include <QMutexLocker>
 
