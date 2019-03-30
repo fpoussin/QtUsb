@@ -31,6 +31,18 @@ public:
   typedef quint8 Endpoint;
 
   /**
+   * @brief The LogLevel enum
+   */
+  enum LogLevel {
+    logNone = 0,
+    logError = 1,
+    logWarning = 2,
+    logInfo = 3,
+    logDebug = 4,
+    logDebugAll = 5 // Includes libusb debug output
+  };
+
+  /**
    * @brief bmRequestType field
    *
    */
@@ -161,7 +173,7 @@ public:
   };
   Q_ENUM(DeviceStatus)
 
-  Q_PROPERTY(bool debug READ debug WRITE setDebug)
+  Q_PROPERTY(LogLevel logLevel READ logLevel WRITE setLogLevel)
   Q_PROPERTY(Id id READ id WRITE setId)
   Q_PROPERTY(Config config READ config WRITE setConfig)
   Q_PROPERTY(quint16 pid READ pid)
@@ -182,7 +194,7 @@ public:
    *
    * @param enable
    */
-  void setDebug(bool enable);
+  void setLogLevel(LogLevel level);
   /**
    * @brief Set device Id
    *
@@ -247,7 +259,7 @@ public:
    *
    * @return bool debug enabled
    */
-  bool debug(void) const { return m_debug; }
+  LogLevel logLevel(void) const { return m_log_level; }
   /**
    * @brief Get current device speed
    *
@@ -292,7 +304,7 @@ private:
   Q_DISABLE_COPY(QUsbDevice)
 
   quint16 m_timeout;            /**< Device timeout */
-  bool m_debug;                 /**< Debug enabled boolean */
+  LogLevel m_log_level;         /**< Debug enabled boolean */
   bool m_connected;             /**< Connected boolean */
   Id m_id;                      /**< Device IDs */
   Config m_config;              /**< Device config */

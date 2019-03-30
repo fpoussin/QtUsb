@@ -30,7 +30,7 @@ void tst_QUsbDevice::constructors()
   const QUsbDevice::Config c = {1,0,0};
 
   QVERIFY(!dev.isConnected());
-  QVERIFY(!dev.debug());
+  QVERIFY(!dev.logLevel());
   QCOMPARE(dev.speed(), QUsbDevice::unknownSpeed);
   QCOMPARE(dev.speedString(), QByteArray("Unknown speed"));
   QCOMPARE(dev.config(), c);
@@ -58,11 +58,11 @@ void tst_QUsbDevice::states()
 {
   QUsbDevice dev;
 
-  dev.setDebug(true);
-  QVERIFY(dev.debug());
+  dev.setLogLevel(QUsbDevice::logDebug);
+  QCOMPARE(dev.logLevel(), QUsbDevice::logDebug);
 
-  dev.setDebug(false);
-  QVERIFY(!dev.debug());
+  dev.setLogLevel(QUsbDevice::logNone);
+  QCOMPARE(dev.logLevel(), QUsbDevice::logNone);
 
 }
 

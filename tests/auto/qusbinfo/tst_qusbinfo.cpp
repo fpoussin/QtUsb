@@ -25,7 +25,7 @@ void tst_QUsbInfo::constructors()
 {
   QUsbInfo info;
 
-  QVERIFY(!info.debug());
+  QVERIFY(!info.logLevel());
 
 }
 
@@ -33,10 +33,11 @@ void tst_QUsbInfo::assignment()
 {
   QUsbInfo info;
 
-  info.setDebug(true);
-  QVERIFY(info.debug());
-  info.setDebug(false);
-  QVERIFY(!info.debug());
+  info.setLogLevel(QUsbDevice::logDebug);
+  QCOMPARE(info.logLevel(), QUsbDevice::logDebug);
+
+  info.setLogLevel(QUsbDevice::logNone);
+  QCOMPARE(info.logLevel(), QUsbDevice::logNone);
 }
 
 void tst_QUsbInfo::features()

@@ -95,13 +95,13 @@ public slots:
    *
    * @param debug
    */
-  void setDebug(bool debug);
+  void setLogLevel(QUsbDevice::LogLevel level);
 
   /**
    * @brief get debug mode
    *
    */
-  bool debug() const {return m_debug;}
+  QUsbDevice::LogLevel logLevel() const;
 
 protected slots:
   /**
@@ -114,7 +114,7 @@ protected slots:
   void checkDevices();
 
 protected:
-  bool m_debug;
+  QUsbDevice::LogLevel m_log_level;
   QUsbDevice::IdList m_list;        /**< List of IDs we are using */
   QUsbDevice::IdList m_system_list; /**< List of all IDs in the system */
 

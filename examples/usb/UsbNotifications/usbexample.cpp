@@ -6,7 +6,7 @@ UsbExample::UsbExample(QObject *parent) : QObject(parent) {
   QObject::connect(&m_usb_manager, SIGNAL(deviceRemoved(QUsbDevice::IdList)), this,
                    SLOT(onDevRemoved(QUsbDevice::IdList)));
 
-  m_usb_manager.setDebug(false);
+  m_usb_manager.setLogLevel(QUsbDevice::logDebug);
   qInfo("Starting...");
   qInfo("Press CTRL+C to close.");
 }

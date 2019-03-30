@@ -31,7 +31,7 @@ void UsbExample::setupDevice() {
 
   qDebug("setupDevice");
 
-  m_usb_dev->setDebug(true);
+  m_usb_dev->setLogLevel(QUsbDevice::logDebug);
 
   //
   m_filter.pid = 0x3748;

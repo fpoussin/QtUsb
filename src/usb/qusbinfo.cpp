@@ -3,7 +3,8 @@
 #include <QThread>
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define DbgPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define DbgPrintFuncName() if (m_log_level >= QUsbDevice::logDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define DbgPrintCB() if (manager->logLevel() >= QUsbDevice::logDebug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
 
@@ -19,8 +20,9 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
   QUsbDevice::IdList device_list;
   QUsbDevice::Id dev;
   QUsbInfo *manager = reinterpret_cast<QUsbInfo*>(user_data);
+  DbgPrintCB();
 
-  if (manager->debug())
+  if (manager->logLevel())
     qDebug("hotplugCallback");
 
   (void)libusb_get_device_descriptor(device, &desc);
@@ -97,7 +99,8 @@ void QUsbInfo::checkDevices()
 QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d_dummy(Q_NULLPTR) {
   Q_D(QUsbInfo);
 
-  m_debug = false;
+  m_log_level = QUsbDevice::logError;
+  DbgPrintFuncName();
   int rc;
 
   qRegisterMetaType<QUsbDevice::Id>("QUsbDevice::DeviceFilter");
@@ -143,6 +146,7 @@ QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d
 
 QUsbInfo::~QUsbInfo() {
   Q_D(QUsbInfo);
+  DbgPrintFuncName();
   libusb_hotplug_deregister_callback(d->m_ctx, callback_handle);
   libusb_exit(d->m_ctx);
 }
@@ -163,12 +167,13 @@ QUsbDevice::IdList QUsbInfo::getPresentDevices() const {
 }
 
 bool QUsbInfo::isPresent(const QUsbDevice::Id &id) const {
-
+  DbgPrintFuncName();
   return this->findDevice(id, m_system_list) >= 0;
 }
 
 bool QUsbInfo::addDevice(const QUsbDevice::Id &id) {
 
+  DbgPrintFuncName();
   if (this->findDevice(id, m_list) == -1) {
     m_list.append(id);
     return true;
@@ -178,6 +183,7 @@ bool QUsbInfo::addDevice(const QUsbDevice::Id &id) {
 
 bool QUsbInfo::removeDevice(const QUsbDevice::Id &id) {
 
+  DbgPrintFuncName();
   const int pos = this->findDevice(id, m_list);
   if (pos > 0) {
     m_list.removeAt(pos);
@@ -188,6 +194,7 @@ bool QUsbInfo::removeDevice(const QUsbDevice::Id &id) {
 
 int QUsbInfo::findDevice(const QUsbDevice::Id &id,
                             const QUsbDevice::IdList &list) const {
+  DbgPrintFuncName();
   for (int i = 0; i < list.length(); i++) {
     const QUsbDevice::Id *d = &list.at(i);
 
@@ -198,15 +205,19 @@ int QUsbInfo::findDevice(const QUsbDevice::Id &id,
   return -1;
 }
 
-void QUsbInfo::setDebug(bool debug)
+void QUsbInfo::setLogLevel(QUsbDevice::LogLevel level)
 {
   DbgPrintFuncName();
   Q_D(QUsbInfo);
-  m_debug = debug;
-  if (m_debug)
+  m_log_level = level;
+  if (m_log_level >= QUsbDevice::logDebug)
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
   else
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
+}
+
+QUsbDevice::LogLevel QUsbInfo::logLevel() const {
+  return m_log_level;
 }
 
 void QUsbInfo::monitorDevices(const QUsbDevice::IdList &list) {
