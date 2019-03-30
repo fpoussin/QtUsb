@@ -57,6 +57,7 @@ public:
   Q_PROPERTY(Type type READ type)
   Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn)
   Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut)
+  Q_PROPERTY(bool polling READ polling WRITE setPolling)
 
   /**
    * @brief
