@@ -11,6 +11,7 @@ private slots:
     void constructors();
     void assignment();
     void states();
+    void staticfuncs();
 
 private:
 
@@ -63,6 +64,11 @@ void tst_QUsbDevice::states()
   dev.setDebug(false);
   QVERIFY(!dev.debug());
 
+}
+
+void tst_QUsbDevice::staticfuncs()
+{
+  QUsbDevice::devices();
 }
 
 QTEST_MAIN(tst_QUsbDevice)

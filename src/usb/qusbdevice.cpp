@@ -2,8 +2,8 @@
 #include "qusbdevice_p.h"
 #include <QElapsedTimer>
 
-#define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define UsbPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define DbgPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 QUsbDevicePrivate::QUsbDevicePrivate()
 {
@@ -68,17 +68,7 @@ QByteArray QUsbDevice::speedString() const {
   return "Error";
 }
 
-void QUsbDevice::showSettings() {
-  qInfo() << "\n"
-          << "Debug" << m_debug << "\n"
-          << "Config" << m_config.config << "\n"
-          << "Timeout" << m_timeout << "\n"
-          << "Interface" << m_config.interface << "\n"
-          << "Device.pid" << QString::number(m_filter.pid, 16) << "\n"
-          << "Device.vid" << QString::number(m_filter.vid, 16) << "\n";
-}
-
-QUsbDevice::FilterList QUsbDevice::availableDevices() {
+QUsbDevice::FilterList QUsbDevice::devices() {
   FilterList list;
   ssize_t cnt;  // holding number of devices in list
   libusb_device** devs;
@@ -111,7 +101,7 @@ QUsbDevice::FilterList QUsbDevice::availableDevices() {
 }
 
 qint32 QUsbDevice::open() {
-  UsbPrintFuncName();
+  DbgPrintFuncName();
   Q_D(QUsbDevice);
 
   int rc = -5;   // Not found by default
@@ -204,7 +194,7 @@ qint32 QUsbDevice::open() {
 }
 
 void QUsbDevice::close() {
-  UsbPrintFuncName();
+  DbgPrintFuncName();
   Q_D(QUsbDevice);
 
   if (d->m_devHandle && m_connected) {

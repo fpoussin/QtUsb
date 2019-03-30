@@ -263,10 +263,11 @@ public:
 
   /**
    * @brief Get a list of all USB devices available for use
+   * Static function
    *
    * @return FilterList
    */
-  static FilterList availableDevices(void);
+  static FilterList devices(void);
 
 public slots:
   /**
@@ -281,13 +282,6 @@ public slots:
    *
    */
   void close();
-
-  /**
-   * @brief Print settings to qDebug
-   *
-   */
-  void showSettings(void);
-
 
 signals:
 

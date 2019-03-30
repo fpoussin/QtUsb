@@ -2,8 +2,8 @@
 #include "qusbinfo_p.h"
 #include <QThread>
 
-#define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define UsbPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define DbgPrintFuncName() if (m_debug) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
 
@@ -80,7 +80,7 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
 
 void QUsbInfo::checkDevices()
 {
-  UsbPrintFuncName();
+  DbgPrintFuncName();
   Q_D(QUsbInfo);
   QUsbDevice::FilterList list;
 
@@ -89,7 +89,7 @@ void QUsbInfo::checkDevices()
   if (d->m_has_hotplug) {
     libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);
   } else {
-    list = QUsbDevice::availableDevices();
+    list = QUsbDevice::devices();
     monitorDevices(list);
   }
 }
@@ -116,7 +116,7 @@ QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d
   libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 
   // Populate list once
-  m_system_list = QUsbDevice::availableDevices();
+  m_system_list = QUsbDevice::devices();
 
   // Try hotplug first
   d->m_has_hotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
@@ -148,7 +148,7 @@ QUsbInfo::~QUsbInfo() {
 }
 
 QUsbDevice::FilterList QUsbInfo::getPresentDevices() {
-  UsbPrintFuncName();
+  DbgPrintFuncName();
   QUsbDevice::FilterList list;
   QUsbDevice::Filter filter;
 
@@ -200,7 +200,7 @@ int QUsbInfo::findDevice(const QUsbDevice::Filter &filter,
 
 void QUsbInfo::setDebug(bool debug)
 {
-  UsbPrintFuncName();
+  DbgPrintFuncName();
   Q_D(QUsbInfo);
   m_debug = debug;
   if (m_debug)
@@ -211,7 +211,7 @@ void QUsbInfo::setDebug(bool debug)
 
 void QUsbInfo::monitorDevices(const QUsbDevice::FilterList &list) {
 
-  UsbPrintFuncName();
+  DbgPrintFuncName();
   QUsbDevice::FilterList inserted, removed;
   QUsbDevice::Filter filter;
 

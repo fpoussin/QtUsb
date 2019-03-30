@@ -4,13 +4,15 @@
 
 #include <QElapsedTimer>
 
-#define UsbPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define UsbPrintFuncName() if (m_dev->debug()) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define DbgPrintFuncName() if (d->debug()) qDebug() << "***[" << Q_FUNC_INFO << "]***"
+#define DbgPrintCB() if (handler->debug()) qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 /* Write callback */
 static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
+  DbgPrintCB();
 
   libusb_transfer_status s = transfer->status;
   const int sent = transfer->actual_length;
@@ -18,7 +20,7 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
   handler->setStatus(static_cast<QUsbTransferHandler::Status>(s));
 
   if (handler->debug())
-    qDebug("cb_out(): status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
+    qDebug("OUT: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
             transfer->status,
             transfer->timeout,
             transfer->endpoint,
@@ -37,13 +39,9 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
     return;
   }
 
-  if (transfer == handler->m_transfer_out) {
-    libusb_free_transfer(transfer);
-    handler->m_transfer_out = Q_NULLPTR;
-  }
-  else {
-    qWarning("Wrong transfer");
-  }
+  libusb_free_transfer(transfer);
+  handler->m_transfer_out = Q_NULLPTR;
+
   handler->m_write_buf_mutex.unlock();
 
   if (s != LIBUSB_TRANSFER_COMPLETED) {
@@ -58,13 +56,13 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
 static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
 {
   QUsbTransferHandlerPrivate *handler = reinterpret_cast<QUsbTransferHandlerPrivate*>(transfer->user_data);
+  DbgPrintCB();
 
   libusb_transfer_status s = transfer->status;
   const int received = transfer->actual_length;
-  const int total = transfer->length;
 
   if (handler->debug())
-    qDebug("cb_in(): status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
+    qDebug("IN: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
             transfer->status,
             transfer->timeout,
             transfer->endpoint,
@@ -77,19 +75,14 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
   }
   else {
     handler->m_read_buf_mutex.lock();
-    int previous_size = handler->m_read_buf.size();
+    const int previous_size = handler->m_read_buf.size();
     handler->m_read_buf.resize(previous_size + received);
     memcpy(handler->m_read_buf.data() + previous_size, transfer->buffer, static_cast<ulong>(received));
     handler->m_read_buf_mutex.unlock();
   }
 
   libusb_free_transfer(transfer);
-  if (transfer == handler->m_transfer_in) {
-    handler->m_transfer_in = Q_NULLPTR;
-  }
-  else {
-    qWarning("Wrong transfer");
-  }
+  handler->m_transfer_in = Q_NULLPTR;
 
   handler->m_read_transfer_buf.clear(); // it's in fact transfer->buffer
   handler->m_read_transfer_mutex.unlock();
@@ -418,28 +411,28 @@ void QUsbTransferHandler::cancelTransfer()
 
 qint64 QUsbTransferHandler::readData(char *data, qint64 maxSize)
 {
-  UsbPrintFuncName();
   Q_D(QUsbTransferHandler);
+  DbgPrintFuncName();
   Q_CHECK_PTR(data);
 
   if (maxSize <= 0) return 0;
 
   QMutexLocker(&d->m_read_buf_mutex);
-  qint64 buf_size = d->m_read_buf.size();
-  if (buf_size == 0) return 0;
-  if (!isOpen() && buf_size == 0) return -1;
-  if (buf_size > maxSize) buf_size = maxSize;
+  qint64 read_size = d->m_read_buf.size();
+  if (read_size == 0) return 0;
+  if (!isOpen() && read_size == 0) return -1;
+  if (read_size > maxSize) read_size = maxSize;
 
-  memcpy(data, d->m_read_buf.data(), static_cast<ulong>(buf_size));
-  d->m_read_buf = d->m_read_buf.mid(0, static_cast<int>(buf_size));
+  memcpy(data, d->m_read_buf.data(), static_cast<ulong>(read_size));
+  d->m_read_buf = d->m_read_buf.mid(static_cast<int>(read_size));
 
-  return buf_size;
+  return read_size;
 }
 
 qint64 QUsbTransferHandler::writeData(const char *data, qint64 maxSize)
 {
-  UsbPrintFuncName();
   Q_D(QUsbTransferHandler);
+  DbgPrintFuncName();
   Q_CHECK_PTR(data);
 
   if (!d->isValid()) return -1;
