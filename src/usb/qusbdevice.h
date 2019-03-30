@@ -9,8 +9,8 @@
 QT_BEGIN_NAMESPACE
 
 class QUsbDevicePrivate;
-class QUsbTransferHandler;
-class QUsbTransferHandlerPrivate;
+class QUsbTransfer;
+class QUsbTransferPrivate;
 
 /**
  * @brief
@@ -21,8 +21,8 @@ class Q_USB_EXPORT QUsbDevice : public QObject
   Q_OBJECT
   Q_DECLARE_PRIVATE(QUsbDevice)
 
-  friend QUsbTransferHandler;
-  friend QUsbTransferHandlerPrivate;
+  friend QUsbTransfer;
+  friend QUsbTransferPrivate;
 
 public:
 

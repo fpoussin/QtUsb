@@ -1,7 +1,7 @@
-#ifndef QUSBTRANSFERHANDLER_P_H
-#define QUSBTRANSFERHANDLER_P_H
+#ifndef QUSBTRANSFER_P_H
+#define QUSBTRANSFER_P_H
 
-#include "qusbtransferhandler.h"
+#include "QUsbTransfer.h"
 #include <private/qiodevice_p.h>
 #include <QMutexLocker>
 
@@ -13,17 +13,17 @@
 
 QT_BEGIN_NAMESPACE
 
-class QUsbTransferHandlerPrivate : public QIODevicePrivate {
+class QUsbTransferPrivate : public QIODevicePrivate {
 
-  Q_DECLARE_PUBLIC(QUsbTransferHandler)
+  Q_DECLARE_PUBLIC(QUsbTransfer)
 
 public:
-  QUsbTransferHandlerPrivate();
+  QUsbTransferPrivate();
 
   void readyRead();
   void bytesWritten(qint64 bytes);
-  void error(QUsbTransferHandler::Status error);
-  void setStatus(QUsbTransferHandler::Status status);
+  void error(QUsbTransfer::Status error);
+  void setStatus(QUsbTransfer::Status status);
   bool isValid();
 
   bool prepareTransfer(libusb_transfer **tr, libusb_transfer_cb_fn cb, char *data, qint64 size, QUsbDevice::Endpoint ep);

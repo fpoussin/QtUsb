@@ -74,7 +74,7 @@ bool UsbExample::openHandle()
 {
   qDebug("Opening Handle");
   bool b = false;
-  m_transfer_handler = new QUsbTransferHandler(m_usb_dev, QUsbTransferHandler::bulkTransfer, m_read_ep, m_write_ep);
+  m_transfer_handler = new QUsbTransfer(m_usb_dev, QUsbTransfer::bulkTransfer, m_read_ep, m_write_ep);
 
   connect(m_transfer_handler, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
   connect(m_transfer_handler, SIGNAL(bytesWritten(qint64)), this, SLOT(onWriteComplete(qint64)));

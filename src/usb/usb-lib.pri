@@ -3,19 +3,18 @@ INCLUDEPATH += $$PWD
 PUBLIC_HEADERS += \
     $$PWD/qusbglobal.h \
     $$PWD/qusbdevice.h \
-    $$PWD/qusbtypes.h \
     $$PWD/qusbinfo.h \
-    $$PWD/qusbtransferhandler.h
+    $$PWD/qusbtransfer.h
 
 PRIVATE_HEADERS += \
     $$PWD/qusbdevice_p.h \
     $$PWD/qusbinfo_p.h \
-    $$PWD/qusbtransferhandler_p.h
+    $$PWD/qusbtransfer_p.h
 
 SOURCES += \
     $$PWD/qusbinfo.cpp \
     $$PWD/qusbdevice.cpp \
-    $$PWD/qusbtransferhandler.cpp
+    $$PWD/qusbtransfer.cpp
 
 win32 {
     LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ Advapi32.lib

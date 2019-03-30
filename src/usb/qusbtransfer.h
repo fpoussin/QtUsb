@@ -1,20 +1,20 @@
-#ifndef QUSBTRANSFERHANDLER_H
-#define QUSBTRANSFERHANDLER_H
+#ifndef QUSBTRANSFER_H
+#define QUSBTRANSFER_H
 
 #include <QObject>
 #include <QIODevice>
 #include "qusbdevice.h"
 
-class QUsbTransferHandlerPrivate;
+class QUsbTransferPrivate;
 
 /**
  * @brief
  *
  */
-class Q_USB_EXPORT QUsbTransferHandler : public QIODevice
+class Q_USB_EXPORT QUsbTransfer : public QIODevice
 {
   Q_OBJECT
-  Q_DECLARE_PRIVATE(QUsbTransferHandler)
+  Q_DECLARE_PRIVATE(QUsbTransfer)
 
 public:
   /**
@@ -67,7 +67,7 @@ public:
    * @param out OUT endpoint
    * @param parent
    */
-  explicit QUsbTransferHandler(QUsbDevice * dev,
+  explicit QUsbTransfer(QUsbDevice * dev,
                                Type type,
                                QUsbDevice::Endpoint in,
                                QUsbDevice::Endpoint out);
@@ -76,7 +76,7 @@ public:
    * @brief
    *
    */
-  ~QUsbTransferHandler();
+  ~QUsbTransfer();
 
   /**
    * @brief
@@ -224,13 +224,13 @@ protected:
  qint64 writeData(const char* data, qint64 maxSize);
 
 private:
-  QUsbTransferHandlerPrivate * const d_dummy;
+  QUsbTransferPrivate * const d_dummy;
   /**
    * @brief
    *
    * @param
    */
-  Q_DISABLE_COPY(QUsbTransferHandler)
+  Q_DISABLE_COPY(QUsbTransfer)
 
   Status m_status;
   const QUsbDevice *m_dev; /**< parent USB Device */
@@ -239,4 +239,4 @@ private:
   const QUsbDevice::Endpoint m_out_ep; /**< OUT endpoint */
 };
 
-#endif // QUSBTRANSFERHANDLER_H
+#endif // QUSBTRANSFER_H

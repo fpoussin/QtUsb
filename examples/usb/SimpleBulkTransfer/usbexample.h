@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QUsbDevice>
-#include <QUsbTransferHandler>
+#include <QUsbTransfer>
 
 const QUsbDevice::Endpoint USB_PIPE_IN = 0x81;   /* Bulk output endpoint for responses */
 const QUsbDevice::Endpoint USB_PIPE_OUT = 0x01;	   /* Bulk input endpoint for commands */
@@ -31,7 +31,7 @@ signals:
 
 private:
     QUsbDevice* m_usb_dev;
-    QUsbTransferHandler* m_transfer_handler;
+    QUsbTransfer* m_transfer_handler;
 
     QByteArray m_send, m_recv;
 

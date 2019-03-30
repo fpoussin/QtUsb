@@ -1,11 +1,11 @@
 #include <QtTest/QtTest>
-#include <QtUsb/QUsbTransferHandler>
+#include <QtUsb/QUsbTransfer>
 
-class tst_QUsbTransferHandler : public QObject
+class tst_QUsbTransfer : public QObject
 {
     Q_OBJECT
 public:
-    explicit tst_QUsbTransferHandler();
+    explicit tst_QUsbTransfer();
 
 private slots:
     void constructors();
@@ -17,51 +17,51 @@ private:
 };
 
 
-tst_QUsbTransferHandler::tst_QUsbTransferHandler()
+tst_QUsbTransfer::tst_QUsbTransfer()
 {
 
 }
 
-void tst_QUsbTransferHandler::constructors()
+void tst_QUsbTransfer::constructors()
 {
   QUsbDevice dev;
   QUsbDevice::Endpoint ep_in = 81, ep_out = 1;
-  QUsbTransferHandler handler1(&dev, QUsbTransferHandler::bulkTransfer, ep_in, ep_out);
+  QUsbTransfer handler1(&dev, QUsbTransfer::bulkTransfer, ep_in, ep_out);
 
   QCOMPARE(handler1.parent(), static_cast<QObject*>(&dev));
-  QCOMPARE(handler1.status(), QUsbTransferHandler::transferCanceled);
-  QVERIFY(handler1.type() == QUsbTransferHandler::bulkTransfer);
+  QCOMPARE(handler1.status(), QUsbTransfer::transferCanceled);
+  QVERIFY(handler1.type() == QUsbTransfer::bulkTransfer);
   QVERIFY(!handler1.polling());
   QCOMPARE(handler1.endpointIn(), ep_in);
   QCOMPARE(handler1.endpointOut(), ep_out);
 
-  QUsbTransferHandler handler2(&dev, QUsbTransferHandler::interruptTransfer, ep_in, ep_out);
+  QUsbTransfer handler2(&dev, QUsbTransfer::interruptTransfer, ep_in, ep_out);
   QCOMPARE(handler2.parent(), static_cast<QObject*>(&dev));
-  QCOMPARE(handler2.status(), QUsbTransferHandler::transferCanceled);
-  QVERIFY(handler2.type() == QUsbTransferHandler::interruptTransfer);
+  QCOMPARE(handler2.status(), QUsbTransfer::transferCanceled);
+  QVERIFY(handler2.type() == QUsbTransfer::interruptTransfer);
   QVERIFY(!handler2.polling());
 }
 
-void tst_QUsbTransferHandler::assignment()
+void tst_QUsbTransfer::assignment()
 {
   QUsbDevice dev;
   QUsbDevice::Endpoint ep_in = 81, ep_out = 1;
-  QUsbTransferHandler handler1(&dev, QUsbTransferHandler::bulkTransfer, ep_in, ep_out);
+  QUsbTransfer handler1(&dev, QUsbTransfer::bulkTransfer, ep_in, ep_out);
 
   QCOMPARE(handler1.parent(), static_cast<QObject*>(&dev));
-  QVERIFY(handler1.type() == QUsbTransferHandler::bulkTransfer);
+  QVERIFY(handler1.type() == QUsbTransfer::bulkTransfer);
 
-  QUsbTransferHandler handler2(&dev, QUsbTransferHandler::interruptTransfer, ep_in, ep_out);
+  QUsbTransfer handler2(&dev, QUsbTransfer::interruptTransfer, ep_in, ep_out);
   QCOMPARE(handler2.parent(), static_cast<QObject*>(&dev));
-  QVERIFY(handler2.type() == QUsbTransferHandler::interruptTransfer);
+  QVERIFY(handler2.type() == QUsbTransfer::interruptTransfer);
 
 }
 
-void tst_QUsbTransferHandler::polling()
+void tst_QUsbTransfer::polling()
 {
   QUsbDevice dev;
   QUsbDevice::Endpoint ep_in = 81, ep_out = 1;
-  QUsbTransferHandler handler1(&dev, QUsbTransferHandler::bulkTransfer, ep_in, ep_out);
+  QUsbTransfer handler1(&dev, QUsbTransfer::bulkTransfer, ep_in, ep_out);
 
   QCOMPARE(handler1.parent(), static_cast<QObject*>(&dev));
   QVERIFY(!handler1.polling());
@@ -74,7 +74,7 @@ void tst_QUsbTransferHandler::polling()
   handler1.close();
   QVERIFY(!handler1.isOpen());
 
-  QUsbTransferHandler handler2(&dev, QUsbTransferHandler::interruptTransfer, ep_in, ep_out);
+  QUsbTransfer handler2(&dev, QUsbTransfer::interruptTransfer, ep_in, ep_out);
   QCOMPARE(handler2.parent(), static_cast<QObject*>(&dev));
   QVERIFY(!handler2.polling());
   QVERIFY(handler2.open(QIODevice::ReadOnly));
@@ -87,5 +87,5 @@ void tst_QUsbTransferHandler::polling()
   QVERIFY(!handler2.isOpen());
 }
 
-QTEST_MAIN(tst_QUsbTransferHandler)
-#include "tst_qusbtransferhandler.moc"
+QTEST_MAIN(tst_QUsbTransfer)
+#include "tst_qusbtransfer.moc"

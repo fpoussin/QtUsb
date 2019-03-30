@@ -20,12 +20,12 @@ public:
   libusb_context *m_ctx;
 };
 
-class QUsbTransferHandlerPrivate;
+class QUsbTransferPrivate;
 
 class QUsbDevicePrivate : public QObjectPrivate {
 
   Q_DECLARE_PUBLIC(QUsbDevice)
-  friend QUsbTransferHandlerPrivate;
+  friend QUsbTransferPrivate;
 
 public:
   QUsbDevicePrivate();
