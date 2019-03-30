@@ -30,7 +30,7 @@ void tst_QUsbDevice::constructors()
   const QUsbDevice::Config c = {1,0,0};
 
   QVERIFY(!dev.isConnected());
-  QVERIFY(!dev.logLevel());
+  QCOMPARE(dev.logLevel(), QUsbDevice::logInfo);
   QCOMPARE(dev.speed(), QUsbDevice::unknownSpeed);
   QCOMPARE(dev.speedString(), QByteArray("Unknown speed"));
   QCOMPARE(dev.config(), c);

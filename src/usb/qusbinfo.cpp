@@ -99,7 +99,7 @@ void QUsbInfo::checkDevices()
 QUsbInfo::QUsbInfo(QObject *parent) : QObject(*(new QUsbInfoPrivate), parent), d_dummy(Q_NULLPTR) {
   Q_D(QUsbInfo);
 
-  m_log_level = QUsbDevice::logError;
+  m_log_level = QUsbDevice::logInfo;
   DbgPrintFuncName();
   int rc;
 

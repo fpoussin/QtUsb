@@ -25,7 +25,7 @@ void tst_QUsbInfo::constructors()
 {
   QUsbInfo info;
 
-  QVERIFY(!info.logLevel());
+  QCOMPARE(info.logLevel(), QUsbDevice::logInfo);
 
 }
 
