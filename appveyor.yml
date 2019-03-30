@@ -58,7 +58,7 @@ after_build:
   - cd build
   - 7z a qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
   - cd tests
-  - nmake check TESTARGS="-o xunit.xml,xunitxml"
+  - nmake /I check TESTARGS="-o xunit.xml,xunitxml"
 
 artifacts:
   - path: build\*.7z
