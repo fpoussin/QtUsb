@@ -41,17 +41,17 @@ void tst_QUsbDevice::assignment()
 {
   QUsbDevice dev;
   QUsbDevice::Config c = {1, 1, 1};
-  QUsbDevice::Filter f = {1234, 4321};
-  int timeout = 10;
+  QUsbDevice::Id f = {1234, 4321};
+  const quint16 timeout = (rand() % 200) + 10;
 
   dev.setConfig(c);
-  dev.setFilter(f);
+  dev.setId(f);
 
   QCOMPARE(dev.config(), c);
-  QCOMPARE(dev.filter(), f);
+  QCOMPARE(dev.id(), f);
 
   dev.setTimeout(timeout);
-  QCOMPARE(static_cast<uint>(dev.timeout()), static_cast<uint>(timeout));
+  QCOMPARE(dev.timeout(), timeout);
 }
 
 void tst_QUsbDevice::states()

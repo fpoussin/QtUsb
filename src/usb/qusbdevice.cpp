@@ -68,8 +68,8 @@ QByteArray QUsbDevice::speedString() const {
   return "Error";
 }
 
-QUsbDevice::FilterList QUsbDevice::devices() {
-  FilterList list;
+QUsbDevice::IdList QUsbDevice::devices() {
+  IdList list;
   ssize_t cnt;  // holding number of devices in list
   libusb_device** devs;
   libusb_context* ctx;
@@ -87,7 +87,7 @@ QUsbDevice::FilterList QUsbDevice::devices() {
     libusb_device_descriptor desc;
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
-      Filter filter;
+      Id filter;
       filter.pid = desc.idProduct;
       filter.vid = desc.idVendor;
 
@@ -122,7 +122,7 @@ qint32 QUsbDevice::open() {
     libusb_device_descriptor desc;
 
     if (libusb_get_device_descriptor(dev, &desc) == 0) {
-      if (desc.idProduct == m_filter.pid && desc.idVendor == m_filter.vid) {
+      if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid) {
         if (m_debug) {
           qDebug("Found device.");
         }

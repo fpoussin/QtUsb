@@ -7,8 +7,8 @@
 UsbExample::UsbExample(QObject *parent) : QObject(parent), m_usb_dev(new QUsbDevice()), m_transfer_handler(Q_NULLPTR) {
   this->setupDevice();
 
-  m_send.append(0xF1);
-  m_send.append(0x80);
+  m_send.append(static_cast<char>(0xF1u));
+  m_send.append(static_cast<char>(0x80u));
 
   if (this->openDevice()) {
     qInfo("Device open!");
@@ -47,7 +47,7 @@ void UsbExample::setupDevice() {
   m_write_ep = 0x02;
 
   //
-  m_usb_dev->setFilter(m_filter);
+  m_usb_dev->setId(m_filter);
   m_usb_dev->setConfig(m_config);
 }
 

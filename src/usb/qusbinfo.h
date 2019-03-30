@@ -38,57 +38,57 @@ public:
    *
    * @return QUsbDevice::FilterList
    */
-  QUsbDevice::FilterList getPresentDevices(void);
+  QUsbDevice::IdList getPresentDevices(void) const;
 
   /**
    * @brief Check if device is present
    *
-   * @param filter Device to search
+   * @param Id Device to search
    * @return bool true if present
    */
-  bool isPresent(const QUsbDevice::Filter &filter);
+  bool isPresent(const QUsbDevice::Id &id) const;
 
 signals:
   /**
    * @brief Signals a new device from the given list has been inserted
    *
-   * @param filters list of devices to match
+   * @param IdList list of devices to match
    */
-  void deviceInserted(QUsbDevice::FilterList filters);
+  void deviceInserted(QUsbDevice::IdList list);
 
   /**
    * @brief Signals a device from the given list has been removed
    *
-   * @param filters list of devices to match
+   * @param IdList list of devices to match
    */
-  void deviceRemoved(QUsbDevice::FilterList filters);
+  void deviceRemoved(QUsbDevice::IdList list);
 
 public slots:
   /**
    * @brief Add a device to the list
    *
-   * @param filter device filter
+   * @param Id device filter
    * @return bool false if device was already in the list, else true
    */
-  bool addDevice(const QUsbDevice::Filter &filter);
+  bool addDevice(const QUsbDevice::Id &id);
 
   /**
    * @brief Remove a device from the list
    *
-   * @param filter device filter
+   * @param Id device filter
    * @return bool false if device was not in the list, else true
    */
-  bool removeDevice(const QUsbDevice::Filter &filter);
+  bool removeDevice(const QUsbDevice::Id &id);
 
   /**
    * @brief Search a device in a device list
    *
-   * @param filter the device filter
-   * @param list the device filter list
+   * @param Id the device filter
+   * @param IdList the device filter list
    * @return int index of the filter, returns -1 if not found
    */
-  int findDevice(const QUsbDevice::Filter &filter,
-                 const QUsbDevice::FilterList &list);
+  int findDevice(const QUsbDevice::Id &id,
+                 const QUsbDevice::IdList &list) const;
 
   /**
    * @brief set debug mode
@@ -101,22 +101,22 @@ public slots:
    * @brief get debug mode
    *
    */
-  bool debug() {return m_debug;}
+  bool debug() const {return m_debug;}
 
 protected slots:
   /**
    * @brief Checks for new events (insertions/removal) in the given list
    *
-   * @param list Lists of devices to monitor
+   * @param IdList list of devices to monitor
    */
-  void monitorDevices(const QUsbDevice::FilterList &list);
+  void monitorDevices(const QUsbDevice::IdList &list);
 
   void checkDevices();
 
 protected:
   bool m_debug;
-  QUsbDevice::FilterList m_filter_list;        /**< List of filters we are using */
-  QUsbDevice::FilterList m_system_list; /**< List of all filters in the system */
+  QUsbDevice::IdList m_list;        /**< List of IDs we are using */
+  QUsbDevice::IdList m_system_list; /**< List of all IDs in the system */
 
 private:
   QUsbInfoPrivate * const d_dummy;

@@ -87,23 +87,23 @@ public:
    * @brief Device filter
    *
    */
-  typedef struct Filter {
+  typedef struct Id {
     quint16 pid;      /**< Product ID */
     quint16 vid;      /**< Vendor ID */
 
-    bool operator == (const QUsbDevice::Filter& o) const
+    bool operator == (const QUsbDevice::Id& o) const
     {
         return o.pid == this->pid &&
                o.vid == this->vid;
     }
 
-  } Filter;
+  } Id;
 
   /**
    * @brief List of device filters
    *
    */
-  typedef QList<Filter> FilterList;
+  typedef QList<Id> IdList;
   /**
    * @brief List of device configs
    *
@@ -162,7 +162,7 @@ public:
   Q_ENUM(DeviceStatus)
 
   Q_PROPERTY(bool debug READ debug WRITE setDebug)
-  Q_PROPERTY(Filter filter READ filter WRITE setFilter)
+  Q_PROPERTY(Id id READ id WRITE setId)
   Q_PROPERTY(Config config READ config WRITE setConfig)
   Q_PROPERTY(quint16 pid READ pid)
   Q_PROPERTY(quint16 vid READ vid)
@@ -184,11 +184,11 @@ public:
    */
   void setDebug(bool enable);
   /**
-   * @brief Set device filter
+   * @brief Set device Id
    *
-   * @param Filter Filter to apply
+   * @param Id ID to apply
    */
-  void setFilter(const Filter &filter) { m_filter = filter; }
+  void setId(const Id &id) { m_id = id; }
   /**
    * @brief Set device config
    *
@@ -204,11 +204,11 @@ public:
   void setTimeout(quint16 timeout) { m_timeout = timeout; }
 
   /**
-   * @brief Get current device filter
+   * @brief Get current device Id
    *
-   * @return DeviceFilter
+   * @return Id
    */
-  Filter filter(void) const { return m_filter; }
+  Id id(void) const { return m_id; }
 
   /**
    * @brief Get current device config
@@ -229,13 +229,13 @@ public:
    *
    * @return quint16
    */
-  quint16 pid(void) const { return m_filter.pid; }
+  quint16 pid(void) const { return m_id.pid; }
   /**
    * @brief Get current device vid
    *
    * @return quint16
    */
-  quint16 vid(void) const { return m_filter.vid; }
+  quint16 vid(void) const { return m_id.vid; }
   /**
    * @brief Get current timeout
    *
@@ -267,7 +267,7 @@ public:
    *
    * @return FilterList
    */
-  static FilterList devices(void);
+  static IdList devices(void);
 
 public slots:
   /**
@@ -294,9 +294,9 @@ private:
   quint16 m_timeout;            /**< Device timeout */
   bool m_debug;                 /**< Debug enabled boolean */
   bool m_connected;             /**< Connected boolean */
-  Filter m_filter; /**< Device filter */
-  Config m_config; /**< Device config */
-  DeviceSpeed m_spd;     /**< Device speed */
+  Id m_id;                      /**< Device IDs */
+  Config m_config;              /**< Device config */
+  DeviceSpeed m_spd;            /**< Device speed */
 };
 
 QT_END_NAMESPACE
