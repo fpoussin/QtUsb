@@ -27,6 +27,9 @@ class Q_USB_EXPORT QUsbDevice : public QObject
 public:
     static const quint16 DefaultTimeout = 250; /**< Default timeout in milliseconds */
 
+    /**
+     * @brief Endpoint type
+     */
     typedef quint8 Endpoint;
 
     /**
@@ -85,6 +88,11 @@ public:
         quint8 interface; /**< Interface index */
         quint8 alternate; /**< Alternate configuration index */
 
+        /**
+         * @brief operator ==
+         * @param o
+         * @return
+         */
         bool operator==(const QUsbDevice::Config &o) const
         {
             return o.config == this->config && o.interface == this->interface && o.alternate == this->alternate;
@@ -100,6 +108,11 @@ public:
         quint16 pid; /**< Product ID */
         quint16 vid; /**< Vendor ID */
 
+        /**
+         * @brief operator ==
+         * @param o
+         * @return
+         */
         bool operator==(const QUsbDevice::Id &o) const
         {
             return o.pid == this->pid && o.vid == this->vid;
@@ -169,13 +182,13 @@ public:
     };
     Q_ENUM(DeviceStatus)
 
-    Q_PROPERTY(LogLevel logLevel READ logLevel WRITE setLogLevel)
-    Q_PROPERTY(Id id READ id WRITE setId)
-    Q_PROPERTY(Config config READ config WRITE setConfig)
-    Q_PROPERTY(quint16 pid READ pid)
-    Q_PROPERTY(quint16 vid READ vid)
-    Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
-    Q_PROPERTY(DeviceSpeed speed READ speed)
+    Q_PROPERTY(LogLevel logLevel READ logLevel WRITE setLogLevel) /**< loglevel */
+    Q_PROPERTY(Id id READ id WRITE setId) /**< IDs */
+    Q_PROPERTY(Config config READ config WRITE setConfig) /**< Config */
+    Q_PROPERTY(quint16 pid READ pid) /**< Product ID */
+    Q_PROPERTY(quint16 vid READ vid) /**< Vendor ID */
+    Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout) /**< Transfer timeout */
+    Q_PROPERTY(DeviceSpeed speed READ speed) /**< Device speed */
 
     /**
    * @brief constructor
@@ -188,19 +201,21 @@ public:
     /**
    * @brief Enable/Disable debug
    *
-   * @param enable
+   * @param level log level
    */
     void setLogLevel(LogLevel level);
+
     /**
    * @brief Set device Id
    *
-   * @param Id ID to apply
+   * @param id to apply
    */
     void setId(const Id &id) { m_id = id; }
+
     /**
    * @brief Set device config
    *
-   * @param Config config to apply
+   * @param config to apply
    */
     void setConfig(const Config &config) { m_config = config; }
 
@@ -238,30 +253,35 @@ public:
    * @return quint16
    */
     quint16 pid(void) const { return m_id.pid; }
+
     /**
    * @brief Get current device vid
    *
    * @return quint16
    */
     quint16 vid(void) const { return m_id.vid; }
+
     /**
    * @brief Get current timeout
    *
    * @return quint8
    */
     quint16 timeout(void) const { return m_timeout; }
+
     /**
    * @brief Get debug mode
    *
    * @return bool debug enabled
    */
     LogLevel logLevel(void) const { return m_log_level; }
+
     /**
    * @brief Get current device speed
    *
    * @return DeviceSpeed
    */
     DeviceSpeed speed(void) const { return m_spd; }
+
     /**
    * @brief Get current device speed string
    *
@@ -300,7 +320,7 @@ private:
     Q_DISABLE_COPY(QUsbDevice)
 
     quint16 m_timeout; /**< Device timeout */
-    LogLevel m_log_level; /**< Debug enabled boolean */
+    LogLevel m_log_level; /**< Log level */
     bool m_connected; /**< Connected boolean */
     Id m_id; /**< Device IDs */
     Config m_config; /**< Device config */

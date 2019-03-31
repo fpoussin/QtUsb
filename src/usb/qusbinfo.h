@@ -44,7 +44,7 @@ public:
     /**
    * @brief Check if device is present
    *
-   * @param Id Device to search
+   * @param id device Id
    * @return bool true if present
    */
     bool isPresent(const QUsbDevice::Id &id) const;
@@ -53,14 +53,14 @@ signals:
     /**
    * @brief Signals a new device from the given list has been inserted
    *
-   * @param IdList list of devices to match
+   * @param list of devices to match
    */
     void deviceInserted(QUsbDevice::IdList list);
 
     /**
    * @brief Signals a device from the given list has been removed
    *
-   * @param IdList list of devices to match
+   * @param list of devices to match
    */
     void deviceRemoved(QUsbDevice::IdList list);
 
@@ -68,7 +68,7 @@ public slots:
     /**
    * @brief Add a device to the list
    *
-   * @param Id device filter
+   * @param id device Id
    * @return bool false if device was already in the list, else true
    */
     bool addDevice(const QUsbDevice::Id &id);
@@ -76,7 +76,7 @@ public slots:
     /**
    * @brief Remove a device from the list
    *
-   * @param Id device filter
+   * @param id device Id
    * @return bool false if device was not in the list, else true
    */
     bool removeDevice(const QUsbDevice::Id &id);
@@ -84,8 +84,8 @@ public slots:
     /**
    * @brief Search a device in a device list
    *
-   * @param Id the device filter
-   * @param IdList the device filter list
+   * @param id the device filter
+   * @param list the device filter list
    * @return int index of the filter, returns -1 if not found
    */
     int findDevice(const QUsbDevice::Id &id,
@@ -94,7 +94,7 @@ public slots:
     /**
    * @brief set debug mode
    *
-   * @param debug
+   * @param level debug level
    */
     void setLogLevel(QUsbDevice::LogLevel level);
 
@@ -108,14 +108,17 @@ protected slots:
     /**
    * @brief Checks for new events (insertions/removal) in the given list
    *
-   * @param IdList list of devices to monitor
+   * @param list of devices to monitor
    */
     void monitorDevices(const QUsbDevice::IdList &list);
 
+    /**
+     * @brief Check if system device list has changed
+     */
     void checkDevices();
 
 protected:
-    QUsbDevice::LogLevel m_log_level;
+    QUsbDevice::LogLevel m_log_level; /**< Log level */
     QUsbDevice::IdList m_list; /**< List of IDs we are using */
     QUsbDevice::IdList m_system_list; /**< List of all IDs in the system */
 

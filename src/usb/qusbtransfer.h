@@ -54,10 +54,10 @@ public:
     };
     Q_ENUM(Status)
 
-    Q_PROPERTY(Type type READ type)
-    Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn)
-    Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut)
-    Q_PROPERTY(bool polling READ polling WRITE setPolling)
+    Q_PROPERTY(Type type READ type) /**< Transfer type */
+    Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn) /**< Input endpoint */
+    Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut) /**< Output endpoint */
+    Q_PROPERTY(bool polling READ polling WRITE setPolling) /**< Input Polling */
 
     /**
    * @brief
@@ -66,7 +66,6 @@ public:
    * @param type Transfer type for this object
    * @param in IN Endpoint
    * @param out OUT endpoint
-   * @param parent
    */
     explicit QUsbTransfer(QUsbDevice *dev,
                           Type type,
@@ -88,10 +87,8 @@ public:
     bool open(QIODevice::OpenMode mode);
 
     /**
-   * @brief
-   *
-   */
-
+     * @brief close
+     */
     void close();
 
     /**
@@ -176,7 +173,8 @@ public:
                            quint16 wLength) const;
 
     /**
-   * @brief Enable automatic IN polling (recuring read read)
+   * @brief Enable automatic IN polling (recuring read).
+   *
    * This is enabled by default on interrupt endpoints
    *
    * @param enable
@@ -204,6 +202,9 @@ public slots:
     void cancelTransfer(void);
 
 signals:
+    /**
+     * @brief error
+     */
     void error(Status);
 
 protected:
@@ -226,11 +227,6 @@ protected:
 
 private:
     QUsbTransferPrivate *const d_dummy;
-    /**
-   * @brief
-   *
-   * @param
-   */
     Q_DISABLE_COPY(QUsbTransfer)
 
     Status m_status;
