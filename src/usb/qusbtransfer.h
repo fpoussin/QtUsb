@@ -8,8 +8,9 @@
 class QUsbTransferPrivate;
 
 /**
- * @brief
+ * @brief This class handles transfers between endpoints and the host.
  *
+ * It works on top of libusb's async module.
  */
 class Q_USB_EXPORT QUsbTransfer : public QIODevice
 {

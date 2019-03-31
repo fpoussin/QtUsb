@@ -6,14 +6,13 @@
 
 QT_BEGIN_NAMESPACE
 
-/**
- * @brief The QUsb info class.
- * Handles USB events, searching, and devices.
- *
- */
-
 class QUsbInfoPrivate;
 
+/**
+ * @brief The QtUsb info class.
+ * Handles USB events and searching.
+ * Can be used to monitor events for a list of devices or all system devices.
+ */
 class Q_USB_EXPORT QUsbInfo : public QObject
 {
     Q_OBJECT

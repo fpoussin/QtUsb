@@ -13,7 +13,7 @@ class QUsbTransfer;
 class QUsbTransferPrivate;
 
 /**
- * @brief
+ * @brief This class handles opening and configuring the device.
  *
  */
 class Q_USB_EXPORT QUsbDevice : public QObject
