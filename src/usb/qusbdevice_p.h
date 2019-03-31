@@ -13,36 +13,37 @@
 
 QT_BEGIN_NAMESPACE
 
-class QUsbEventsThread : public QThread {
+class QUsbEventsThread : public QThread
+{
 public:
-  void run();
+    void run();
 
-  libusb_context *m_ctx;
+    libusb_context *m_ctx;
 };
 
 class QUsbTransferPrivate;
 
-class QUsbDevicePrivate : public QObjectPrivate {
-
-  Q_DECLARE_PUBLIC(QUsbDevice)
-  friend QUsbTransferPrivate;
+class QUsbDevicePrivate : public QObjectPrivate
+{
+    Q_DECLARE_PUBLIC(QUsbDevice)
+    friend QUsbTransferPrivate;
 
 public:
-  QUsbDevicePrivate();
-  ~QUsbDevicePrivate();
+    QUsbDevicePrivate();
+    ~QUsbDevicePrivate();
 
-  /**
+    /**
    * @brief Print error code to qWarning
    *
    * @param error_code
    */
-  void printUsbError(int error_code) const;
+    void printUsbError(int error_code) const;
 
-  libusb_device **m_devs;            /**< libusb device ptr to ptr */
-  libusb_device_handle *m_devHandle; /**< libusb device handle ptr */
-  libusb_context *m_ctx;             /**< libusb context */
+    libusb_device **m_devs; /**< libusb device ptr to ptr */
+    libusb_device_handle *m_devHandle; /**< libusb device handle ptr */
+    libusb_context *m_ctx; /**< libusb context */
 
-  QUsbEventsThread *m_events;
+    QUsbEventsThread *m_events;
 };
 
 QT_END_NAMESPACE

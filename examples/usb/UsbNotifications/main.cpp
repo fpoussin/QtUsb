@@ -1,12 +1,13 @@
 #include "usbexample.h"
 #include <QCoreApplication>
 
-int main(int argc, char *argv[]) {
-  QCoreApplication a(argc, argv);
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
 
-  qInfo("UsbNotifications");
+    qInfo("UsbNotifications");
 
-  UsbExample example;
+    UsbExample example;
 
-  return a.exec();
+    return a.exec();
 }

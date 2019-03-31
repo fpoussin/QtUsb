@@ -13,37 +13,34 @@ private slots:
     void features();
 
 private:
-
 };
 
 tst_QUsbInfo::tst_QUsbInfo()
 {
-
 }
 
 void tst_QUsbInfo::constructors()
 {
-  QUsbInfo info;
+    QUsbInfo info;
 
-  QCOMPARE(info.logLevel(), QUsbDevice::logInfo);
-
+    QCOMPARE(info.logLevel(), QUsbDevice::logInfo);
 }
 
 void tst_QUsbInfo::assignment()
 {
-  QUsbInfo info;
+    QUsbInfo info;
 
-  info.setLogLevel(QUsbDevice::logDebug);
-  QCOMPARE(info.logLevel(), QUsbDevice::logDebug);
+    info.setLogLevel(QUsbDevice::logDebug);
+    QCOMPARE(info.logLevel(), QUsbDevice::logDebug);
 
-  info.setLogLevel(QUsbDevice::logNone);
-  QCOMPARE(info.logLevel(), QUsbDevice::logNone);
+    info.setLogLevel(QUsbDevice::logNone);
+    QCOMPARE(info.logLevel(), QUsbDevice::logNone);
 }
 
 void tst_QUsbInfo::features()
 {
-  QUsbInfo info;
-  info.getPresentDevices();
+    QUsbInfo info;
+    info.getPresentDevices();
 }
 
 QTEST_MAIN(tst_QUsbInfo)

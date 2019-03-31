@@ -13,18 +13,18 @@
 
 QT_BEGIN_NAMESPACE
 
-class QUsbInfoPrivate : public QObjectPrivate {
-
-  Q_DECLARE_PUBLIC(QUsbInfo)
+class QUsbInfoPrivate : public QObjectPrivate
+{
+    Q_DECLARE_PUBLIC(QUsbInfo)
 
 public:
-  QUsbInfoPrivate();
+    QUsbInfoPrivate();
 
-  ~QUsbInfoPrivate();
+    ~QUsbInfoPrivate();
 
-  bool m_has_hotplug;
-  libusb_context *m_ctx;
-  QTimer *m_refresh_timer;
+    bool m_has_hotplug;
+    libusb_context *m_ctx;
+    QTimer *m_refresh_timer;
 };
 
 QT_END_NAMESPACE
