@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QUsbDevice>
-#include <QUsbManager>
+#include <QUsbInfo>
 
 class UsbExample : public QObject
 {
@@ -15,11 +15,11 @@ public:
 signals:
 
 public slots:
-    void onDevInserted(QtUsb::FilterList list);
-    void onDevRemoved(QtUsb::FilterList list);
+    void onDevInserted(QUsbDevice::IdList list);
+    void onDevRemoved(QUsbDevice::IdList list);
 
 private:
-    QUsbManager m_usb_manager;
+    QUsbInfo m_usb_manager;
 
 };
 

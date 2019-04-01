@@ -27,7 +27,7 @@
 
 /*!
     \page qtusb-index.html
-    \since 0.4.0
+    \since 0.5.0
     \title Qt Usb
     \brief Provides an API to connect to USB devices.
 
@@ -37,10 +37,12 @@
     statement:
 
     \code
-    #include <QUsb>
+    #include <QUsbInfo>
+    #include <QUsbDevice>
+    #include <QUsbTransferHandler>
     \endcode
 
-    To link against the module, add this line to your \l qmake \c
+    To import the module, add this line to your \l qmake \c
     .pro file:
 
     \code

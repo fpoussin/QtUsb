@@ -3,4 +3,4 @@ TEMPLATE = subdirs
 
 CMAKE_QT_MODULES_UNDER_TEST = usb
 
-CONFIG += ctest_testcase
+#CONFIG += ctest_testcase

@@ -9,20 +9,18 @@ matrix:
 environment:
   matrix:
   - arch: x64
-    qt: 5.12.1
+    qt: 5.12
     cc: VS2017
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    APPVEYOR_JOB_NAME: msvc-x64
 
   - arch: x86
-    qt: 5.12.1
+    qt: 5.12
     cc: VS2017
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    APPVEYOR_JOB_NAME: msvc-x86
 
 init:
   - set vcarch=%arch%
@@ -34,7 +32,7 @@ init:
     ) else if not %cc%==MinGW (
       call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
     )
-  - set PATH=%QTDIR%\bin;%PATH%
+  - set PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
   - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
 
@@ -51,9 +49,16 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "DEFINES += QT_BUILD_USB_LIB" "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%/libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%/" ..
-  - nmake INSTALL_ROOT=\projects\install install
-  - 7z a qt%qt%-usb-%arch%.7z C:\projects\install\*
+  - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%" ..
+  - jom INSTALL_ROOT=\projects\install install
+  - jom sub-tests
+
+after_build:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cd build
+  - 7z a qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
+  - cd tests
+  - nmake /I check TESTARGS="-o xunit.xml,xunitxml"
 
 artifacts:
   - path: build\*.7z
@@ -71,3 +76,7 @@ deploy:
 
 test: off
 
+on_success:
+  - ps: |
+      $wc = New-Object 'System.Net.WebClient'
+      Get-ChildItem -Recurse -Filter "xunit.xml" | ForEach-Object { Write-Host $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }

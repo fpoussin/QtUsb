@@ -3,6 +3,7 @@
 
 #include "qusbdevice.h"
 #include <private/qobject_p.h>
+#include <QThread>
 
 #ifdef Q_OS_UNIX
 #include <libusb-1.0/libusb.h>
@@ -12,29 +13,37 @@
 
 QT_BEGIN_NAMESPACE
 
-class QUsbDevicePrivate : public QObjectPrivate {
+class QUsbEventsThread : public QThread
+{
+public:
+    void run();
 
-  Q_DECLARE_PUBLIC(QUsbDevice)
+    libusb_context *m_ctx;
+};
+
+class QUsbTransferPrivate;
+
+class QUsbDevicePrivate : public QObjectPrivate
+{
+    Q_DECLARE_PUBLIC(QUsbDevice)
+    friend QUsbTransferPrivate;
 
 public:
-  QUsbDevicePrivate();
+    QUsbDevicePrivate();
+    ~QUsbDevicePrivate();
 
-  /**
+    /**
    * @brief Print error code to qWarning
    *
    * @param error_code
    */
-  void printUsbError(int error_code) const;
+    void printUsbError(int error_code) const;
 
-  /**
-   * @brief Set default values (config)
-   *
-   */
-  void setDefaults(void);
+    libusb_device **m_devs; /**< libusb device ptr to ptr */
+    libusb_device_handle *m_devHandle; /**< libusb device handle ptr */
+    libusb_context *m_ctx; /**< libusb context */
 
-  libusb_device **m_devs;            /**< libusb device ptr to ptr */
-  libusb_device_handle *m_devHandle; /**< libusb device handle ptr */
-  libusb_context *m_ctx;             /**< libusb context */
+    QUsbEventsThread *m_events;
 };
 
 QT_END_NAMESPACE
