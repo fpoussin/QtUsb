@@ -104,13 +104,13 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
 /*!
     \fn void QUsbInfo::deviceInserted(QUsbDevice::IdList list)
 
-    This is signal is emited when one or more new devices are detected, providing a \a list
+    This is signal is emited when one or more new devices are detected, providing a \a list.
 */
 
 /*!
     \fn void QUsbInfo::deviceRemoved(QUsbDevice::IdList list)
 
-    This is signal is emited when one or more new devices are removed, providing a \a list
+    This is signal is emited when one or more new devices are removed, providing a \a list.
 */
 
 /*!
@@ -169,7 +169,7 @@ QUsbInfo::QUsbInfo(QObject *parent)
 }
 
 /*!
-    Unregister callbacks and close the usb context
+    Unregister callbacks and close the usb context.
  */
 QUsbInfo::~QUsbInfo()
 {
@@ -180,7 +180,9 @@ QUsbInfo::~QUsbInfo()
 }
 
 /*!
-    Chekc devices present in system
+    Check devices present in system.
+
+    This gets called by the internal timer.
  */
 void QUsbInfo::checkDevices()
 {
@@ -230,7 +232,7 @@ bool QUsbInfo::isPresent(const QUsbDevice::Id &id) const
 }
 
 /*!
-      Add an \a id device to the list
+      Add an \a id device to the list.
 
       Returns false if device was already in the list, else true.
  */

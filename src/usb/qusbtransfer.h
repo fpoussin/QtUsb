@@ -33,10 +33,10 @@ public:
     };
     Q_ENUM(Status)
 
-    Q_PROPERTY(Type type READ type) /*!< Transfer type */
-    Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn) /*!< Input endpoint */
-    Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut) /*!< Output endpoint */
-    Q_PROPERTY(bool polling READ polling WRITE setPolling) /*!< Input Polling */
+    Q_PROPERTY(Type type READ type)
+    Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn)
+    Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut)
+    Q_PROPERTY(bool polling READ polling WRITE setPolling)
 
     explicit QUsbTransfer(QUsbDevice *dev,
                           Type type,
@@ -48,8 +48,8 @@ public:
     void close();
     Type type() const;
 
-    QUsbDevice::Endpoint endpointIn(void) const;
-    QUsbDevice::Endpoint endpointOut(void) const;
+    QUsbDevice::Endpoint endpointIn() const;
+    QUsbDevice::Endpoint endpointOut() const;
 
     bool isSequential() const;
     Status status() const;
@@ -74,7 +74,7 @@ public slots:
     void cancelTransfer();
 
 Q_SIGNALS:
-    void error(Status);
+    void error(Status error);
 
 protected:
     qint64 readData(char *data, qint64 maxSize);

@@ -36,7 +36,6 @@ public slots:
     bool removeDevice(const QUsbDevice::Id &id);
 
 protected slots:
-
     void monitorDevices(const QUsbDevice::IdList &list);
     void checkDevices();
 
