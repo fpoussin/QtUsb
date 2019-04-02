@@ -310,6 +310,24 @@ QUsbDevice::LogLevel QUsbTransferPrivate::logLevel()
     return q->m_dev->logLevel();
 }
 
+/*!
+    \class QUsbTransfer
+
+    \brief This class handles transfers between endpoints and the host.
+
+    It works on top of libusb's async module.
+
+    \reentrant
+    \ingroup usb-main
+    \inmodule QtUsb
+*/
+
+
+/*!
+    \fn void QUsbTransfer::error(Status)
+    emits a signal on any transfer error
+ */
+
 QUsbTransfer::QUsbTransfer(QUsbDevice *dev, QUsbTransfer::Type type, QUsbDevice::Endpoint in, QUsbDevice::Endpoint out)
     : QIODevice(*(new QUsbTransferPrivate)), d_dummy(Q_NULLPTR), m_status(QUsbTransfer::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
@@ -357,6 +375,31 @@ void QUsbTransfer::close()
     // Wait for (canceled) transfers to finish
     while (d_func()->m_transfer_in != Q_NULLPTR || d_func()->m_transfer_out != Q_NULLPTR)
         QThread::msleep(10);
+}
+
+QUsbTransfer::Type QUsbTransfer::type() const
+{
+    return m_type;
+}
+
+QUsbDevice::Endpoint QUsbTransfer::endpointIn() const
+{
+    return m_in_ep;
+}
+
+QUsbDevice::Endpoint QUsbTransfer::endpointOut() const
+{
+    return m_out_ep;
+}
+
+bool QUsbTransfer::isSequential() const
+{
+    return true;
+}
+
+QUsbTransfer::Status QUsbTransfer::status() const
+{
+    return m_status;
 }
 
 qint64 QUsbTransfer::bytesAvailable() const

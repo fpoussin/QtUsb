@@ -36,6 +36,15 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
     qWarning("libusb Error: %s", libusb_strerror(static_cast<enum libusb_error>(error_code)));
 }
 
+/*!
+    \class QUsbDevice
+
+    \brief This class handles opening and configuring the device.
+
+    \reentrant
+    \ingroup usb-main
+    \inmodule QtUsb
+*/
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
@@ -233,6 +242,61 @@ void QUsbDevice::setLogLevel(LogLevel level)
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
     else
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_NONE);
+}
+
+void QUsbDevice::setId(const QUsbDevice::Id &id)
+{
+    m_id = id;
+}
+
+void QUsbDevice::setConfig(const QUsbDevice::Config &config)
+{
+    m_config = config;
+}
+
+void QUsbDevice::setTimeout(quint16 timeout)
+{
+    m_timeout = timeout;
+}
+
+QUsbDevice::Id QUsbDevice::id() const
+{
+    return m_id;
+}
+
+QUsbDevice::Config QUsbDevice::config() const
+{
+    return m_config;
+}
+
+bool QUsbDevice::isConnected() const
+{
+    return m_connected;
+}
+
+quint16 QUsbDevice::pid() const
+{
+    return m_id.pid;
+}
+
+quint16 QUsbDevice::vid() const
+{
+    return m_id.vid;
+}
+
+quint16 QUsbDevice::timeout() const
+{
+    return m_timeout;
+}
+
+QUsbDevice::LogLevel QUsbDevice::logLevel() const
+{
+    return m_log_level;
+}
+
+QUsbDevice::DeviceSpeed QUsbDevice::speed() const
+{
+    return m_spd;
 }
 
 void QUsbEventsThread::run()

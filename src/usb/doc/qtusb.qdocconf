@@ -32,11 +32,10 @@ headerdirs  += ..
 sourcedirs  += ..
 exampledirs += ../../../examples/usb
 imagedirs   += images
-excludedirs += ../qt4support
 
 examplesinstallpath = usb
 
-depends += qtcore qtdoc qtnetwork qmake
+depends += qtcore qtdoc qmake
 
 navigation.landingpage = "Qt Usb"
 navigation.cppclassespage = "Qt Usb C++ Classes"

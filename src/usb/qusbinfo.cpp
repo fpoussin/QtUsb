@@ -6,8 +6,8 @@
 #define DbgPrintFuncName()                   \
     if (m_log_level >= QUsbDevice::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
-#define DbgPrintCB()                                 \
-    if (manager->logLevel() >= QUsbDevice::logDebug) \
+#define DbgPrintCB()                              \
+    if (info->logLevel() >= QUsbDevice::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
@@ -20,28 +20,28 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
 
     static libusb_device_handle *handle = Q_NULLPTR;
     struct libusb_device_descriptor desc;
-    int rc;
     (void)ctx;
+    int rc = 0;
     QUsbDevice::IdList device_list;
     QUsbDevice::Id dev;
-    QUsbInfo *manager = reinterpret_cast<QUsbInfo *>(user_data);
+    QUsbInfo *info = reinterpret_cast<QUsbInfo *>(user_data);
     DbgPrintCB();
 
-    if (manager->logLevel())
+    if (info->logLevel())
         qDebug("hotplugCallback");
 
     (void)libusb_get_device_descriptor(device, &desc);
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
         rc = libusb_open(device, &handle);
-        if (LIBUSB_SUCCESS != rc) {
+        if (rc != LIBUSB_SUCCESS) {
             qWarning("Could not open new USB device");
-            return -1;
+            return rc;
         }
         // Add to list
         dev.vid = desc.idVendor;
         dev.pid = desc.idProduct;
         device_list.append(dev);
-        emit manager->deviceInserted(device_list);
+        emit info->deviceInserted(device_list);
 
     } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
         if (handle) {
@@ -49,7 +49,7 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
             dev.vid = desc.idVendor;
             dev.pid = desc.idProduct;
             device_list.append(dev);
-            emit manager->deviceRemoved(device_list);
+            emit info->deviceRemoved(device_list);
 
             libusb_close(handle);
             handle = Q_NULLPTR;
@@ -59,11 +59,11 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
         qWarning("Unhandled hotplug event %d", event);
         return -1;
     }
-    return 0;
+    return rc;
 }
 
 QUsbInfoPrivate::QUsbInfoPrivate()
-    : m_refresh_timer(new QTimer)
+    : m_has_hotplug(false), m_ctx(Q_NULLPTR), m_refresh_timer(new QTimer)
 {
     QThread *t = new QThread();
     m_refresh_timer->moveToThread(t);
@@ -86,21 +86,37 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
     m_refresh_timer->deleteLater();
 }
 
-void QUsbInfo::checkDevices()
-{
-    DbgPrintFuncName();
-    Q_D(QUsbInfo);
-    QUsbDevice::IdList list;
+/*!
+    \class QUsbInfo
 
-    timeval t = { 0, 0 };
+    \brief The QtUsb info class.
 
-    if (d->m_has_hotplug) {
-        libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);
-    } else {
-        list = QUsbDevice::devices();
-        monitorDevices(list);
-    }
-}
+    \reentrant
+    \ingroup usb-main
+    \inmodule QtUsb
+
+    Handles USB events and searching.
+    Can be used to monitor events for a list of devices or all system devices.
+
+    \sa QUsbDevice
+*/
+
+/*!
+    \fn void QUsbInfo::deviceInserted(QUsbDevice::IdList list)
+
+    This is signal is emited when one or more new devices are detected, providing a \a list
+*/
+
+/*!
+    \fn void QUsbInfo::deviceRemoved(QUsbDevice::IdList list)
+
+    This is signal is emited when one or more new devices are removed, providing a \a list
+*/
+
+/*!
+    \property QUsbInfo::logLevel
+    \brief the log level for hotplug/detection.
+*/
 
 QUsbInfo::QUsbInfo(QObject *parent)
     : QObject(*(new QUsbInfoPrivate), parent), d_dummy(Q_NULLPTR)
@@ -152,6 +168,9 @@ QUsbInfo::QUsbInfo(QObject *parent)
     connect(d->m_refresh_timer, SIGNAL(timeout()), this, SLOT(checkDevices()));
 }
 
+/*!
+    Unregister callbacks and close the usb context
+ */
 QUsbInfo::~QUsbInfo()
 {
     Q_D(QUsbInfo);
@@ -160,6 +179,29 @@ QUsbInfo::~QUsbInfo()
     libusb_exit(d->m_ctx);
 }
 
+/*!
+    Chekc devices present in system
+ */
+void QUsbInfo::checkDevices()
+{
+    DbgPrintFuncName();
+    Q_D(QUsbInfo);
+    QUsbDevice::IdList list;
+
+    timeval t = { 0, 0 };
+
+    if (d->m_has_hotplug) {
+        libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);
+    } else {
+        list = QUsbDevice::devices();
+        monitorDevices(list);
+    }
+}
+
+/*!
+   Gets a list of devices present in the system.
+
+ */
 QUsbDevice::IdList QUsbInfo::getPresentDevices() const
 {
     DbgPrintFuncName();
@@ -176,12 +218,22 @@ QUsbDevice::IdList QUsbInfo::getPresentDevices() const
     return list;
 }
 
+/*!
+      Check if \a id  device is present.
+
+      Return bool true if present.
+ */
 bool QUsbInfo::isPresent(const QUsbDevice::Id &id) const
 {
     DbgPrintFuncName();
     return this->findDevice(id, m_system_list) >= 0;
 }
 
+/*!
+      Add an \a id device to the list
+
+      Returns false if device was already in the list, else true.
+ */
 bool QUsbInfo::addDevice(const QUsbDevice::Id &id)
 {
 
@@ -193,6 +245,11 @@ bool QUsbInfo::addDevice(const QUsbDevice::Id &id)
     return false;
 }
 
+/*!
+      \brief Remove \a id device from the list.
+
+      Return bool false if device was not in the list, else true.
+ */
 bool QUsbInfo::removeDevice(const QUsbDevice::Id &id)
 {
 
@@ -205,6 +262,11 @@ bool QUsbInfo::removeDevice(const QUsbDevice::Id &id)
     return true;
 }
 
+/*!
+      Search an \a id device in a device \a list.
+
+      Return index of the filter, returns -1 if not found.
+ */
 int QUsbInfo::findDevice(const QUsbDevice::Id &id,
                          const QUsbDevice::IdList &list) const
 {
@@ -219,6 +281,9 @@ int QUsbInfo::findDevice(const QUsbDevice::Id &id,
     return -1;
 }
 
+/*!
+    Set log \a level (only hotplug/detection).
+ */
 void QUsbInfo::setLogLevel(QUsbDevice::LogLevel level)
 {
     DbgPrintFuncName();
@@ -230,11 +295,17 @@ void QUsbInfo::setLogLevel(QUsbDevice::LogLevel level)
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 }
 
+/*!
+    Get current log level.
+ */
 QUsbDevice::LogLevel QUsbInfo::logLevel() const
 {
     return m_log_level;
 }
 
+/*!
+    Add a \a list to monitor.
+ */
 void QUsbInfo::monitorDevices(const QUsbDevice::IdList &list)
 {
 
