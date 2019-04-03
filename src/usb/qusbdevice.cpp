@@ -122,10 +122,35 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
  */
 
 /*!
+    \variable QUsbDevice::Config::config
+    \brief The configuration ID.
+ */
+
+/*!
+    \variable QUsbDevice::Config::interface
+    \brief The interface ID.
+ */
+
+/*!
+    \variable QUsbDevice::Config::alternate
+    \brief The alternate ID.
+ */
+
+/*!
     \class QUsbDevice::Id
     \brief Device Ids structure.
     \ingroup usb-main
     \inmodule QtUsb
+ */
+
+/*!
+    \variable QUsbDevice::Id::vid
+    \brief The vendor ID.
+ */
+
+/*!
+    \variable QUsbDevice::Id::pid
+    \brief The product ID.
  */
 
 QUsbDevice::QUsbDevice(QObject *parent)
@@ -446,4 +471,24 @@ void QUsbEventsThread::run()
             break;
         }
     }
+}
+
+/*!
+    \brief Comparision operator.
+
+    Returns \c true if all \a other attributes match.
+ */
+bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
+{
+  return other.config == this->config && other.interface == this->interface && other.alternate == this->alternate;
+}
+
+/*!
+    \brief Comparision operator.
+
+    Returns \c true if all \a other attributes match.
+ */
+bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
+{
+  return other.pid == this->pid && other.vid == this->vid;
 }

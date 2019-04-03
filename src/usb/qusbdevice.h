@@ -34,26 +34,22 @@ public:
         logDebugAll = 5
     };
 
-    typedef struct Config {
+    class Config {
+        public:
         quint8 config;
         quint8 interface;
         quint8 alternate;
 
-        bool operator==(const QUsbDevice::Config &o) const
-        {
-            return o.config == this->config && o.interface == this->interface && o.alternate == this->alternate;
-        }
-    } Config;
+        bool operator==(const QUsbDevice::Config &other) const;
+    };
 
-    typedef struct Id {
+    class Id {
+        public:
         quint16 pid;
         quint16 vid;
 
-        bool operator==(const QUsbDevice::Id &o) const
-        {
-            return o.pid == this->pid && o.vid == this->vid;
-        }
-    } Id;
+        bool operator==(const QUsbDevice::Id &other) const;
+    };
 
     typedef QList<Id> IdList;
     typedef QList<Config> ConfigList;
