@@ -16,7 +16,6 @@ class Q_USB_EXPORT QUsbInfo : public QObject
     Q_PROPERTY(QUsbDevice::LogLevel logLevel READ logLevel WRITE setLogLevel)
 
 public:
-
     explicit QUsbInfo(QObject *parent = Q_NULLPTR);
     ~QUsbInfo(void);
 
