@@ -19,7 +19,6 @@ class QUsbInfoPrivate : public QObjectPrivate
 
 public:
     QUsbInfoPrivate();
-
     ~QUsbInfoPrivate();
 
     bool m_has_hotplug;

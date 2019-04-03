@@ -39,6 +39,12 @@
     #include <QUsbDevice>
     \endcode
 
+    For QUsbTransfer, use the following include statement:
+
+    \code
+    #include <QUsbTransfer>
+    \endcode
+
     For QUsbInfo, use the following include statement:
 
     \code

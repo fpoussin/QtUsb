@@ -33,13 +33,15 @@
 
     Qt Usb provides a simple way to exchange data with your USB devices.
 
+    Built on top of \l {https://libusb.info}{libusb-1.0}
+
     To use QtUsb in your application, add the following include
-    statement:
+    statements:
 
     \code
     #include <QUsbInfo>
     #include <QUsbDevice>
-    #include <QUsbTransferHandler>
+    #include <QUsbTransfer>
     \endcode
 
     To import the module, add this line to your \l qmake \c
