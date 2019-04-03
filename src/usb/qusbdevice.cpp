@@ -480,7 +480,7 @@ void QUsbEventsThread::run()
  */
 bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 {
-  return other.config == this->config && other.interface == this->interface && other.alternate == this->alternate;
+    return other.config == this->config && other.interface == this->interface && other.alternate == this->alternate;
 }
 
 /*!
@@ -490,5 +490,5 @@ bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
  */
 bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 {
-  return other.pid == this->pid && other.vid == this->vid;
+    return other.pid == this->pid && other.vid == this->vid;
 }
