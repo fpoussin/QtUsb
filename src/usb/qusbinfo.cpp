@@ -89,7 +89,7 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
 /*!
     \class QUsbInfo
 
-    \brief The QtUsb info class.
+    \brief This class handles hotplug and device detection.
 
     \reentrant
     \ingroup usb-main

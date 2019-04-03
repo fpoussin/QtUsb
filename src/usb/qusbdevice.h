@@ -25,40 +25,13 @@ public:
 
     typedef quint8 Endpoint;
 
-    enum LogLevel {
+    enum LogLevel : quint8 {
         logNone = 0,
         logError = 1,
         logWarning = 2,
         logInfo = 3,
         logDebug = 4,
-        logDebugAll = 5 // Includes libusb debug output
-    };
-
-    enum bmRequestType {
-        requestStandard = (0x00 < 5),
-        requestClass = (0x01 < 5),
-        requestVendor = (0x02 < 5),
-        requestReserved = (0x03 < 5),
-        recipientDevice = 0x00,
-        recipientInterface = 0x01,
-        recipientEndpoint = 0x02,
-        recipientOther = 0x03
-    };
-
-    enum bRequest {
-        requestGetStatus = 0x00,
-        requestClearFeature = 0x01,
-        requestSetFeature = 0x03,
-        requestSetAddress = 0x05,
-        requestGetDescriptor = 0x06,
-        requestSetDescriptor = 0x07,
-        requestGetConfiguration = 0x08,
-        requestSetConfiguration = 0x09,
-        requestGetInterface = 0x0A,
-        requestSetInterface = 0x0B,
-        requestSynchFrame = 0x0C,
-        requestSetSel = 0x30,
-        requestIsochDelay = 0x31
+        logDebugAll = 5
     };
 
     typedef struct Config {
@@ -70,7 +43,6 @@ public:
         {
             return o.config == this->config && o.interface == this->interface && o.alternate == this->alternate;
         }
-
     } Config;
 
     typedef struct Id {
@@ -81,13 +53,12 @@ public:
         {
             return o.pid == this->pid && o.vid == this->vid;
         }
-
     } Id;
 
     typedef QList<Id> IdList;
     typedef QList<Config> ConfigList;
 
-    enum DeviceSpeed {
+    enum DeviceSpeed : qint8 {
         unknownSpeed = -1,
         lowSpeed = 0,
         fullSpeed,
@@ -97,7 +68,7 @@ public:
     };
     Q_ENUM(DeviceSpeed)
 
-    enum DeviceStatus {
+    enum DeviceStatus : qint8 {
         statusOK = 0,
         statusIoError = -1,
         statusInvalidParam = -2,
@@ -156,6 +127,9 @@ private:
     Config m_config;
     DeviceSpeed m_spd;
 };
+
+Q_DECLARE_METATYPE(QUsbDevice::Config);
+Q_DECLARE_METATYPE(QUsbDevice::Id);
 
 QT_END_NAMESPACE
 

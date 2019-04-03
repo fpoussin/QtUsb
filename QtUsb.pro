@@ -6,4 +6,4 @@ lessThan(QT_MAJOR_VERSION, 5) | lessThan(QT_MINOR_VERSION, 2) {
 load(configure)
 load(qt_parts)
 
-CONFIG += testcase
+CONFIG += testcase c++11

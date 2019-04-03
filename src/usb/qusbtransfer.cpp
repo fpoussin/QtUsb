@@ -316,6 +316,7 @@ QUsbDevice::LogLevel QUsbTransferPrivate::logLevel()
     \brief This class handles transfers between endpoints and the host.
 
     It works on top of libusb's async module.
+    The QUsbDevice is set as parent object.
 
     \reentrant
     \ingroup usb-main
@@ -354,6 +355,41 @@ QUsbDevice::LogLevel QUsbTransferPrivate::logLevel()
  */
 
 /*!
+    \enum QUsbTransfer::bmRequestType
+
+    \brief This enum describres a bmRequestType packet.
+
+    \value requestStandard
+    \value requestClass
+    \value requestVendor
+    \value requestReserved
+    \value recipientDevice
+    \value recipientInterface
+    \value recipientEndpoint
+    \value recipientOther
+ */
+
+/*!
+    \enum QUsbTransfer::bRequest
+
+    \brief This enum describres a bRequest packet.
+
+    \value requestGetStatus
+    \value requestClearFeature
+    \value requestSetFeature
+    \value requestSetAddress
+    \value requestGetDescriptor
+    \value requestSetDescriptor
+    \value requestGetConfiguration
+    \value requestSetConfiguration
+    \value requestGetInterface
+    \value requestSetInterface
+    \value requestSynchFrame
+    \value requestSetSel
+    \value requestIsochDelay
+ */
+
+/*!
     \property QUsbTransfer::type
     \brief Transfer type.
  */
@@ -373,6 +409,13 @@ QUsbDevice::LogLevel QUsbTransferPrivate::logLevel()
     \brief polling status.
  */
 
+/*!
+    \brief QUsbTransfer constructor.
+
+    This create an object of the given transfer \a type, using endpoints \a in and \a out.
+
+    \a dev will be set as parent object.
+ */
 QUsbTransfer::QUsbTransfer(QUsbDevice *dev, QUsbTransfer::Type type, QUsbDevice::Endpoint in, QUsbDevice::Endpoint out)
     : QIODevice(*(new QUsbTransferPrivate)), d_dummy(Q_NULLPTR), m_status(QUsbTransfer::transferCanceled), m_dev(dev), m_type(type), m_in_ep(in), m_out_ep(out)
 {
@@ -393,7 +436,7 @@ QUsbTransfer::QUsbTransfer(QUsbDevice *dev, QUsbTransfer::Type type, QUsbDevice:
 }
 
 /*!
-
+  \brief Will cancel all transfers on exit.
  */
 QUsbTransfer::~QUsbTransfer()
 {
@@ -404,6 +447,8 @@ QUsbTransfer::~QUsbTransfer()
 
 /*!
     \brief Open the transfer with \a mode.
+
+    Returns \c true on success.
  */
 bool QUsbTransfer::open(QIODevice::OpenMode mode)
 {
@@ -442,7 +487,7 @@ QUsbTransfer::Type QUsbTransfer::type() const
 }
 
 /*!
-    \brief Returns \c the transfer IN endpoint.
+    \brief Returns the transfer \c IN endpoint.
  */
 QUsbDevice::Endpoint QUsbTransfer::endpointIn() const
 {
@@ -466,7 +511,7 @@ bool QUsbTransfer::isSequential() const
 }
 
 /*!
-    \brief Get the transfer status.
+    \brief Get the transfer \c status.
  */
 QUsbTransfer::Status QUsbTransfer::status() const
 {
@@ -491,6 +536,8 @@ qint64 QUsbTransfer::bytesToWrite() const
 
 /*!
     \brief Wait for at least one byte to be written for \a msecs milliseconds.
+
+    Returns \c true if any data was written before timeout.
  */
 bool QUsbTransfer::waitForBytesWritten(int msecs)
 {
@@ -508,6 +555,8 @@ bool QUsbTransfer::waitForBytesWritten(int msecs)
 
 /*!
     \brief Wait for at least one byte to be available for \a msecs milliseconds.
+
+    Returns \c true if any data was read before timeout.
  */
 bool QUsbTransfer::waitForReadyRead(int msecs)
 {
@@ -526,7 +575,7 @@ bool QUsbTransfer::waitForReadyRead(int msecs)
 /*!
     \brief Create a control packet using \a buffer, \a bmRequestType, \a bRequest, \a wValue, \a bRequest, \a wIndex, \a wLength.
  */
-void QUsbTransfer::makeControlPacket(char *buffer, quint8 bmRequestType, quint8 bRequest, quint16 wValue, quint16 wIndex, quint16 wLength) const
+void QUsbTransfer::makeControlPacket(char *buffer, QUsbTransfer::bmRequestType bmRequestType, QUsbTransfer::bRequest bRequest, quint16 wValue, quint16 wIndex, quint16 wLength) const
 {
     libusb_fill_control_setup(reinterpret_cast<uchar *>(buffer), bmRequestType, bRequest, wValue, wIndex, wLength);
 }

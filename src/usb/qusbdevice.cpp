@@ -44,7 +44,90 @@ void QUsbDevicePrivate::printUsbError(int error_code) const
     \reentrant
     \ingroup usb-main
     \inmodule QtUsb
-*/
+ */
+
+/*!
+    \enum QUsbDevice::DeviceSpeed
+
+    \value unknownSpeed     Speed is unkown
+    \value lowSpeed         USB 1.0
+    \value fullSpeed        USB 1.1/2.0
+    \value highSpeed        USB 2.0
+    \value superSpeed       USB 3.0/3.1 G1
+    \value superSpeedPlus   USB 3.1 G2
+ */
+
+/*!
+    \enum QUsbDevice::DeviceStatus
+
+    \value statusOK             Success (no error)
+    \value statusIoError        Input/output error
+    \value statusInvalidParam   Invalid parameter
+    \value statusAccessDenied   Access denied (insufficient permissions)
+    \value statusNoSuchDevice   No such device (it may have been disconnected)
+    \value statusNotFound       Entity not found
+    \value statusBusy           Resource busy
+    \value statusTimeout        Operation timed out
+    \value statusOverflow       Overflow
+    \value statusPipeError      Pipe error
+    \value statusInterrupted    System call interrupted (perhaps due to signal)
+    \value statusNoMemory       Insufficient memory
+    \value statusNotSupported   Operation not supported or unimplemented on this platform
+    \value StatusUnknownError   Other error
+ */
+
+/*!
+    \enum QUsbDevice::LogLevel
+
+    \value logNone      No debug output
+    \value logError     Errors only
+    \value logWarning   Warning and abose
+    \value logInfo      Info and above
+    \value logDebug     Everything
+    \value logDebugAll  Everything + libusb debug output
+ */
+
+/*!
+    \property QUsbDevice::config
+    \property QUsbDevice::id
+    \property QUsbDevice::logLevel
+    \property QUsbDevice::pid
+    \property QUsbDevice::vid
+    \property QUsbDevice::speed
+    \property QUsbDevice::timeout
+
+    \brief Various properties.
+ */
+
+/*!
+    \typedef QUsbDevice::Endpoint
+    \brief An endpoint ID.
+ */
+
+/*!
+    \typedef QUsbDevice::ConfigList
+    \brief List of Config structs.
+ */
+
+/*!
+    \typedef QUsbDevice::IdList
+    \brief List of Id structs.
+ */
+
+/*!
+    \class QUsbDevice::Config
+    \brief Device configuration structure.
+    \ingroup usb-main
+    \inmodule QtUsb
+ */
+
+/*!
+    \class QUsbDevice::Id
+    \brief Device Ids structure.
+    \ingroup usb-main
+    \inmodule QtUsb
+ */
+
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
@@ -59,10 +142,16 @@ QUsbDevice::QUsbDevice(QObject *parent)
     this->setLogLevel(m_log_level); // Apply log level to libusb
 }
 
+/*!
+    \brief Destructor.
+ */
 QUsbDevice::~QUsbDevice()
 {
 }
 
+/*!
+    \brief Returns the current speed as a human readable \c string.
+ */
 QByteArray QUsbDevice::speedString() const
 {
     switch (m_spd) {
@@ -83,6 +172,9 @@ QByteArray QUsbDevice::speedString() const
     return "Error";
 }
 
+/*!
+    \brief Returns all present \c devices.
+ */
 QUsbDevice::IdList QUsbDevice::devices()
 {
     IdList list;
@@ -117,6 +209,9 @@ QUsbDevice::IdList QUsbDevice::devices()
     return list;
 }
 
+/*!
+    \brief Open the device. Returns \c 0 on success
+ */
 qint32 QUsbDevice::open()
 {
     DbgPrintFuncName();
@@ -216,6 +311,9 @@ qint32 QUsbDevice::open()
     return 0;
 }
 
+/*!
+    \brief Close the device.
+ */
 void QUsbDevice::close()
 {
     DbgPrintFuncName();
@@ -234,6 +332,9 @@ void QUsbDevice::close()
     m_connected = false;
 }
 
+/*!
+    \brief Set the log \a level.
+ */
 void QUsbDevice::setLogLevel(LogLevel level)
 {
     Q_D(QUsbDevice);
@@ -244,56 +345,89 @@ void QUsbDevice::setLogLevel(LogLevel level)
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_NONE);
 }
 
+/*!
+    \brief Set the device \a id.
+ */
 void QUsbDevice::setId(const QUsbDevice::Id &id)
 {
     m_id = id;
 }
 
+/*!
+    \brief Set the device \a config.
+ */
 void QUsbDevice::setConfig(const QUsbDevice::Config &config)
 {
     m_config = config;
 }
 
+/*!
+    \brief Set the device \a timeout.
+ */
 void QUsbDevice::setTimeout(quint16 timeout)
 {
     m_timeout = timeout;
 }
 
+/*!
+    \brief Returns the device \c id.
+ */
 QUsbDevice::Id QUsbDevice::id() const
 {
     return m_id;
 }
 
+/*!
+    \brief Returns the current \c config.
+ */
 QUsbDevice::Config QUsbDevice::config() const
 {
     return m_config;
 }
 
+/*!
+    \brief Returns \c true if connected.
+ */
 bool QUsbDevice::isConnected() const
 {
     return m_connected;
 }
 
+/*!
+    \brief Return the device \c pid. (Product id)
+ */
 quint16 QUsbDevice::pid() const
 {
     return m_id.pid;
 }
 
+/*!
+    \brief Return the device \c vid. (Vendor id)
+ */
 quint16 QUsbDevice::vid() const
 {
     return m_id.vid;
 }
 
+/*!
+    \brief Return the \c timeout.
+ */
 quint16 QUsbDevice::timeout() const
 {
     return m_timeout;
 }
 
+/*!
+    \brief Returns the log \c level.
+ */
 QUsbDevice::LogLevel QUsbDevice::logLevel() const
 {
     return m_log_level;
 }
 
+/*!
+    \brief Returns the device \c speed.
+ */
 QUsbDevice::DeviceSpeed QUsbDevice::speed() const
 {
     return m_spd;

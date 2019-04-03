@@ -28,6 +28,8 @@ qhp.QtUsb.subprojects.examples.indexTitle = Qt Usb Examples
 qhp.QtUsb.subprojects.examples.selectors = fake:example
 qhp.QtUsb.subprojects.examples.sortPages = true
 
+includepaths += .. /usr/lib/gcc/x86_64-linux-gnu/7.3.0/include
+
 headerdirs  += ..
 sourcedirs  += ..
 exampledirs += ../../../examples/usb
