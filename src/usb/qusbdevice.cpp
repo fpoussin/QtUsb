@@ -483,6 +483,14 @@ bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
     return other.config == this->config && other.interface == this->interface && other.alternate == this->alternate;
 }
 
+QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &other)
+{
+    config = other.config;
+    alternate = other.alternate;
+    interface = other.interface;
+    return *this;
+}
+
 /*!
     \brief Comparision operator.
 
@@ -491,4 +499,11 @@ bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 {
     return other.pid == this->pid && other.vid == this->vid;
+}
+
+QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)
+{
+    pid = other.pid;
+    vid = other.vid;
+    return *this;
 }

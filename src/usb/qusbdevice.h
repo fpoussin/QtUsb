@@ -34,21 +34,25 @@ public:
         logDebugAll = 5
     };
 
-    class Config {
-        public:
+    class Config
+    {
+    public:
         quint8 config;
         quint8 interface;
         quint8 alternate;
 
         bool operator==(const QUsbDevice::Config &other) const;
+        QUsbDevice::Config &operator=(const QUsbDevice::Config &other);
     };
 
-    class Id {
-        public:
+    class Id
+    {
+    public:
         quint16 pid;
         quint16 vid;
 
         bool operator==(const QUsbDevice::Id &other) const;
+        QUsbDevice::Id &operator=(const QUsbDevice::Id &other);
     };
 
     typedef QList<Id> IdList;
