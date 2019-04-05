@@ -34,7 +34,7 @@ public:
         logDebugAll = 5
     };
 
-    class Config
+    class Q_USB_EXPORT Config
     {
     public:
         quint8 config;
@@ -45,7 +45,7 @@ public:
         QUsbDevice::Config &operator=(const QUsbDevice::Config &other);
     };
 
-    class Id
+    class Q_USB_EXPORT Id
     {
     public:
         quint16 pid;
