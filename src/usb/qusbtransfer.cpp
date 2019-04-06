@@ -455,7 +455,7 @@ bool QUsbTransfer::open(QIODevice::OpenMode mode)
     Q_D(QUsbTransfer);
     DbgPrintFuncName();
     bool b = QIODevice::open(mode);
-    if (openMode() & ReadOnly && m_type == interruptTransfer) {
+    if ((openMode() & ReadOnly && m_type == interruptTransfer) || d->m_poll) {
         setPolling(true);
     }
     return b;
