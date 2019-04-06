@@ -689,5 +689,8 @@ qint64 QUsbTransfer::writeData(const char *data, qint64 maxSize)
     if (!d->isValid())
         return -1;
 
-    return d->writeUsb(data, maxSize);
+    if (d->writeUsb(data, maxSize) != 0)
+        return -1;
+
+    return maxSize;
 }
