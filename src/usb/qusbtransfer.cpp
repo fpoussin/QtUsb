@@ -103,7 +103,7 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
 }
 
 QUsbTransferPrivate::QUsbTransferPrivate()
-    : m_poll(false), m_poll_size(64), m_transfer_in(Q_NULLPTR), m_transfer_out(Q_NULLPTR)
+    : m_poll(false), m_poll_size(1024), m_transfer_in(Q_NULLPTR), m_transfer_out(Q_NULLPTR)
 {
 }
 
@@ -228,6 +228,7 @@ bool QUsbTransferPrivate::prepareTransfer(libusb_transfer **tr, libusb_transfer_
 void QUsbTransferPrivate::stopTransfer()
 {
     DbgPrivPrintFuncName();
+    // TODO: check if struc it not already freed
     if (m_transfer_in != Q_NULLPTR)
         libusb_cancel_transfer(m_transfer_in);
     if (m_transfer_out != Q_NULLPTR)
@@ -423,16 +424,6 @@ QUsbTransfer::QUsbTransfer(QUsbDevice *dev, QUsbTransfer::Type type, QUsbDevice:
     Q_D(QUsbTransfer);
     DbgPrintFuncName();
     setParent(dev);
-
-    // Set polling size to max packet size
-    switch (type) {
-    case bulkTransfer:
-        if (m_dev->speed() >= QUsbDevice::highSpeed)
-            d->m_poll_size = 512;
-        break;
-    default:
-        d->m_poll_size = 64;
-    }
 }
 
 /*!
@@ -455,6 +446,25 @@ bool QUsbTransfer::open(QIODevice::OpenMode mode)
     Q_D(QUsbTransfer);
     DbgPrintFuncName();
     bool b = QIODevice::open(mode);
+
+    // Reset possible unclean mutex states.
+    d->m_write_buf_mutex.tryLock();
+    d->m_write_buf_mutex.unlock();
+    d->m_read_buf_mutex.tryLock();
+    d->m_read_buf_mutex.unlock();
+    d->m_read_transfer_mutex.tryLock();
+    d->m_read_transfer_mutex.unlock();
+
+    // Set polling size to max packet size
+    switch (m_type) {
+    case bulkTransfer:
+        if (m_dev->speed() >= QUsbDevice::highSpeed)
+            d->m_poll_size = 512;
+        break;
+    default:
+        d->m_poll_size = 64;
+    }
+
     if ((openMode() & ReadOnly && m_type == interruptTransfer) || d->m_poll) {
         setPolling(true);
     }
