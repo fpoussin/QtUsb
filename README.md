@@ -8,8 +8,9 @@ A Cross-platform USB Module for Qt built around libusb-1.0
 ## Features
 
 - Bulk transfer
+- Interrupt transfer
 - Hotplug detection
-- Device search
+- Device enumeration and filtering
 
 ## Install
 **Ubuntu**  
