@@ -42,8 +42,6 @@ ie: build_msvc2017.bat x64 C:\Qt\5.12.1\msvc2017_64
 
 ## Using
 
-Documentation is not complete yet, you can have a look at the examples in the meanwhile.
-
 You'll need to add the module to your project file:
 
 ```
@@ -60,7 +58,8 @@ Then include it into your headers:
 
 ## Documentation
 
-Doxygen documentation can be found [here](http://fpoussin.github.io/doxygen/qtusb/0.5.x)  
+QCH documentation files can be found with each release.  
+You have to manually install them in Qt Creator.
 
 ## Downloads
 
