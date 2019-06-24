@@ -21,6 +21,20 @@ environment:
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    
+  - arch: x64
+    qt: 5.13
+    cc: VS2017
+    mode: release
+    QTDIR: C:\Qt\%qt%\msvc2017_64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+  - arch: x86
+    qt: 5.13
+    cc: VS2017
+    mode: release
+    QTDIR: C:\Qt\%qt%\msvc2017
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 init:
   - set vcarch=%arch%
