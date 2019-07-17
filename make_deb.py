@@ -147,8 +147,6 @@ if __name__ == '__main__':
 
     # Extract version from .qmake.conf
     ver = ''
-    suffix = args.suffix
-    ver_suffix = ''
     with open('.qmake.conf') as f:
         for l in f.readlines():
             r = re.search(r'^MODULE_VERSION = (.+)', l)
@@ -160,7 +158,8 @@ if __name__ == '__main__':
         print('Could not read version from .qmake.conf')
         exit(1)
 
-
+    ver_suffix = ver
+    suffix = args.suffix
     if suffix:
         ver_suffix = ver + '~' + suffix
 
