@@ -142,7 +142,7 @@ if __name__ == '__main__':
         parser.print_help()
 
     if args.distro not in distros:
-        print('Invalid Ubuntu release, please chose among:', distros)
+        print('Invalid Ubuntu release, please chose among:', ", ".join(distros.keys()))
         exit(1)
 
     # Extract version from .qmake.conf
