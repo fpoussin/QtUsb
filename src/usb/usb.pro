@@ -7,6 +7,7 @@ DEFINES += QT_BUILD_USB_LIB
 
 include($$PWD/usb-lib.pri)
 
+load(qt_build_config)
 load(qt_module)
 
 PRECOMPILED_HEADER =

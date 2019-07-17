@@ -7,4 +7,4 @@ usr/lib/*/cmake/Qt5Usb/Qt5UsbConfigVersion.cmake
 usr/lib/*/libQt5Usb.prl
 usr/lib/*/pkgconfig/Qt5Usb.pc
 usr/lib/*/cmake/Qt5Usb/*
-usr/lib/*/qt5/mkspecs/modules/*.pri
+usr/lib/*/qt5/mkspecs/modules/qt_lib_usb.pri

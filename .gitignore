@@ -1,6 +1,7 @@
 build
 debian/changelog
 debian/files
+debian/syncqt*
 doc/
 *.user
 .directory

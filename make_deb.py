@@ -5,22 +5,28 @@ from subprocess import call, check_output, Popen, CalledProcessError, STDOUT, PI
 from xml.etree import ElementTree as ET
 from traceback import print_exc
 from glob import glob
+import requests
 
-distros = ['xenial', 'bionic', 'cosmic', 'disco']
+# qtsync.pl version for each distro release
+distros = {'xenial': '5.5',
+           'bionic': '5.9',
+           'cosmic': '5.11',
+           'disco': '5.12'}
+
+build_dir = os.getcwd() + '/../qtusb-build'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--distro', help='The Ubuntu release')
 parser.add_argument('-r', '--release', help='Package release number', type=int, default=1)
 parser.add_argument('-S', '--suffix', help='Package version suffix', type=str, default='')
 parser.add_argument('-s', '--source', help='Build signed source package', action='store_true')
-parser.add_argument('-l', '--bin', help='Build local binary package', action='store_true')
 parser.add_argument('-u', '--upload', help='Send source package to PPA', action='store_true')
-parser.add_argument('-b', '--sbuild', help='Build binary package with sbuild', action='store_true')
+parser.add_argument('-b', '--build', help='Build binary package with sbuild', action='store_true')
 parser.add_argument('-k', '--keep', help='Keep build folder', action='store_true', default=False)
 
 
 def run_cmd(cmd, do_print=True, **kwargs):
-    p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, **kwargs)
+    p = Popen(cmd, shell=True, stdout=PIPE, stderr=STDOUT, **kwargs)
     if do_print:
         lines_iterator = iter(p.stdout.readline, b'')
         for line in lines_iterator:
@@ -46,59 +52,82 @@ def clean_src():
             pass
 
 
-def copy_src(dest, ver, release, distro):
+def get_syncqt(qt_ver):
+    # Check is file have already been downloaded
+    if os.path.isfile('debian/syncqt_{}.pl'.format(qt_ver)):
+        return
 
+    url = 'https://raw.githubusercontent.com/qt/qtbase/{}/bin/syncqt.pl'
+    r = requests.get(url.format(qt_ver), allow_redirects=True)
+    open('debian/syncqt_{}.pl'.format(qt_ver), 'wb').write(r.content)
+
+
+def copy_src(dest, ver, suffix, release, distro):
+
+    ver_suffix = ver
+    if suffix:
+        ver_suffix += '~' + suffix
     # Add distro / release
     with open('debian/changelog_template', 'r') as f:
         tmp = f.read().replace('distro', distro)\
-            .replace('(0.0.0)', '({0}-{1}{2})'.format(ver, distro, release))
+            .replace('(0.0.0)', '({0}-{1}{2})'.format(ver_suffix, distro, release))
         print(tmp)
 
     with open('debian/changelog', 'w') as f:
         f.write(str(tmp))
 
     with open('version', 'w') as f:
-        f.write(str(ver))
+        f.write(str(ver_suffix))
 
     clean_src()
 
+    qt_ver = distros[distro]
+    get_syncqt(qt_ver)
+
     # Generate headers manually since we are exporting to an archive
-    run_cmd('perl -w /usr/lib/*/qt5/bin/syncqt.pl -module QtUsb -version {0} -outdir . .'.format(ver))
+    run_cmd('perl debian/syncqt_{0}.pl -version {1} .'.format(qt_ver, ver))
+
+    # Create external build dir
+    run_cmd('mkdir -p {}'.format(build_dir))
+
+    # Copy debian files
+    run_cmd('cp -r debian {}'.format(build_dir))
 
     # Exclude all the files we don't need to build the package
-    run_cmd('tar cvf ../qtusb_{0}.orig.tar.gz '
-            '--exclude=debian '
-            '--exclude=.git* '
-            '--exclude=libusb '
-            '--exclude=build '
-            '--exclude=*.user '
-            '--exclude=.travis '
-            '--exclude=appveyor.yml '
-            '--exclude=Jenkinsfile '
-            '--exclude=*.py '
-            '--exclude=*.bat '
-            '--exclude=Doxyfile '
-            '.'.format(ver))
+    run_cmd('tar cvf {0}/../qtusb_{1}.orig.tar.gz '
+            '--exclude=./debian* '
+            '--exclude=./.git* '
+            '--exclude=./libusb* '
+            '--exclude=./build* '
+            '--exclude=./*.clang* '
+            '--exclude=./*.user '
+            '--exclude=./.travis* '
+            '--exclude=./appveyor.yml '
+            '--exclude=./Jenkinsfile '
+            '--exclude=./*.py '
+            '--exclude=./*.bat '
+            '--exclude=./Doxyfile '
+            '.'.format(build_dir, ver_suffix))
+
+    # Extract our cleaned code in build dir
+    run_cmd(['tar xf {0}/../qtusb_{1}.orig.tar.gz'.format(build_dir, ver_suffix)], cwd=build_dir)
 
 
 def make_src(dest):
     print('Building Signed Source package')
-    run_cmd(['debuild -S -sa'])
+    run_cmd(['debuild -S -sa'], cwd=build_dir)
 
 
 def make_local_src(dest):
     print('Building Unsigned Source package')
-    run_cmd([' debuild -S -us -uc'])
+    run_cmd(['debuild -S -us -uc'], cwd=build_dir)
 
 
 def make_s_build(dest):
     print('Building binary package (sbuild)')
-    run_cmd(['sbuild -vd {0} -c {0}-amd64 --no-apt-clean --no-apt-update --no-apt-upgrade --no-apt-distupgrade -j8 {1}'.format(args.distro, dest)])
-
-
-def make_bin(dest):
-    print('Building binary package')
-    run_cmd(['debuild -j8 -b -uc -us'])
+    cmd = 'sbuild -vd {0} -c {0}-amd64 --no-apt-clean --no-apt-update --no-apt-upgrade --no-apt-distupgrade -j8 {1}'.format(args.distro, dest)
+    print(cmd)
+    run_cmd([cmd], cwd=build_dir)
 
 
 def upload(ver):
@@ -118,6 +147,8 @@ if __name__ == '__main__':
 
     # Extract version from .qmake.conf
     ver = ''
+    suffix = args.suffix
+    ver_suffix = ''
     with open('.qmake.conf') as f:
         for l in f.readlines():
             r = re.search(r'^MODULE_VERSION = (.+)', l)
@@ -129,31 +160,31 @@ if __name__ == '__main__':
         print('Could not read version from .qmake.conf')
         exit(1)
 
-    ver += args.suffix
-    print('Source Version:', ver)
 
-    folder_name = '../qtusb-{0}.orig.tar.gz'.format(ver)
-    dsc_name = '../qtusb_{0}-{1}{2}'.format(ver, args.distro, args.release)
+    if suffix:
+        ver_suffix = ver + '~' + suffix
+
+    build_dir += '/' + args.distro
+
+    print('Source Version:', ver)
+    print('Suffix:', suffix)
+    print('Build dir:', build_dir)
+
+    folder_name = '{0}/qtusb-{0}.orig.tar.gz'.format(build_dir, ver_suffix)
+    dsc_name = '{0}/../qtusb_{1}-{2}{3}'.format(build_dir, ver_suffix, args.distro, args.release)
 
     print('Package location:', folder_name)
 
-    copy_src(folder_name, ver, args.release, args.distro)
+    copy_src(folder_name, ver, suffix, args.release, args.distro)
 
     try:
         if args.source:
             make_src(folder_name)
-            if args.upload:
-                upload(dsc_name)
-        if args.sbuild:
+        if args.upload:
+            upload(dsc_name)
+        if args.build:
             make_local_src(folder_name)
             make_s_build(dsc_name + '.dsc')
-        if args.bin:
-            make_bin(folder_name)
-            if not args.keep:
-                run_cmd('make distclean')
-            for i in glob('../libqt5usb5*_{0}-{1}{2}*.deb'.format(ver, args.distro, args.release)):
-                print(i)
-                run_cmd('dpkg -c {0}'.format(i))
 
     except CalledProcessError as e:
         print(e.output)
