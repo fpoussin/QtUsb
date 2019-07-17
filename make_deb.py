@@ -11,6 +11,7 @@ distros = ['xenial', 'bionic', 'cosmic', 'disco']
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--distro', help='The Ubuntu release')
 parser.add_argument('-r', '--release', help='Package release number', type=int, default=1)
+parser.add_argument('-S', '--suffix', help='Package version suffix', type=str, default='')
 parser.add_argument('-s', '--source', help='Build signed source package', action='store_true')
 parser.add_argument('-l', '--bin', help='Build local binary package', action='store_true')
 parser.add_argument('-u', '--upload', help='Send source package to PPA', action='store_true')
@@ -128,6 +129,7 @@ if __name__ == '__main__':
         print('Could not read version from .qmake.conf')
         exit(1)
 
+    ver += args.suffix
     print('Source Version:', ver)
 
     folder_name = '../qtusb-{0}.orig.tar.gz'.format(ver)
