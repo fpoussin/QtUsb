@@ -208,7 +208,7 @@ QUsbDevice::IdList QUsbDevice::devices()
     libusb_context *ctx;
 
     libusb_init(&ctx);
-    libusb_set_debug(ctx, LIBUSB_LOG_LEVEL_NONE);
+    libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE);
     cnt = libusb_get_device_list(ctx, &devs); // get the list of devices
     if (cnt < 0) {
         qCritical("libusb_get_device_list Error");
@@ -365,9 +365,9 @@ void QUsbDevice::setLogLevel(LogLevel level)
     Q_D(QUsbDevice);
     m_log_level = level;
     if (level >= logDebugAll)
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
     else
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_NONE);
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE);
 }
 
 /*!

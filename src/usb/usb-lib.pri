@@ -43,7 +43,7 @@ android {
     $$LIBUSB_ROOT_REL/libusb/os/linux_netlink.c
 
     # We have to copy the header for includes to work in our library
-    system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h libusb-1.0/")
+    system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h $$PWD/libusb-1.0/")
 
     INCLUDEPATH += $$LIBUSB_ROOT_REL/libusb $$LIBUSB_ROOT_REL/libusb/os $$LIBUSB_ROOT_REL/android $$PWD/libusb-1.0
 }
