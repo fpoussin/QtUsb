@@ -140,7 +140,7 @@ QUsbInfo::QUsbInfo(QObject *parent)
         return;
     }
 
-    libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
+    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 
     // Populate list once
     m_system_list = QUsbDevice::devices();
@@ -292,9 +292,9 @@ void QUsbInfo::setLogLevel(QUsbDevice::LogLevel level)
     Q_D(QUsbInfo);
     m_log_level = level;
     if (m_log_level >= QUsbDevice::logDebug)
-        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
     else
-        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
+        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 }
 
 /*!
