@@ -27,7 +27,27 @@ win32 {
     INCLUDEPATH += $$PWD/libusb $$PWD/../libusb $$PWD/../../libusb
 }
 
-unix {
+# We build libusb ourselves instead of using a library
+android {
+    LIBUSB_ROOT_REL = $$PWD/../../libusb
+    SOURCES += \
+    $$LIBUSB_ROOT_REL/libusb/core.c \
+    $$LIBUSB_ROOT_REL/libusb/descriptor.c \
+    $$LIBUSB_ROOT_REL/libusb/hotplug.c \
+    $$LIBUSB_ROOT_REL/libusb/io.c \
+    $$LIBUSB_ROOT_REL/libusb/sync.c \
+    $$LIBUSB_ROOT_REL/libusb/strerror.c \
+    $$LIBUSB_ROOT_REL/libusb/os/linux_usbfs.c \
+    $$LIBUSB_ROOT_REL/libusb/os/poll_posix.c \
+    $$LIBUSB_ROOT_REL/libusb/os/threads_posix.c \
+    $$LIBUSB_ROOT_REL/libusb/os/linux_netlink.c
+
+    # We have to copy the header for includes to work in our library
+    system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h libusb-1.0/")
+
+    INCLUDEPATH += $$LIBUSB_ROOT_REL/libusb $$LIBUSB_ROOT_REL/libusb/os $$LIBUSB_ROOT_REL/android $$PWD/libusb-1.0
+}
+else:unix {
     !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
     CONFIG += link_pkgconfig
     PKGCONFIG += libusb-1.0
