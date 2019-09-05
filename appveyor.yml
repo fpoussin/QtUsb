@@ -50,7 +50,7 @@ build_script:
   - mkdir build
   - cd build
   - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%" ..
-  - jom INSTALL_ROOT=\projects\install install install_docs
+  - jom INSTALL_ROOT=\projects\install install docs install_docs
   - jom sub-tests
 
 after_build:
