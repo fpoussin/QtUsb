@@ -8,8 +8,7 @@ from glob import glob
 import requests
 
 # qtsync.pl version for each distro release
-distros = {'xenial': '5.5',
-           'bionic': '5.9',
+distros = {'bionic': '5.9',
            'cosmic': '5.11',
            'disco': '5.12'}
 

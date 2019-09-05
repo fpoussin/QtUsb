@@ -10,23 +10,18 @@ export QT_SELECT := qt5
 %:
 	dh $@ --with pkgkde_symbolshelper
 
-override_dh_auto_build-indep:
-	dh_auto_build -Smakefile -- docs
-
 override_dh_auto_install-arch:
 	dh_auto_install
+	$(MAKE) INSTALL_ROOT=$(CURDIR)/debian/tmp install_docs
 
 	# Remove libtool-like files
-	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.la
+	rm -f $(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/*.la
 
 	# Remove private headers and related files, nothing needs them so far.
-	rm -rfv debian/tmp/usr/include/*/qt5/QtUsb/*/QtUsb/private/
-	rm -fv debian/tmp/usr/lib/*/qt5/mkspecs/modules/qt_lib_usb_private.pri
-	rm -rf debian/tmp/usr/lib/*/qt5/examples/usb/
-
-override_dh_auto_install-indep:
-	make INSTALL_ROOT=$(CURDIR)/debian/tmp install_docs
+	rm -rf $(CURDIR)/debian/tmp/usr/include/*/qt5/QtUsb/*/QtUsb/private
+	rm -f $(CURDIR)/debian/tmp/usr/include/*/qt5/QtUsb/libusb.h
+	rm -f $(CURDIR)/debian/tmp/usr/lib/*/qt5/mkspecs/modules/qt_lib_usb_private.pri
+	rm -rf $(CURDIR)/debian/tmp/usr/lib/*/qt5/examples/usb
 
 override_dh_missing:
 	dh_missing --fail-missing
-

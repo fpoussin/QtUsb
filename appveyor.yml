@@ -9,20 +9,6 @@ matrix:
 environment:
   matrix:
   - arch: x64
-    qt: 5.12
-    cc: VS2017
-    mode: release
-    QTDIR: C:\Qt\%qt%\msvc2017_64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-
-  - arch: x86
-    qt: 5.12
-    cc: VS2017
-    mode: release
-    QTDIR: C:\Qt\%qt%\msvc2017
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    
-  - arch: x64
     qt: 5.13
     cc: VS2017
     mode: release
@@ -64,7 +50,7 @@ build_script:
   - mkdir build
   - cd build
   - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%" ..
-  - jom INSTALL_ROOT=\projects\install install
+  - jom INSTALL_ROOT=\projects\install install install_docs
   - jom sub-tests
 
 after_build:
