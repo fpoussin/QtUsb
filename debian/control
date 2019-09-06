@@ -18,7 +18,7 @@ Package: libqt5usb5-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libqt5usb5 (= ${binary:Version}), qtbase5-dev, ${misc:Depends}
+Depends: libqt5usb5 (= ${binary:Version}), qtbase5-dev, ${misc:Depends}, qttools5-dev-tools, qt5-doc
 Description: Qt 5 USB development files
  .
  This package includes the development headers for the USB library.
