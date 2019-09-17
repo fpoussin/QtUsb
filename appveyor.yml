@@ -56,7 +56,11 @@ build_script:
 after_build:
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd build
-  - 7z a qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
+  - if %APPVEYOR_REPO_TAG%==true (
+      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
+    ) else (
+      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
+    )
   - cd tests
   - nmake /I check TESTARGS="-o xunit.xml,xunitxml"
 
