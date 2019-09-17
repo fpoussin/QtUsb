@@ -120,7 +120,7 @@ private:
     void handleUsbError(int error_code);
 
 signals:
-    void statusChanged(DeviceStatus status);
+    void statusChanged(QUsbDevice::DeviceStatus status);
     void connectionChanged(bool connected);
 
 public slots:
