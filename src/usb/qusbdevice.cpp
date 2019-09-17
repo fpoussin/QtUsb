@@ -374,6 +374,7 @@ qint32 QUsbDevice::open()
     }
 
     m_connected = true;
+    emit connectionChanged(m_connected);
 
     return 0;
 }
@@ -397,6 +398,7 @@ void QUsbDevice::close()
     }
 
     m_connected = false;
+    emit connectionChanged(m_connected);
 }
 
 /*!

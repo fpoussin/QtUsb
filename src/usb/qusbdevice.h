@@ -94,6 +94,7 @@ public:
     Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
     Q_PROPERTY(DeviceSpeed speed READ speed)
     Q_PROPERTY(DeviceStatus status READ status NOTIFY statusChanged)
+    Q_PROPERTY(bool connected READ isConnected NOTIFY connectionChanged)
 
     explicit QUsbDevice(QObject *parent = Q_NULLPTR);
     ~QUsbDevice();
