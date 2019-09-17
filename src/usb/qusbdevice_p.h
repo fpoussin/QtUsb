@@ -32,8 +32,6 @@ public:
     QUsbDevicePrivate();
     ~QUsbDevicePrivate();
 
-    void printUsbError(int error_code) const;
-
     libusb_device **m_devs;
     libusb_device_handle *m_devHandle;
     libusb_context *m_ctx;

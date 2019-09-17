@@ -26,63 +26,63 @@ public:
     typedef quint8 Endpoint;
 
     enum LogLevel : quint8 {
-        logNone = 0,
-        logError = 1,
-        logWarning = 2,
-        logInfo = 3,
-        logDebug = 4,
-        logDebugAll = 5
+	logNone = 0,
+	logError = 1,
+	logWarning = 2,
+	logInfo = 3,
+	logDebug = 4,
+	logDebugAll = 5
     };
 
     class Q_USB_EXPORT Config
     {
     public:
-        quint8 config;
-        quint8 interface;
-        quint8 alternate;
+	quint8 config;
+	quint8 interface;
+	quint8 alternate;
 
-        bool operator==(const QUsbDevice::Config &other) const;
-        QUsbDevice::Config &operator=(const QUsbDevice::Config &other);
+	bool operator==(const QUsbDevice::Config &other) const;
+	QUsbDevice::Config &operator=(const QUsbDevice::Config &other);
     };
 
     class Q_USB_EXPORT Id
     {
     public:
-        quint16 pid;
-        quint16 vid;
+	quint16 pid;
+	quint16 vid;
 
-        bool operator==(const QUsbDevice::Id &other) const;
-        QUsbDevice::Id &operator=(const QUsbDevice::Id &other);
+	bool operator==(const QUsbDevice::Id &other) const;
+	QUsbDevice::Id &operator=(const QUsbDevice::Id &other);
     };
 
     typedef QList<Id> IdList;
     typedef QList<Config> ConfigList;
 
     enum DeviceSpeed : qint8 {
-        unknownSpeed = -1,
-        lowSpeed = 0,
-        fullSpeed,
-        highSpeed,
-        superSpeed,
-        superSpeedPlus
+	unknownSpeed = -1,
+	lowSpeed = 0,
+	fullSpeed,
+	highSpeed,
+	superSpeed,
+	superSpeedPlus
     };
     Q_ENUM(DeviceSpeed)
 
     enum DeviceStatus : qint8 {
-        statusOK = 0,
-        statusIoError = -1,
-        statusInvalidParam = -2,
-        statusAccessDenied = -3,
-        statusNoSuchDevice = -4,
-        statusNotFound = -5,
-        statusBusy = -6,
-        statusTimeout = -7,
-        statusOverflow = -8,
-        statusPipeError = -9,
-        statusInterrupted = -10,
-        statusNoMemory = -11,
-        statusNotSupported = -12,
-        StatusUnknownError = -99,
+	statusOK = 0,
+	statusIoError = -1,
+	statusInvalidParam = -2,
+	statusAccessDenied = -3,
+	statusNoSuchDevice = -4,
+	statusNotFound = -5,
+	statusBusy = -6,
+	statusTimeout = -7,
+	statusOverflow = -8,
+	statusPipeError = -9,
+	statusInterrupted = -10,
+	statusNoMemory = -11,
+	statusNotSupported = -12,
+	statusUnknownError = -99,
     };
     Q_ENUM(DeviceStatus)
 
@@ -93,6 +93,8 @@ public:
     Q_PROPERTY(quint16 vid READ vid)
     Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
     Q_PROPERTY(DeviceSpeed speed READ speed)
+    Q_PROPERTY(DeviceStatus status READ status NOTIFY statusChanged)
+    Q_PROPERTY(bool connected READ isConnected NOTIFY connectionChanged)
 
     explicit QUsbDevice(QObject *parent = Q_NULLPTR);
     ~QUsbDevice();
@@ -110,7 +112,16 @@ public:
     LogLevel logLevel() const;
     DeviceSpeed speed() const;
     QByteArray speedString() const;
+    DeviceStatus status() const;
+    QByteArray statusString() const;
     static IdList devices();
+
+private:
+    void handleUsbError(int error_code);
+
+signals:
+    void statusChanged(QUsbDevice::DeviceStatus status);
+    void connectionChanged(bool connected);
 
 public slots:
     qint32 open();
@@ -126,6 +137,7 @@ private:
     Id m_id;
     Config m_config;
     DeviceSpeed m_spd;
+    DeviceStatus m_status;
 };
 
 Q_DECLARE_METATYPE(QUsbDevice::Config);
