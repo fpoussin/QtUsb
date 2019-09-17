@@ -9,6 +9,9 @@ export QT_SELECT := qt5
 
 %:
 	dh $@ --with pkgkde_symbolshelper
+
+override_dh_auto_configure:
+	qmake QMAKE_STRIP=: PREFIX=/usr
 	
 override_dh_auto_build:
 	dh_auto_build
