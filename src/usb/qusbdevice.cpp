@@ -241,9 +241,6 @@ void QUsbDevice::handleUsbError(int error_code)
     if (status != m_status) {
 	m_status = status;
 	qWarning("Usb device status changed: %s", statusString().constData());
-	if (m_status != QUsbDevice::statusOK && isConnected()) {
-		close();
-	}
 	emit statusChanged(m_status);
     }
 }
