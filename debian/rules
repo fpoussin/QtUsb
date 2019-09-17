@@ -9,8 +9,12 @@ export QT_SELECT := qt5
 
 %:
 	dh $@ --with pkgkde_symbolshelper
+	
+override_dh_auto_build:
+	dh_auto_build
+	$(MAKE) docs
 
-override_dh_auto_install-arch:
+override_dh_auto_install:
 	dh_auto_install
 	$(MAKE) INSTALL_ROOT=$(CURDIR)/debian/tmp install_docs
 

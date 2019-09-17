@@ -8,8 +8,8 @@ from glob import glob
 import requests
 
 # qtsync.pl version for each distro release
-distros = {'bionic': '5.9',
-           'cosmic': '5.11',
+distros = {'xenial': '5.5',
+           'bionic': '5.9',
            'disco': '5.12'}
 
 build_dir = os.getcwd() + '/../qtusb-build'
