@@ -82,7 +82,7 @@ public:
         statusInterrupted = -10,
         statusNoMemory = -11,
         statusNotSupported = -12,
-        StatusUnknownError = -99,
+	statusUnknownError = -99,
     };
     Q_ENUM(DeviceStatus)
 
