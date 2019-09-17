@@ -12,62 +12,61 @@ A Cross-platform USB Module for Qt built around libusb-1.0
 - Hotplug detection
 - Device enumeration and filtering
 
-## Install
-**Ubuntu**
+## Install  
+
+**Ubuntu**  
 ```
 sudo add-apt-repository ppa:fpoussin/ppa
 sudo apt install libqt5usb5 libqt5usb5-dev
 ```
 
-**Windows**
+**Windows**  
 Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appveyor build artifacts](https://ci.appveyor.com/project/fpoussin/qtusb) for binary archives
 
-## Build
+## Build  
 
-**Unix**
+**Unix**  
 You need libusb-1.0-0-dev and pkg-config packages installed
 ```shell
 mkdir build && cd build
 qmake ..
 make install
 ```
-Alternatively build as static lib
+Alternatively build as static lib while still using a dynamic Qt lib
 ```shell
 mkdir build && cd build
 qmake CONFIG+=static_lib ..
-//Link with '*.a' file
+# Link with '*.a' file later in you project
 ```
 
-**MSVC 2017**
-You need WDK 8.1 and CRT SDK installed to compile libusb
-These are both available from the Visual Studio Installer
+**MSVC 2017**  
+You need WDK 8.1 and CRT SDK installed to compile libusb  
+These are both available from the Visual Studio Installer  
 ```
 build_msvc2017.bat [x64|x86] QT_PATH
-ie: build_msvc2017.bat x64 C:\Qt\5.12.1\msvc2017_64
+ie: build_msvc2017.bat x64 C:\Qt\5.13.1\msvc2017_64
 ```
 
-## Using
+## Using  
 
-You'll need to add the module to your project file:
-
+You'll need to add the module to your project file:  
 ```
 qt += usb
 ```
 
-Then include it into your headers:
-
+Then include it into your headers:  
 ```
 #include <QUsbDevice>
 #include <QUsbInfo>
 #include <QUsbTransferHandler>
 ```
 
-## Documentation
+## Documentation  
 
-QCH documentation files can be found with each release.
-You have to manually install them in Qt Creator.
+QCH documentation files can be found with each release, they are also included in ubuntu packages.  
+You have to manually install them in Qt Creator on Windows.  
 
-## Downloads
+## Downloads  
 
-[Ubuntu PPA](https://launchpad.net/~fpoussin/+archive/ubuntu/ppa)
-Windows binaries are [in the releases section](https://github.com/fpoussin/QtUsb/releases).
+[Ubuntu PPA](https://launchpad.net/~fpoussin/+archive/ubuntu/ppa)  
+Windows binaries are [in the releases section](https://github.com/fpoussin/QtUsb/releases).  
