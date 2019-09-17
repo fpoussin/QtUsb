@@ -31,11 +31,6 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
     libusb_exit(m_ctx);
 }
 
-void QUsbDevicePrivate::printUsbError(int error_code) const
-{
-    qWarning("libusb Error: %s", libusb_strerror(static_cast<enum libusb_error>(error_code)));
-}
-
 /*!
     \class QUsbDevice
 
@@ -164,6 +159,7 @@ QUsbDevice::QUsbDevice(QObject *parent)
     m_config.config = 0x01;
     m_config.interface = 0x00;
     m_config.alternate = 0x00;
+    m_status = statusOK;
     this->setLogLevel(m_log_level); // Apply log level to libusb
 }
 
@@ -195,6 +191,58 @@ QByteArray QUsbDevice::speedString() const
     }
 
     return "Error";
+}
+
+QUsbDevice::DeviceStatus QUsbDevice::status() const
+{
+    return m_status;
+}
+
+QByteArray QUsbDevice::statusString() const
+{
+    switch (m_status) {
+    case statusOK:
+        return "Success (no error)";
+    case statusIoError:
+        return "Input/output error";
+    case statusInvalidParam:
+        return "Invalid parameter";
+    case statusAccessDenied:
+        return "Access denied (insufficient permissions)";
+    case statusNoSuchDevice:
+        return "No such device (it may have been disconnected)";
+    case statusNotFound:
+        return "Entity not found";
+    case statusBusy:
+        return "Resource busy";
+    case statusTimeout:
+        return "Operation timed out";
+    case statusOverflow:
+        return "Overflow";
+    case statusPipeError:
+        return "Pipe error";
+    case statusInterrupted:
+        return "System call interrupted (perhaps due to signal)";
+    case statusNoMemory:
+        return "Insufficient memory";
+    case statusNotSupported:
+        return "Operation not supported or unimplemented on this platform";
+    case statusUnknownError:
+        break;
+    }
+
+    return "Other error";
+}
+
+void QUsbDevice::handleUsbError(int error_code)
+{
+    DbgPrintFuncName();
+    DeviceStatus status = static_cast<QUsbDevice::DeviceStatus>(error_code);
+    if (status != m_status) {
+        m_status = status;
+        qWarning("Usb device status changed: %s", statusString().constData());
+        emit statusChanged(m_status);
+    }
 }
 
 /*!
@@ -301,7 +349,7 @@ qint32 QUsbDevice::open()
         if (rc != 0) {
             if (m_log_level >= logWarning)
                 qWarning("Cannot Set Configuration");
-            d->printUsbError(rc);
+            handleUsbError(rc);
             return -3;
         }
     }
@@ -309,7 +357,7 @@ qint32 QUsbDevice::open()
     if (rc != 0) {
         if (m_log_level >= logWarning)
             qWarning("Cannot Claim Interface");
-        d->printUsbError(rc);
+        handleUsbError(rc);
         return -4;
     }
 
@@ -332,6 +380,7 @@ qint32 QUsbDevice::open()
     }
 
     m_connected = true;
+    emit connectionChanged(m_connected);
 
     return 0;
 }
@@ -355,6 +404,7 @@ void QUsbDevice::close()
     }
 
     m_connected = false;
+    emit connectionChanged(m_connected);
 }
 
 /*!
@@ -481,8 +531,8 @@ void QUsbEventsThread::run()
 bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 {
     return other.config == config &&
-           other.interface == interface &&
-           other.alternate == alternate;
+            other.interface == interface &&
+            other.alternate == alternate;
 }
 
 QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &other)
@@ -501,7 +551,7 @@ QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &othe
 bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 {
     return other.pid == pid &&
-           other.vid == vid;
+            other.vid == vid;
 }
 
 QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)

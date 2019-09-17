@@ -82,7 +82,7 @@ public:
         statusInterrupted = -10,
         statusNoMemory = -11,
         statusNotSupported = -12,
-        StatusUnknownError = -99,
+        statusUnknownError = -99,
     };
     Q_ENUM(DeviceStatus)
 
@@ -93,6 +93,8 @@ public:
     Q_PROPERTY(quint16 vid READ vid)
     Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
     Q_PROPERTY(DeviceSpeed speed READ speed)
+    Q_PROPERTY(DeviceStatus status READ status NOTIFY statusChanged)
+    Q_PROPERTY(bool connected READ isConnected NOTIFY connectionChanged)
 
     explicit QUsbDevice(QObject *parent = Q_NULLPTR);
     ~QUsbDevice();
@@ -110,7 +112,16 @@ public:
     LogLevel logLevel() const;
     DeviceSpeed speed() const;
     QByteArray speedString() const;
+    DeviceStatus status() const;
+    QByteArray statusString() const;
     static IdList devices();
+
+private:
+    void handleUsbError(int error_code);
+
+signals:
+    void statusChanged(QUsbDevice::DeviceStatus status);
+    void connectionChanged(bool connected);
 
 public slots:
     qint32 open();
@@ -126,6 +137,7 @@ private:
     Id m_id;
     Config m_config;
     DeviceSpeed m_spd;
+    DeviceStatus m_status;
 };
 
 Q_DECLARE_METATYPE(QUsbDevice::Config);

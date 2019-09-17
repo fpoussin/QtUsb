@@ -228,7 +228,8 @@ bool QUsbTransferPrivate::prepareTransfer(libusb_transfer **tr, libusb_transfer_
 void QUsbTransferPrivate::stopTransfer()
 {
     DbgPrivPrintFuncName();
-    // TODO: check if struc it not already freed
+    // TODO: check if struct it not already freed
+    // HINT: libusb_cancel_transfer is async, callback function is called, dont close device first on deconstruction...
     if (m_transfer_in != Q_NULLPTR)
         libusb_cancel_transfer(m_transfer_in);
     if (m_transfer_out != Q_NULLPTR)
@@ -255,7 +256,11 @@ int QUsbTransferPrivate::readUsb(qint64 maxSize)
     rc = libusb_submit_transfer(m_transfer_in);
 
     if (rc != LIBUSB_SUCCESS) {
-        q->m_dev->d_func()->printUsbError(rc);
+        setStatus(QUsbTransfer::transferError);
+        error(QUsbTransfer::transferError);
+        // TODO: Check if QUsbTransfer::QUsbDevice must be const...
+        QUsbDevice* dev = const_cast<QUsbDevice*>(q->m_dev);
+        dev->handleUsbError(rc);
         libusb_free_transfer(m_transfer_in);
         m_transfer_in = Q_NULLPTR;
         m_read_transfer_mutex.unlock();
@@ -280,7 +285,11 @@ int QUsbTransferPrivate::writeUsb(const char *data, qint64 maxSize)
     rc = libusb_submit_transfer(m_transfer_out);
 
     if (rc != LIBUSB_SUCCESS) {
-        q->m_dev->d_func()->printUsbError(rc);
+        setStatus(QUsbTransfer::transferError);
+        error(QUsbTransfer::transferError);
+        // TODO: Check if QUsbTransfer::QUsbDevice must be const...
+        QUsbDevice* dev = const_cast<QUsbDevice*>(q->m_dev);
+        dev->handleUsbError(rc);
         libusb_free_transfer(m_transfer_out);
         m_transfer_out = Q_NULLPTR;
         m_write_buf_mutex.unlock();

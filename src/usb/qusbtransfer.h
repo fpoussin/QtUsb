@@ -103,7 +103,7 @@ public slots:
     void cancelTransfer();
 
 Q_SIGNALS:
-    void error(Status error);
+    void error(QUsbTransfer::Status error);
 
 protected:
     qint64 readData(char *data, qint64 maxSize);
