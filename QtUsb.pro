@@ -7,3 +7,5 @@ load(configure)
 load(qt_parts)
 
 CONFIG += testcase c++11
+
+OTHER_FILES += README.md
