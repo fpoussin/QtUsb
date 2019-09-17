@@ -132,27 +132,27 @@ void QUsbTransferPrivate::setStatus(QUsbTransfer::Status status)
 
     q->m_status = status;
     switch (status) {
-        case QUsbTransfer::transferCompleted:
-            q->setErrorString(QString::fromUtf8("transferCompleted"));
-            break;
-        case QUsbTransfer::transferError:
-            q->setErrorString(QString::fromUtf8("transferError"));
-            break;
-        case QUsbTransfer::transferTimeout:
-            q->setErrorString(QString::fromUtf8("transferTimeout"));
-            break;
-        case QUsbTransfer::transferCanceled:
-            q->setErrorString(QString::fromUtf8("transferCanceled"));
-            break;
-        case QUsbTransfer::transferStall:
-            q->setErrorString(QString::fromUtf8("transferStall"));
-            break;
-        case QUsbTransfer::transferNoDevice:
-            q->setErrorString(QString::fromUtf8("transferOverflow"));
-            break;
-        case QUsbTransfer::transferOverflow:
-            q->setErrorString(QString::fromUtf8("transferOverflow"));
-            break;
+    case QUsbTransfer::transferCompleted:
+        q->setErrorString(QString::fromUtf8("transferCompleted"));
+        break;
+    case QUsbTransfer::transferError:
+        q->setErrorString(QString::fromUtf8("transferError"));
+        break;
+    case QUsbTransfer::transferTimeout:
+        q->setErrorString(QString::fromUtf8("transferTimeout"));
+        break;
+    case QUsbTransfer::transferCanceled:
+        q->setErrorString(QString::fromUtf8("transferCanceled"));
+        break;
+    case QUsbTransfer::transferStall:
+        q->setErrorString(QString::fromUtf8("transferStall"));
+        break;
+    case QUsbTransfer::transferNoDevice:
+        q->setErrorString(QString::fromUtf8("transferOverflow"));
+        break;
+    case QUsbTransfer::transferOverflow:
+        q->setErrorString(QString::fromUtf8("transferOverflow"));
+        break;
     }
 }
 
@@ -466,12 +466,12 @@ bool QUsbTransfer::open(QIODevice::OpenMode mode)
 
     // Set polling size to max packet size
     switch (m_type) {
-        case bulkTransfer:
-            if (m_dev->speed() >= QUsbDevice::highSpeed)
-                d->m_poll_size = 512;
-            break;
-        default:
-            d->m_poll_size = 64;
+    case bulkTransfer:
+        if (m_dev->speed() >= QUsbDevice::highSpeed)
+            d->m_poll_size = 512;
+        break;
+    default:
+        d->m_poll_size = 64;
     }
 
     if ((openMode() & ReadOnly && m_type == interruptTransfer) || d->m_poll) {

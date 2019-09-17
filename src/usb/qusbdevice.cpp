@@ -176,18 +176,18 @@ QUsbDevice::~QUsbDevice()
 QByteArray QUsbDevice::speedString() const
 {
     switch (m_spd) {
-        case unknownSpeed:
-            return "Unknown speed";
-        case lowSpeed:
-            return "Low speed";
-        case fullSpeed:
-            return "Full speed";
-        case highSpeed:
-            return "High speed";
-        case superSpeed:
-            return "Super speed";
-        case superSpeedPlus:
-            return "Super speed plus";
+    case unknownSpeed:
+        return "Unknown speed";
+    case lowSpeed:
+        return "Low speed";
+    case fullSpeed:
+        return "Full speed";
+    case highSpeed:
+        return "High speed";
+    case superSpeed:
+        return "Super speed";
+    case superSpeedPlus:
+        return "Super speed plus";
     }
 
     return "Error";
@@ -201,34 +201,34 @@ QUsbDevice::DeviceStatus QUsbDevice::status() const
 QByteArray QUsbDevice::statusString() const
 {
     switch (m_status) {
-        case statusOK:
-            return "Success (no error)";
-        case statusIoError:
-            return "Input/output error";
-        case statusInvalidParam:
-            return "Invalid parameter";
-        case statusAccessDenied:
-            return "Access denied (insufficient permissions)";
-        case statusNoSuchDevice:
-            return "No such device (it may have been disconnected)";
-        case statusNotFound:
-            return "Entity not found";
-        case statusBusy:
-            return "Resource busy";
-        case statusTimeout:
-            return "Operation timed out";
-        case statusOverflow:
-            return "Overflow";
-        case statusPipeError:
-            return "Pipe error";
-        case statusInterrupted:
-            return "System call interrupted (perhaps due to signal)";
-        case statusNoMemory:
-            return "Insufficient memory";
-        case statusNotSupported:
-            return "Operation not supported or unimplemented on this platform";
-        case statusUnknownError:
-            break;
+    case statusOK:
+        return "Success (no error)";
+    case statusIoError:
+        return "Input/output error";
+    case statusInvalidParam:
+        return "Invalid parameter";
+    case statusAccessDenied:
+        return "Access denied (insufficient permissions)";
+    case statusNoSuchDevice:
+        return "No such device (it may have been disconnected)";
+    case statusNotFound:
+        return "Entity not found";
+    case statusBusy:
+        return "Resource busy";
+    case statusTimeout:
+        return "Operation timed out";
+    case statusOverflow:
+        return "Overflow";
+    case statusPipeError:
+        return "Pipe error";
+    case statusInterrupted:
+        return "System call interrupted (perhaps due to signal)";
+    case statusNoMemory:
+        return "Insufficient memory";
+    case statusNotSupported:
+        return "Operation not supported or unimplemented on this platform";
+    case statusUnknownError:
+        break;
     }
 
     return "Other error";
@@ -362,21 +362,21 @@ qint32 QUsbDevice::open()
     }
 
     switch (libusb_get_device_speed(dev)) {
-        case LIBUSB_SPEED_LOW:
-            this->m_spd = lowSpeed;
-            break;
-        case LIBUSB_SPEED_FULL:
-            this->m_spd = fullSpeed;
-            break;
-        case LIBUSB_SPEED_HIGH:
-            this->m_spd = highSpeed;
-            break;
-        case LIBUSB_SPEED_SUPER:
-            this->m_spd = superSpeed;
-            break;
-        default:
-            this->m_spd = unknownSpeed;
-            break;
+    case LIBUSB_SPEED_LOW:
+        this->m_spd = lowSpeed;
+        break;
+    case LIBUSB_SPEED_FULL:
+        this->m_spd = fullSpeed;
+        break;
+    case LIBUSB_SPEED_HIGH:
+        this->m_spd = highSpeed;
+        break;
+    case LIBUSB_SPEED_SUPER:
+        this->m_spd = superSpeed;
+        break;
+    default:
+        this->m_spd = unknownSpeed;
+        break;
     }
 
     m_connected = true;
