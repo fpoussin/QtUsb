@@ -164,6 +164,7 @@ QUsbDevice::QUsbDevice(QObject *parent)
     m_config.config = 0x01;
     m_config.interface = 0x00;
     m_config.alternate = 0x00;
+    m_status = statusOK;
     this->setLogLevel(m_log_level); // Apply log level to libusb
 }
 
@@ -195,6 +196,47 @@ QByteArray QUsbDevice::speedString() const
     }
 
     return "Error";
+}
+
+QUsbDevice::DeviceStatus QUsbDevice::status() const
+{
+    return m_status;
+}
+
+QByteArray QUsbDevice::statusString() const
+{
+    switch (m_status) {
+    case statusOK:
+	return "Success (no error)";
+    case statusIoError:
+	return "Input/output error";
+    case statusInvalidParam:
+	return "Invalid parameter";
+    case statusAccessDenied:
+	return "Access denied (insufficient permissions)";
+    case statusNoSuchDevice:
+	return "No such device (it may have been disconnected)";
+    case statusNotFound:
+	return "Entity not found";
+    case statusBusy:
+	return "Resource busy";
+    case statusTimeout:
+	return "Operation timed out";
+    case statusOverflow:
+	return "Overflow";
+    case statusPipeError:
+	return "Pipe error";
+    case statusInterrupted:
+	return "System call interrupted (perhaps due to signal)";
+    case statusNoMemory:
+	return "Insufficient memory";
+    case statusNotSupported:
+	return "Operation not supported or unimplemented on this platform";
+    case statusUnknownError:
+	break;
+    }
+
+    return "Other error";
 }
 
 /*!

@@ -93,6 +93,7 @@ public:
     Q_PROPERTY(quint16 vid READ vid)
     Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
     Q_PROPERTY(DeviceSpeed speed READ speed)
+    Q_PROPERTY(DeviceStatus status READ status NOTIFY statusChanged)
 
     explicit QUsbDevice(QObject *parent = Q_NULLPTR);
     ~QUsbDevice();
@@ -110,7 +111,13 @@ public:
     LogLevel logLevel() const;
     DeviceSpeed speed() const;
     QByteArray speedString() const;
+    DeviceStatus status() const;
+    QByteArray statusString() const;
     static IdList devices();
+
+signals:
+    void statusChanged(DeviceStatus status);
+    void connectionChanged(bool connected);
 
 public slots:
     qint32 open();
@@ -126,6 +133,7 @@ private:
     Id m_id;
     Config m_config;
     DeviceSpeed m_spd;
+    DeviceStatus m_status;
 };
 
 Q_DECLARE_METATYPE(QUsbDevice::Config);
