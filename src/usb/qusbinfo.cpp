@@ -27,7 +27,7 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     QUsbInfo *info = reinterpret_cast<QUsbInfo *>(user_data);
     DbgPrintCB();
 
-    if (info->logLevel())
+    if (info->logLevel() >= QUsbDevice::logDebug)
         qDebug("hotplugCallback");
 
     (void)libusb_get_device_descriptor(device, &desc);
