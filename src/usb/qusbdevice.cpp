@@ -39,24 +39,6 @@ QUsbDevicePrivate::QUsbDevicePrivate()
     m_devHandle = Q_NULLPTR;
     m_classes = {this, q};
 
-    if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
-
-        rc = libusb_hotplug_register_callback(m_ctx,
-                                              static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
-                                              LIBUSB_HOTPLUG_ENUMERATE,
-                                              q->m_id.vid,
-                                              q->m_id.pid,
-                                              LIBUSB_HOTPLUG_MATCH_ANY,
-                                              reinterpret_cast<libusb_hotplug_callback_fn>(DeviceLeftCallback),
-                                              reinterpret_cast<void *>(&m_classes),
-                                              &callback_handle);
-        if (LIBUSB_SUCCESS != rc) {
-            libusb_exit(m_ctx);
-            qWarning("Error creating hotplug callback");
-            return;
-        }
-    }
-
     m_events = new QUsbEventsThread();
     m_events->m_ctx = m_ctx;
     m_events->start();
@@ -202,6 +184,26 @@ QUsbDevice::QUsbDevice(QObject *parent)
     m_config.alternate = 0x00;
     m_status = statusOK;
     this->setLogLevel(m_log_level); // Apply log level to libusb
+
+    Q_D(QUsbDevice);
+    if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
+
+        int rc;
+        rc = libusb_hotplug_register_callback(d->m_ctx,
+                                              static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
+                                              LIBUSB_HOTPLUG_ENUMERATE,
+                                              m_id.vid,
+                                              m_id.pid,
+                                              LIBUSB_HOTPLUG_MATCH_ANY,
+                                              reinterpret_cast<libusb_hotplug_callback_fn>(DeviceLeftCallback),
+                                              reinterpret_cast<void *>(&d->m_classes),
+                                              &callback_handle);
+        if (LIBUSB_SUCCESS != rc) {
+            libusb_exit(d->m_ctx);
+            qWarning("Error creating hotplug callback");
+            return;
+        }
+    }
 }
 
 /*!
