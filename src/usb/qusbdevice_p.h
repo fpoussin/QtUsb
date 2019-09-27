@@ -23,6 +23,11 @@ public:
 
 class QUsbTransferPrivate;
 
+typedef struct  {
+    QUsbDevicePrivate *priv;
+    QUsbDevice *pub;
+} qusbdevice_classes_t;
+
 class QUsbDevicePrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QUsbDevice)
@@ -35,6 +40,7 @@ public:
     libusb_device **m_devs;
     libusb_device_handle *m_devHandle;
     libusb_context *m_ctx;
+    qusbdevice_classes_t m_classes;
 
     QUsbEventsThread *m_events;
 };

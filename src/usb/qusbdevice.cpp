@@ -7,13 +7,55 @@
     if (m_log_level >= logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
+static libusb_hotplug_callback_handle callback_handle;
+
+static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
+                                          libusb_device *device,
+                                          libusb_hotplug_event event,
+                                          void *user_data)
+{
+    (void)ctx;
+    struct libusb_device_descriptor desc;
+    (void)libusb_get_device_descriptor(device, &desc);
+    qusbdevice_classes_t *dev = reinterpret_cast<qusbdevice_classes_t *>(user_data);
+
+    if (dev->pub->logLevel() >= QUsbDevice::logDebug)
+        qDebug("DeviceLeftCallback");
+
+    if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
+        if (dev->priv->m_ctx == ctx && *dev->priv->m_devs == device)
+            dev->pub->close();
+    }
+    return 0;
+}
+
 QUsbDevicePrivate::QUsbDevicePrivate()
 {
-    int r = libusb_init(&m_ctx);
-    if (r < 0) {
-        qCritical("LibUsb Init Error %d", r);
+    int rc = libusb_init(&m_ctx);
+    if (rc < 0) {
+        qCritical("LibUsb Init Error %d", rc);
     }
+    Q_Q(QUsbDevice);
     m_devHandle = Q_NULLPTR;
+    m_classes = {this, q};
+
+    if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
+
+        rc = libusb_hotplug_register_callback(m_ctx,
+                                              static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
+                                              LIBUSB_HOTPLUG_ENUMERATE,
+                                              q->m_id.vid,
+                                              q->m_id.pid,
+                                              LIBUSB_HOTPLUG_MATCH_ANY,
+                                              reinterpret_cast<libusb_hotplug_callback_fn>(DeviceLeftCallback),
+                                              reinterpret_cast<void *>(&m_classes),
+                                              &callback_handle);
+        if (LIBUSB_SUCCESS != rc) {
+            libusb_exit(m_ctx);
+            qWarning("Error creating hotplug callback");
+            return;
+        }
+    }
 
     m_events = new QUsbEventsThread();
     m_events->m_ctx = m_ctx;
@@ -151,7 +193,6 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
-
     m_spd = unknownSpeed;
     m_connected = false;
     m_log_level = logInfo;
@@ -168,6 +209,7 @@ QUsbDevice::QUsbDevice(QObject *parent)
  */
 QUsbDevice::~QUsbDevice()
 {
+    this->close();
 }
 
 /*!
