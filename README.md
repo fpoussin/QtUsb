@@ -63,8 +63,9 @@ Then include it into your headers:
 
 ## Documentation  
 
-QCH documentation files can be found with each release, they are also included in ubuntu packages.  
+QCH files can be found with each release, they are also included in ubuntu packages.  
 You have to manually install them in Qt Creator on Windows.  
+Online documentation can be found here: https://fpoussin.github.io/doxygen/qtusb/0.5.x/ 
 
 ## Downloads  
 
