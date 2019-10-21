@@ -33,12 +33,12 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
 
         // Add to list
-        emit info->deviceInserted({desc.idProduct, desc.idVendor, bus, port});
+        emit info->deviceInserted({desc.idProduct, desc.idVendor, bus, port, desc.bDeviceClass, desc.bDeviceSubClass});
 
     } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
 
         // Remove from list
-        emit info->deviceRemoved({desc.idProduct, desc.idVendor, bus, port});
+        emit info->deviceRemoved({desc.idProduct, desc.idVendor, bus, port, desc.bDeviceClass, desc.bDeviceSubClass});
 
     } else {
         if (info->logLevel() >= QUsbDevice::logWarning)

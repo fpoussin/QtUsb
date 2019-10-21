@@ -52,6 +52,8 @@ public:
         quint16 vid;
         quint8 bus;
         quint8 port;
+        quint8 dClass;
+        quint8 dSubClass;
 
         bool operator==(const QUsbDevice::Id &other) const;
         QUsbDevice::Id &operator=(const QUsbDevice::Id &other);

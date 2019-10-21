@@ -158,6 +158,9 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
 /*!
     \class QUsbDevice::Id
     \brief Device Ids structure.
+
+    If some properties are equal to 0, they won't be taken into account for filtering.
+    You only need PID and VID, or class and subclass to identify a device, but can be more specific if multiple devices using the same IDs are connected.
     \ingroup usb-main
     \inmodule QtUsb
  */
@@ -171,6 +174,27 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
     \variable QUsbDevice::Id::pid
     \brief The product ID.
  */
+
+/*!
+    \variable QUsbDevice::Id::bus
+    \brief The USB bus number.
+ */
+
+/*!
+    \variable QUsbDevice::Id::port
+    \brief The USB port number.
+ */
+
+/*!
+    \variable QUsbDevice::Id::dClass
+    \brief The USB class.
+ */
+
+/*!
+    \variable QUsbDevice::Id::dSubClass
+    \brief The USB Sub-class.
+ */
+
 
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
@@ -343,6 +367,12 @@ qint32 QUsbDevice::open()
     if (m_connected)
         return -1;
 
+    if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0))
+    {
+        qWarning("No device IDs or classes are defined. Aborting.");
+        return -1;
+    }
+
     cnt = libusb_get_device_list(d->m_ctx, &d->m_devs); // get the list of devices
     if (cnt < 0) {
         qCritical("libusb_get_device_list error");
@@ -356,15 +386,26 @@ qint32 QUsbDevice::open()
         quint8 port = libusb_get_port_number(dev);
         libusb_device_descriptor desc;
 
-        // Assign default bus/ports
-        if (m_id.bus == 0)
-            m_id.bus = bus;
-        if (m_id.port == 0)
-            m_id.port = port;
-
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
+
+            // Assign default properties in order to match
+            if (m_id.pid == 0)
+                m_id.pid = desc.idProduct;
+            if (m_id.vid == 0)
+                m_id.vid = desc.idVendor;
+            if (m_id.bus == 0)
+                m_id.bus = bus;
+            if (m_id.port == 0)
+                m_id.port = port;
+            if (m_id.dClass == 0)
+                m_id.dClass = desc.bDeviceClass;
+            if (m_id.dSubClass == 0)
+                m_id.dSubClass = desc.bDeviceSubClass;
+
+            // Check all properties match. Defaults have been assigned above.
             if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid
-                && bus == m_id.bus && port == m_id.port) {
+                && bus == m_id.bus && port == m_id.port
+                && desc.bDeviceClass == m_id.dClass && desc.bDeviceSubClass == m_id.dSubClass) {
                 if (m_log_level >= logInfo)
                     qInfo("Found device");
 
@@ -608,14 +649,21 @@ bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
     return other.pid   == pid &&
             other.vid  == vid &&
             other.bus  == bus &&
-            other.port == port;
+            other.port == port &&
+            other.dClass == dClass &&
+            other.dSubClass == dSubClass;
 }
 
+/*!
+    \brief Copy operator.
+ */
 QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)
 {
     pid  = other.pid;
     vid  = other.vid;
     bus  = other.bus;
     port = other.port;
+    dClass = other.dClass;
+    dSubClass = other.dSubClass;
     return *this;
 }
