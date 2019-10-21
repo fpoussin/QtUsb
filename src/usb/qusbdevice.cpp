@@ -316,6 +316,8 @@ QUsbDevice::IdList QUsbDevice::devices()
             Id filter;
             filter.pid = desc.idProduct;
             filter.vid = desc.idVendor;
+            filter.bus = libusb_get_bus_number(dev);
+            filter.port = libusb_get_port_number(dev);
 
             list.append(filter);
         }
@@ -350,10 +352,19 @@ qint32 QUsbDevice::open()
 
     for (int i = 0; i < cnt; i++) {
         dev = d->m_devs[i];
+        quint8 bus = libusb_get_bus_number(dev);
+        quint8 port = libusb_get_port_number(dev);
         libusb_device_descriptor desc;
 
+        // Assign default bus/ports
+        if (m_id.bus == 0)
+            m_id.bus = bus;
+        if (m_id.port == 0)
+            m_id.port = port;
+
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
-            if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid) {
+            if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid
+                && bus == m_id.bus && port == m_id.port) {
                 if (m_log_level >= logInfo)
                     qInfo("Found device");
 
@@ -574,14 +585,14 @@ void QUsbEventsThread::run()
  */
 bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 {
-    return other.config == config &&
+    return other.config     == config &&
             other.interface == interface &&
             other.alternate == alternate;
 }
 
 QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &other)
 {
-    config = other.config;
+    config    = other.config;
     alternate = other.alternate;
     interface = other.interface;
     return *this;
@@ -594,13 +605,17 @@ QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &othe
  */
 bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 {
-    return other.pid == pid &&
-            other.vid == vid;
+    return other.pid   == pid &&
+            other.vid  == vid &&
+            other.bus  == bus &&
+            other.port == port;
 }
 
 QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)
 {
-    pid = other.pid;
-    vid = other.vid;
+    pid  = other.pid;
+    vid  = other.vid;
+    bus  = other.bus;
+    port = other.port;
     return *this;
 }

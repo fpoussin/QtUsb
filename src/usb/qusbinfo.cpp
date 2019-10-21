@@ -23,6 +23,8 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     QUsbInfo *info = reinterpret_cast<QUsbInfo *>(user_data);
     DbgPrintCB();
 
+    uint8_t bus = libusb_get_bus_number(device);
+    uint8_t port = libusb_get_port_number(device);
 
     if (info->logLevel() >= QUsbDevice::logDebug)
         qDebug("hotplugCallback");
@@ -31,14 +33,12 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
 
         // Add to list
-        device_list.append({desc.idProduct, desc.idVendor});
-        emit info->deviceInserted(device_list);
+        emit info->deviceInserted({desc.idProduct, desc.idVendor, bus, port});
 
     } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
 
         // Remove from list
-        device_list.append({desc.idProduct, desc.idVendor});
-        emit info->deviceRemoved(device_list);
+        emit info->deviceRemoved({desc.idProduct, desc.idVendor, bus, port});
 
     } else {
         if (info->logLevel() >= QUsbDevice::logWarning)
@@ -263,7 +263,10 @@ int QUsbInfo::findDevice(const QUsbDevice::Id &id,
         const QUsbDevice::Id *d = &list.at(i);
 
         if (d->pid == id.pid && d->vid == id.vid) {
-            return i;
+            if (id.bus == 0 && id.port == 0) // Ignore bus/port if both == 0
+                return i;
+            if ((id.bus && d->bus == id.bus) && (id.port && d->port == id.port)) // Take bus/port into account for filtering when set
+                return i;
         }
     }
     return -1;
@@ -319,11 +322,15 @@ void QUsbInfo::monitorDevices(const QUsbDevice::IdList &list)
         }
     }
 
-    if (inserted.length() > 0)
-        emit deviceInserted(inserted);
+    for (int i = 0; i < inserted.length(); i++)
+    {
+        emit deviceInserted(inserted.at(i));
+    }
 
-    if (removed.length() > 0)
-        emit deviceRemoved(removed);
+    for (int i = 0; i < removed.length(); i++)
+    {
+        emit deviceRemoved(removed.at(i));
+    }
 
     m_system_list = list;
 }
