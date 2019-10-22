@@ -7,13 +7,37 @@
     if (m_log_level >= logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
+static libusb_hotplug_callback_handle callback_handle;
+
+static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
+                                          libusb_device *device,
+                                          libusb_hotplug_event event,
+                                          void *user_data)
+{
+    (void)ctx;
+    struct libusb_device_descriptor desc;
+    (void)libusb_get_device_descriptor(device, &desc);
+    qusbdevice_classes_t *dev = reinterpret_cast<qusbdevice_classes_t *>(user_data);
+
+    if (dev->pub->logLevel() >= QUsbDevice::logDebug)
+        qDebug("DeviceLeftCallback");
+
+    if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
+        if (dev->priv->m_ctx == ctx && *dev->priv->m_devs == device)
+            dev->pub->close();
+    }
+    return 0;
+}
+
 QUsbDevicePrivate::QUsbDevicePrivate()
 {
-    int r = libusb_init(&m_ctx);
-    if (r < 0) {
-        qCritical("LibUsb Init Error %d", r);
+    int rc = libusb_init(&m_ctx);
+    if (rc < 0) {
+        qCritical("LibUsb Init Error %d", rc);
     }
+    Q_Q(QUsbDevice);
     m_devHandle = Q_NULLPTR;
+    m_classes = {this, q};
 
     m_events = new QUsbEventsThread();
     m_events->m_ctx = m_ctx;
@@ -134,6 +158,9 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
 /*!
     \class QUsbDevice::Id
     \brief Device Ids structure.
+
+    If some properties are equal to 0, they won't be taken into account for filtering.
+    You only need PID and VID, or class and subclass to identify a device, but can be more specific if multiple devices using the same IDs are connected.
     \ingroup usb-main
     \inmodule QtUsb
  */
@@ -148,10 +175,30 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
     \brief The product ID.
  */
 
+/*!
+    \variable QUsbDevice::Id::bus
+    \brief The USB bus number.
+ */
+
+/*!
+    \variable QUsbDevice::Id::port
+    \brief The USB port number.
+ */
+
+/*!
+    \variable QUsbDevice::Id::dClass
+    \brief The USB class.
+ */
+
+/*!
+    \variable QUsbDevice::Id::dSubClass
+    \brief The USB Sub-class.
+ */
+
+
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
-
     m_spd = unknownSpeed;
     m_connected = false;
     m_log_level = logInfo;
@@ -161,6 +208,26 @@ QUsbDevice::QUsbDevice(QObject *parent)
     m_config.alternate = 0x00;
     m_status = statusOK;
     this->setLogLevel(m_log_level); // Apply log level to libusb
+
+    Q_D(QUsbDevice);
+    if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
+
+        int rc;
+        rc = libusb_hotplug_register_callback(d->m_ctx,
+                                              static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
+                                              LIBUSB_HOTPLUG_ENUMERATE,
+                                              m_id.vid,
+                                              m_id.pid,
+                                              LIBUSB_HOTPLUG_MATCH_ANY,
+                                              reinterpret_cast<libusb_hotplug_callback_fn>(DeviceLeftCallback),
+                                              reinterpret_cast<void *>(&d->m_classes),
+                                              &callback_handle);
+        if (LIBUSB_SUCCESS != rc) {
+            libusb_exit(d->m_ctx);
+            qWarning("Error creating hotplug callback");
+            return;
+        }
+    }
 }
 
 /*!
@@ -168,6 +235,7 @@ QUsbDevice::QUsbDevice(QObject *parent)
  */
 QUsbDevice::~QUsbDevice()
 {
+    this->close();
 }
 
 /*!
@@ -272,6 +340,8 @@ QUsbDevice::IdList QUsbDevice::devices()
             Id filter;
             filter.pid = desc.idProduct;
             filter.vid = desc.idVendor;
+            filter.bus = libusb_get_bus_number(dev);
+            filter.port = libusb_get_port_number(dev);
 
             list.append(filter);
         }
@@ -297,6 +367,12 @@ qint32 QUsbDevice::open()
     if (m_connected)
         return -1;
 
+    if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0))
+    {
+        qWarning("No device IDs or classes are defined. Aborting.");
+        return -1;
+    }
+
     cnt = libusb_get_device_list(d->m_ctx, &d->m_devs); // get the list of devices
     if (cnt < 0) {
         qCritical("libusb_get_device_list error");
@@ -306,10 +382,30 @@ qint32 QUsbDevice::open()
 
     for (int i = 0; i < cnt; i++) {
         dev = d->m_devs[i];
+        quint8 bus = libusb_get_bus_number(dev);
+        quint8 port = libusb_get_port_number(dev);
         libusb_device_descriptor desc;
 
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
-            if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid) {
+
+            // Assign default properties in order to match
+            if (m_id.pid == 0)
+                m_id.pid = desc.idProduct;
+            if (m_id.vid == 0)
+                m_id.vid = desc.idVendor;
+            if (m_id.bus == 0)
+                m_id.bus = bus;
+            if (m_id.port == 0)
+                m_id.port = port;
+            if (m_id.dClass == 0)
+                m_id.dClass = desc.bDeviceClass;
+            if (m_id.dSubClass == 0)
+                m_id.dSubClass = desc.bDeviceSubClass;
+
+            // Check all properties match. Defaults have been assigned above.
+            if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid
+                && bus == m_id.bus && port == m_id.port
+                && desc.bDeviceClass == m_id.dClass && desc.bDeviceSubClass == m_id.dSubClass) {
                 if (m_log_level >= logInfo)
                     qInfo("Found device");
 
@@ -530,14 +626,14 @@ void QUsbEventsThread::run()
  */
 bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 {
-    return other.config == config &&
+    return other.config     == config &&
             other.interface == interface &&
             other.alternate == alternate;
 }
 
 QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &other)
 {
-    config = other.config;
+    config    = other.config;
     alternate = other.alternate;
     interface = other.interface;
     return *this;
@@ -550,13 +646,24 @@ QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &othe
  */
 bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 {
-    return other.pid == pid &&
-            other.vid == vid;
+    return other.pid   == pid &&
+            other.vid  == vid &&
+            other.bus  == bus &&
+            other.port == port &&
+            other.dClass == dClass &&
+            other.dSubClass == dSubClass;
 }
 
+/*!
+    \brief Copy operator.
+ */
 QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)
 {
-    pid = other.pid;
-    vid = other.vid;
+    pid  = other.pid;
+    vid  = other.vid;
+    bus  = other.bus;
+    port = other.port;
+    dClass = other.dClass;
+    dSubClass = other.dSubClass;
     return *this;
 }

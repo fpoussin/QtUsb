@@ -17,49 +17,35 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
                                        libusb_hotplug_event event,
                                        void *user_data)
 {
-
-    static libusb_device_handle *handle = Q_NULLPTR;
     struct libusb_device_descriptor desc;
     (void)ctx;
-    int rc = 0;
     QUsbDevice::IdList device_list;
-    QUsbDevice::Id dev;
     QUsbInfo *info = reinterpret_cast<QUsbInfo *>(user_data);
     DbgPrintCB();
+
+    uint8_t bus = libusb_get_bus_number(device);
+    uint8_t port = libusb_get_port_number(device);
 
     if (info->logLevel() >= QUsbDevice::logDebug)
         qDebug("hotplugCallback");
 
     (void)libusb_get_device_descriptor(device, &desc);
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
-        rc = libusb_open(device, &handle);
-        if (rc != LIBUSB_SUCCESS) {
-            qWarning("Could not open new USB device");
-            return rc;
-        }
+
         // Add to list
-        dev.vid = desc.idVendor;
-        dev.pid = desc.idProduct;
-        device_list.append(dev);
-        emit info->deviceInserted(device_list);
+        emit info->deviceInserted({desc.idProduct, desc.idVendor, bus, port, desc.bDeviceClass, desc.bDeviceSubClass});
 
     } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
-        if (handle) {
-            // Remove from list
-            dev.vid = desc.idVendor;
-            dev.pid = desc.idProduct;
-            device_list.append(dev);
-            emit info->deviceRemoved(device_list);
 
-            libusb_close(handle);
-            handle = Q_NULLPTR;
-            return 0;
-        }
+        // Remove from list
+        emit info->deviceRemoved({desc.idProduct, desc.idVendor, bus, port, desc.bDeviceClass, desc.bDeviceSubClass});
+
     } else {
-        qWarning("Unhandled hotplug event %d", event);
+        if (info->logLevel() >= QUsbDevice::logWarning)
+            qWarning("Unhandled hotplug event %d", event);
         return -1;
     }
-    return rc;
+    return 0;
 }
 
 QUsbInfoPrivate::QUsbInfoPrivate()
@@ -151,7 +137,7 @@ QUsbInfo::QUsbInfo(QObject *parent)
 
         rc = libusb_hotplug_register_callback(d->m_ctx,
                                               static_cast<libusb_hotplug_event>((LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT)),
-                                              static_cast<libusb_hotplug_flag>(0),
+                                              LIBUSB_HOTPLUG_NO_FLAGS,
                                               LIBUSB_HOTPLUG_MATCH_ANY,
                                               LIBUSB_HOTPLUG_MATCH_ANY,
                                               LIBUSB_HOTPLUG_MATCH_ANY,
@@ -160,7 +146,7 @@ QUsbInfo::QUsbInfo(QObject *parent)
                                               &callback_handle);
         if (LIBUSB_SUCCESS != rc) {
             libusb_exit(d->m_ctx);
-            qWarning("Error creating hotplug callback");
+             qWarning("Error creating hotplug callback");
             return;
         }
     }
@@ -277,7 +263,10 @@ int QUsbInfo::findDevice(const QUsbDevice::Id &id,
         const QUsbDevice::Id *d = &list.at(i);
 
         if (d->pid == id.pid && d->vid == id.vid) {
-            return i;
+            if (id.bus == 0 && id.port == 0) // Ignore bus/port if both == 0
+                return i;
+            if ((id.bus && d->bus == id.bus) && (id.port && d->port == id.port)) // Take bus/port into account for filtering when set
+                return i;
         }
     }
     return -1;
@@ -293,8 +282,10 @@ void QUsbInfo::setLogLevel(QUsbDevice::LogLevel level)
     m_log_level = level;
     if (m_log_level >= QUsbDevice::logDebug)
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
-    else
+    else if (m_log_level >= QUsbDevice::logWarning)
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
+    else
+        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
 }
 
 /*!
@@ -331,11 +322,15 @@ void QUsbInfo::monitorDevices(const QUsbDevice::IdList &list)
         }
     }
 
-    if (inserted.length() > 0)
-        emit deviceInserted(inserted);
+    for (int i = 0; i < inserted.length(); i++)
+    {
+        emit deviceInserted(inserted.at(i));
+    }
 
-    if (removed.length() > 0)
-        emit deviceRemoved(removed);
+    for (int i = 0; i < removed.length(); i++)
+    {
+        emit deviceRemoved(removed.at(i));
+    }
 
     m_system_list = list;
 }

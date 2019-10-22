@@ -27,8 +27,8 @@ public:
     QUsbDevice::LogLevel logLevel() const;
 
 Q_SIGNALS:
-    void deviceInserted(QUsbDevice::IdList list);
-    void deviceRemoved(QUsbDevice::IdList list);
+    void deviceInserted(QUsbDevice::Id id);
+    void deviceRemoved(QUsbDevice::Id id);
 
 public slots:
     bool addDevice(const QUsbDevice::Id &id);
