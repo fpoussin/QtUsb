@@ -47,10 +47,15 @@ android {
 
     INCLUDEPATH += $$LIBUSB_ROOT_REL/libusb $$LIBUSB_ROOT_REL/libusb/os $$LIBUSB_ROOT_REL/android $$PWD/libusb-1.0
 }
-else:unix {
+else:unix:!macx {
     !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
     CONFIG += link_pkgconfig
     PKGCONFIG += libusb-1.0
 }
 
+macx {
+ LIBS += /usr/local/lib/libusb-1.0.a
+ LIBS += -L/usr/local/lib -lobjc -Wl,-framework,IOKit -Wl,-framework,CoreFoundation
+ INCLUDEPATH += /usr/local/include
+}
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
