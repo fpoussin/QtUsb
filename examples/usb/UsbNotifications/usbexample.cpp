@@ -3,12 +3,12 @@
 UsbExample::UsbExample(QObject *parent)
     : QObject(parent)
 {
-    QObject::connect(&m_usb_manager, SIGNAL(deviceInserted(QUsbDevice::IdList)),
+    QObject::connect(&m_usb_info, SIGNAL(deviceInserted(QUsbDevice::IdList)),
                      this, SLOT(onDevInserted(QUsbDevice::IdList)));
-    QObject::connect(&m_usb_manager, SIGNAL(deviceRemoved(QUsbDevice::IdList)), this,
+    QObject::connect(&m_usb_info, SIGNAL(deviceRemoved(QUsbDevice::IdList)), this,
                      SLOT(onDevRemoved(QUsbDevice::IdList)));
 
-    m_usb_manager.setLogLevel(QUsbDevice::logDebug);
+    m_usb_info.setLogLevel(QUsbDevice::logDebug);
     qInfo("Starting...");
     qInfo("Press CTRL+C to close.");
 }
