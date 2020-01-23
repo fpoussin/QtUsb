@@ -4,27 +4,33 @@ PUBLIC_HEADERS += \
     $$PWD/qusbglobal.h \
     $$PWD/qusbdevice.h \
     $$PWD/qusbinfo.h \
-    $$PWD/qusbendpoint.h
+    $$PWD/qusbendpoint.h \
+    $$PWD/qhiddevice.h
 
 PRIVATE_HEADERS += \
     $$PWD/qusbdevice_p.h \
     $$PWD/qusbinfo_p.h \
-    $$PWD/qusbendpoint_p.h
+    $$PWD/qusbendpoint_p.h \
+    $$PWD/qhiddevice_p.h
 
 SOURCES += \
     $$PWD/qusbendpoint.cpp \
+    $$PWD/qusbdevice.cpp \
     $$PWD/qusbinfo.cpp \
-    $$PWD/qusbdevice.cpp
+    $$PWD/qhiddevice.cpp
 
 win32 {
     LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ Advapi32.lib
     CONFIG(debug, debug|release) {
         LIBS_PRIVATE += libusb-1.0d.lib
+        LIBS_PRIVATE += hidapid.lib
     }
     CONFIG(release, debug|release) {
         LIBS_PRIVATE += libusb-1.0.lib
+        LIBS_PRIVATE += hidapi.lib
     }
     INCLUDEPATH += $$PWD/libusb $$PWD/../libusb $$PWD/../../libusb
+    INCLUDEPATH += $$PWD/hidapi $$PWD/../hidapi $$PWD/../../hidapi
 }
 
 # We build libusb ourselves instead of using a library
@@ -49,8 +55,12 @@ android {
 }
 else:unix {
     !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
-    CONFIG += link_pkgconfig
     PKGCONFIG += libusb-1.0
+
+    !packagesExist(hidapi-libusb):error("Could not find hidapi-libusb using PKGCONFIG")
+    PKGCONFIG += hidapi-libusb
+
+    CONFIG += link_pkgconfig
 }
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
