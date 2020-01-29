@@ -263,9 +263,9 @@ int QUsbInfo::findDevice(const QUsbDevice::Id &id,
         const QUsbDevice::Id *d = &list.at(i);
 
         if (d->pid == id.pid && d->vid == id.vid) {
-            if (id.bus == 0 && id.port == 0) // Ignore bus/port if both == 0
+            if (id.bus == QUsbDevice::busAny && id.port == QUsbDevice::portAny) // Ignore bus/port if both == any
                 return i;
-            if ((id.bus && d->bus == id.bus) && (id.port && d->port == id.port)) // Take bus/port into account for filtering when set
+            if (d->bus == id.bus && d->port == id.port) // Take bus/port into account for filtering when set
                 return i;
         }
     }
