@@ -34,6 +34,14 @@ public:
         logDebugAll = 5
     };
 
+    enum Bus : quint8 {
+        busAny = 255,
+    };
+
+    enum Port : quint8 {
+        portAny = 255,
+    };
+
     class Q_USB_EXPORT Config
     {
     public:
@@ -48,12 +56,12 @@ public:
     class Q_USB_EXPORT Id
     {
     public:
-        quint16 pid;
-        quint16 vid;
-        quint8 bus;
-        quint8 port;
-        quint8 dClass;
-        quint8 dSubClass;
+        quint16 pid = 0;
+        quint16 vid = 0;
+        quint8 bus = busAny;
+        quint8 port = portAny;
+        quint8 dClass = 0;
+        quint8 dSubClass = 0;
 
         bool operator==(const QUsbDevice::Id &other) const;
         QUsbDevice::Id &operator=(const QUsbDevice::Id &other);

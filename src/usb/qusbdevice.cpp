@@ -178,11 +178,15 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
 /*!
     \variable QUsbDevice::Id::bus
     \brief The USB bus number.
+
+    Default is \a QUsbDevice::busAny, which matches all buses.
  */
 
 /*!
     \variable QUsbDevice::Id::port
     \brief The USB port number.
+
+    Default is \a QUsbDevice::portAny, which matches all ports.
  */
 
 /*!
@@ -367,7 +371,9 @@ qint32 QUsbDevice::open()
     if (m_connected)
         return -1;
 
-    if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0))
+    if ((m_id.pid == 0 || m_id.vid == 0) &&
+        (m_id.dClass == 0 || m_id.dSubClass == 0) &&
+        (m_id.bus == busAny || m_id.port == portAny))
     {
         qWarning("No device IDs or classes are defined. Aborting.");
         return -1;
@@ -393,9 +399,9 @@ qint32 QUsbDevice::open()
                 m_id.pid = desc.idProduct;
             if (m_id.vid == 0)
                 m_id.vid = desc.idVendor;
-            if (m_id.bus == 0)
+            if (m_id.bus == busAny)
                 m_id.bus = bus;
-            if (m_id.port == 0)
+            if (m_id.port == portAny)
                 m_id.port = port;
             if (m_id.dClass == 0)
                 m_id.dClass = desc.bDeviceClass;
