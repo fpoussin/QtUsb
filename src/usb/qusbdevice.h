@@ -9,21 +9,19 @@
 QT_BEGIN_NAMESPACE
 
 class QUsbDevicePrivate;
-class QUsbTransfer;
-class QUsbTransferPrivate;
+class QUsbEndpoint;
+class QUsbEndpointPrivate;
 
 class Q_USB_EXPORT QUsbDevice : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QUsbDevice)
 
-    friend QUsbTransfer;
-    friend QUsbTransferPrivate;
+    friend QUsbEndpoint;
+    friend QUsbEndpointPrivate;
 
 public:
     static const quint16 DefaultTimeout = 250;
-
-    typedef quint8 Endpoint;
 
     enum LogLevel : quint8 {
         logNone = 0,

@@ -1,24 +1,24 @@
-#ifndef QUSBTRANSFER_H
-#define QUSBTRANSFER_H
+#ifndef QUSBENDPOINT_H
+#define QUSBENDPOINT_H
 
 #include <QObject>
 #include <QIODevice>
 #include "qusbdevice.h"
 
-class QUsbTransferPrivate;
+class QUsbEndpointPrivate;
 
-class Q_USB_EXPORT QUsbTransfer : public QIODevice
+class Q_USB_EXPORT QUsbEndpoint : public QIODevice
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QUsbTransfer)
+    Q_DECLARE_PRIVATE(QUsbEndpoint)
 
 public:
     enum Type : quint8 {
-        controlTransfer = 0,
-        isochronousTransfer,
-        bulkTransfer,
-        interruptTransfer,
-        streamTransfer
+        controlEndpoint = 0,
+        isochronousEndpoint,
+        bulkEndpoint,
+        interruptEndpoint,
+        streamEndpoint
     };
     Q_ENUM(Type)
 
@@ -63,25 +63,21 @@ public:
     Q_ENUM(bRequest)
 
     Q_PROPERTY(Type type READ type)
-    Q_PROPERTY(QUsbDevice::Endpoint endpointIn READ endpointIn)
-    Q_PROPERTY(QUsbDevice::Endpoint endpointOut READ endpointOut)
+    Q_PROPERTY(quint8 endpoint READ endpoint)
     Q_PROPERTY(bool polling READ polling WRITE setPolling)
 
-    explicit QUsbTransfer(QUsbDevice *dev,
+    explicit QUsbEndpoint(QUsbDevice *dev,
                           Type type,
-                          QUsbDevice::Endpoint in,
-                          QUsbDevice::Endpoint out);
-    ~QUsbTransfer();
+                          quint8 ep);
+    ~QUsbEndpoint();
 
     bool open(QIODevice::OpenMode mode);
     void close();
     Type type() const;
 
-    QUsbDevice::Endpoint endpointIn() const;
-    QUsbDevice::Endpoint endpointOut() const;
-
-    bool isSequential() const;
+    quint8 endpoint() const;
     Status status() const;
+    bool isSequential() const;
 
     qint64 bytesAvailable() const;
     qint64 bytesToWrite() const;
@@ -89,8 +85,8 @@ public:
     bool waitForReadyRead(int msecs);
 
     void makeControlPacket(char *buffer,
-                           QUsbTransfer::bmRequestType bmRequestType,
-                           QUsbTransfer::bRequest bRequest,
+                           QUsbEndpoint::bmRequestType bmRequestType,
+                           QUsbEndpoint::bRequest bRequest,
                            quint16 wValue,
                            quint16 wIndex,
                            quint16 wLength) const;
@@ -103,21 +99,20 @@ public slots:
     void cancelTransfer();
 
 Q_SIGNALS:
-    void error(QUsbTransfer::Status error);
+    void error(QUsbEndpoint::Status error);
 
 protected:
     qint64 readData(char *data, qint64 maxSize);
     qint64 writeData(const char *data, qint64 maxSize);
 
 private:
-    QUsbTransferPrivate *const d_dummy;
-    Q_DISABLE_COPY(QUsbTransfer)
+    QUsbEndpointPrivate *const d_dummy;
+    Q_DISABLE_COPY(QUsbEndpoint)
 
     Status m_status;
     const QUsbDevice *m_dev;
     const Type m_type;
-    const QUsbDevice::Endpoint m_in_ep;
-    const QUsbDevice::Endpoint m_out_ep;
+    const quint8 m_ep;
 };
 
-#endif // QUSBTRANSFER_H
+#endif // QUSBENDPOINT_H
