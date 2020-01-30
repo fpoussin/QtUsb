@@ -37,7 +37,7 @@ QUsbDevicePrivate::QUsbDevicePrivate()
     }
     Q_Q(QUsbDevice);
     m_devHandle = Q_NULLPTR;
-    m_classes = {this, q};
+    m_classes = { this, q };
 
     m_events = new QUsbEventsThread();
     m_events->m_ctx = m_ctx;
@@ -198,7 +198,6 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
     \variable QUsbDevice::Id::dSubClass
     \brief The USB Sub-class.
  */
-
 
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
@@ -371,10 +370,7 @@ qint32 QUsbDevice::open()
     if (m_connected)
         return -1;
 
-    if ((m_id.pid == 0 || m_id.vid == 0) &&
-        (m_id.dClass == 0 || m_id.dSubClass == 0) &&
-        (m_id.bus == busAny || m_id.port == portAny))
-    {
+    if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0) && (m_id.bus == busAny || m_id.port == portAny)) {
         qWarning("No device IDs or classes are defined. Aborting.");
         return -1;
     }
@@ -632,14 +628,12 @@ void QUsbEventsThread::run()
  */
 bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 {
-    return other.config     == config &&
-            other.interface == interface &&
-            other.alternate == alternate;
+    return other.config == config && other.interface == interface && other.alternate == alternate;
 }
 
 QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &other)
 {
-    config    = other.config;
+    config = other.config;
     alternate = other.alternate;
     interface = other.interface;
     return *this;
@@ -652,12 +646,7 @@ QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &othe
  */
 bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 {
-    return other.pid   == pid &&
-            other.vid  == vid &&
-            other.bus  == bus &&
-            other.port == port &&
-            other.dClass == dClass &&
-            other.dSubClass == dSubClass;
+    return other.pid == pid && other.vid == vid && other.bus == bus && other.port == port && other.dClass == dClass && other.dSubClass == dSubClass;
 }
 
 /*!
@@ -665,9 +654,9 @@ bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
  */
 QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)
 {
-    pid  = other.pid;
-    vid  = other.vid;
-    bus  = other.bus;
+    pid = other.pid;
+    vid = other.vid;
+    bus = other.bus;
     port = other.port;
     dClass = other.dClass;
     dSubClass = other.dSubClass;

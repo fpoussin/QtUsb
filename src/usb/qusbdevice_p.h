@@ -23,7 +23,7 @@ public:
 
 class QUsbTransferPrivate;
 
-typedef struct  {
+typedef struct {
     QUsbDevicePrivate *priv;
     QUsbDevice *pub;
 } qusbdevice_classes_t;

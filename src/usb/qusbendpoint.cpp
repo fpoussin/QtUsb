@@ -10,7 +10,7 @@
 #define DbgPrivPrintFuncName()                    \
     if (this->logLevel() >= QUsbDevice::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
-#define DbgPrintCB(e)                                 \
+#define DbgPrintCB(e)                          \
     if (e->logLevel() >= QUsbDevice::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
@@ -256,7 +256,7 @@ int QUsbEndpointPrivate::readUsb(qint64 maxSize)
         setStatus(QUsbEndpoint::transferError);
         error(QUsbEndpoint::transferError);
         // TODO: Check if QUsbEndpoint::QUsbDevice must be const...
-        QUsbDevice* dev = const_cast<QUsbDevice*>(q->m_dev);
+        QUsbDevice *dev = const_cast<QUsbDevice *>(q->m_dev);
         dev->handleUsbError(rc);
         libusb_free_transfer(m_transfer);
         m_transfer = Q_NULLPTR;
@@ -285,7 +285,7 @@ int QUsbEndpointPrivate::writeUsb(const char *data, qint64 maxSize)
         setStatus(QUsbEndpoint::transferError);
         error(QUsbEndpoint::transferError);
         // TODO: Check if QUsbEndpoint::QUsbDevice must be const...
-        QUsbDevice* dev = const_cast<QUsbDevice*>(q->m_dev);
+        QUsbDevice *dev = const_cast<QUsbDevice *>(q->m_dev);
         dev->handleUsbError(rc);
         libusb_free_transfer(m_transfer);
         m_transfer = Q_NULLPTR;
