@@ -58,7 +58,7 @@ Then include it into your headers:
 ```
 #include <QUsbDevice>
 #include <QUsbInfo>
-#include <QUsbTransferHandler>
+#include <QUsbEndpoint>
 ```
 
 ## Documentation  
