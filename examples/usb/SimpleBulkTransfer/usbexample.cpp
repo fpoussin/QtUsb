@@ -5,7 +5,7 @@
 #endif
 
 UsbExample::UsbExample(QObject *parent)
-    : QObject(parent), m_usb_dev(new QUsbDevice()), m_transfer_handler(Q_NULLPTR)
+    : QObject(parent), m_usb_dev(new QUsbDevice()), m_read_ep(Q_NULLPTR), m_write_ep(Q_NULLPTR)
 {
     this->setupDevice();
 
@@ -46,10 +46,6 @@ void UsbExample::setupDevice()
     m_config.interface = 0;
 
     //
-    m_read_ep = 0x81;
-    m_write_ep = 0x02;
-
-    //
     m_usb_dev->setId(m_filter);
     m_usb_dev->setConfig(m_config);
 }
@@ -78,35 +74,46 @@ void UsbExample::closeDevice()
 bool UsbExample::openHandle()
 {
     qDebug("Opening Handle");
-    bool b = false;
-    m_transfer_handler = new QUsbTransfer(m_usb_dev, QUsbTransfer::bulkTransfer, m_read_ep, m_write_ep);
+    bool a = false, b = false;
+    m_read_ep = new QUsbEndpoint(m_usb_dev, QUsbEndpoint::bulkEndpoint, USB_ENDPOINT_IN);
+    m_write_ep = new QUsbEndpoint(m_usb_dev, QUsbEndpoint::bulkEndpoint, USB_ENDPOINT_OUT);
 
-    connect(m_transfer_handler, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    connect(m_transfer_handler, SIGNAL(bytesWritten(qint64)), this, SLOT(onWriteComplete(qint64)));
+    connect(m_read_ep, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(m_write_ep, SIGNAL(bytesWritten(qint64)), this, SLOT(onWriteComplete(qint64)));
 
-    b = m_transfer_handler->open(QIODevice::ReadWrite);
-    if (b) {
-        m_transfer_handler->setPolling(true);
+    a = m_read_ep->open(QIODevice::ReadOnly);
+    if (a) {
+        m_read_ep->setPolling(true);
     }
 
-    return b;
+    b = m_write_ep->open(QIODevice::WriteOnly);
+
+    return a && b;
 }
 
 void UsbExample::closeHandle()
 {
     qDebug("Closing Handle");
-    if (m_transfer_handler != Q_NULLPTR) {
-        m_transfer_handler->close();
-        m_transfer_handler->disconnect();
-        qInfo() << m_transfer_handler->errorString();
-        delete m_transfer_handler;
-        m_transfer_handler = Q_NULLPTR;
+    if (m_read_ep != Q_NULLPTR) {
+        m_read_ep->close();
+        m_read_ep->disconnect();
+        qInfo() << m_read_ep->errorString();
+        delete m_read_ep;
+        m_read_ep = Q_NULLPTR;
+    }
+
+    if (m_write_ep != Q_NULLPTR) {
+        m_write_ep->close();
+        m_write_ep->disconnect();
+        qInfo() << m_write_ep->errorString();
+        delete m_write_ep;
+        m_write_ep = Q_NULLPTR;
     }
 }
 
 void UsbExample::read(QByteArray *buf)
 {
-    QByteArray b(m_transfer_handler->readAll());
+    QByteArray b(m_read_ep->readAll());
 
     qDebug() << "Reading" << b << b.size();
     buf->append(b);
@@ -115,7 +122,7 @@ void UsbExample::read(QByteArray *buf)
 void UsbExample::write(QByteArray *buf)
 {
     qDebug() << "Writing" << *buf << buf->size();
-    if (m_transfer_handler->write(buf->constData(), buf->size()) < 0) {
+    if (m_write_ep->write(buf->constData(), buf->size()) < 0) {
         qWarning("write failed");
     }
 }

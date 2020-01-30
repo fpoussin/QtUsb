@@ -4,17 +4,17 @@ PUBLIC_HEADERS += \
     $$PWD/qusbglobal.h \
     $$PWD/qusbdevice.h \
     $$PWD/qusbinfo.h \
-    $$PWD/qusbtransfer.h
+    $$PWD/qusbendpoint.h
 
 PRIVATE_HEADERS += \
     $$PWD/qusbdevice_p.h \
     $$PWD/qusbinfo_p.h \
-    $$PWD/qusbtransfer_p.h
+    $$PWD/qusbendpoint_p.h
 
 SOURCES += \
+    $$PWD/qusbendpoint.cpp \
     $$PWD/qusbinfo.cpp \
-    $$PWD/qusbdevice.cpp \
-    $$PWD/qusbtransfer.cpp
+    $$PWD/qusbdevice.cpp
 
 win32 {
     LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ Advapi32.lib
