@@ -10,22 +10,22 @@
 #define DbgPrivPrintFuncName()                    \
     if (this->logLevel() >= QUsbDevice::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
-#define DbgPrintCB()                                 \
-    if (handler->logLevel() >= QUsbDevice::logDebug) \
+#define DbgPrintCB(e)                                 \
+    if (e->logLevel() >= QUsbDevice::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 /* Write callback */
 static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
 {
-    QUsbEndpointPrivate *handler = reinterpret_cast<QUsbEndpointPrivate *>(transfer->user_data);
-    DbgPrintCB();
+    QUsbEndpointPrivate *endpoint = reinterpret_cast<QUsbEndpointPrivate *>(transfer->user_data);
+    DbgPrintCB(endpoint);
 
     libusb_transfer_status s = transfer->status;
     const int sent = transfer->actual_length;
     const int total = transfer->length;
-    handler->setStatus(static_cast<QUsbEndpoint::Status>(s));
+    endpoint->setStatus(static_cast<QUsbEndpoint::Status>(s));
 
-    if (handler->logLevel() >= QUsbDevice::logDebug)
+    if (endpoint->logLevel() >= QUsbDevice::logDebug)
         qDebug("OUT: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
                transfer->status,
                transfer->timeout,
@@ -34,40 +34,40 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
                transfer->length);
 
     if (sent > 0) {
-        handler->m_buf = handler->m_buf.mid(0, total - sent); // Remove what was sent
+        endpoint->m_buf = endpoint->m_buf.mid(0, total - sent); // Remove what was sent
     }
 
     // Send remaining data
     if (total > sent) {
-        transfer->buffer = reinterpret_cast<uchar *>(handler->m_buf.data()); // New data pointer
-        transfer->length = handler->m_buf.size(); // New size
+        transfer->buffer = reinterpret_cast<uchar *>(endpoint->m_buf.data()); // New data pointer
+        transfer->length = endpoint->m_buf.size(); // New size
         libusb_submit_transfer(transfer);
         return;
     }
 
     libusb_free_transfer(transfer);
-    handler->m_transfer = Q_NULLPTR;
+    endpoint->m_transfer = Q_NULLPTR;
 
-    handler->m_buf_mutex.unlock();
+    endpoint->m_buf_mutex.unlock();
 
     if (s != LIBUSB_TRANSFER_COMPLETED) {
-        handler->error(static_cast<QUsbEndpoint::Status>(s));
+        endpoint->error(static_cast<QUsbEndpoint::Status>(s));
     }
     if (sent > 0) {
-        handler->bytesWritten(sent);
+        endpoint->bytesWritten(sent);
     }
 }
 
 /* Read callback */
 static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
 {
-    QUsbEndpointPrivate *handler = reinterpret_cast<QUsbEndpointPrivate *>(transfer->user_data);
-    DbgPrintCB();
+    QUsbEndpointPrivate *endpoint = reinterpret_cast<QUsbEndpointPrivate *>(transfer->user_data);
+    DbgPrintCB(endpoint);
 
     libusb_transfer_status s = transfer->status;
     const int received = transfer->actual_length;
 
-    if (handler->logLevel() >= QUsbDevice::logDebug)
+    if (endpoint->logLevel() >= QUsbDevice::logDebug)
         qDebug("IN: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
                transfer->status,
                transfer->timeout,
@@ -75,29 +75,29 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
                transfer->actual_length,
                transfer->length);
 
-    handler->setStatus(static_cast<QUsbEndpoint::Status>(s));
+    endpoint->setStatus(static_cast<QUsbEndpoint::Status>(s));
     if (s != LIBUSB_TRANSFER_COMPLETED) {
-        handler->error(static_cast<QUsbEndpoint::Status>(s));
+        endpoint->error(static_cast<QUsbEndpoint::Status>(s));
     } else {
-        handler->m_buf_mutex.lock();
-        const int previous_size = handler->m_buf.size();
-        handler->m_buf.resize(previous_size + received);
-        memcpy(handler->m_buf.data() + previous_size, transfer->buffer, static_cast<ulong>(received));
-        handler->m_buf_mutex.unlock();
+        endpoint->m_buf_mutex.lock();
+        const int previous_size = endpoint->m_buf.size();
+        endpoint->m_buf.resize(previous_size + received);
+        memcpy(endpoint->m_buf.data() + previous_size, transfer->buffer, static_cast<ulong>(received));
+        endpoint->m_buf_mutex.unlock();
     }
 
     libusb_free_transfer(transfer);
-    handler->m_transfer = Q_NULLPTR;
+    endpoint->m_transfer = Q_NULLPTR;
 
-    handler->m_transfer_buf.clear(); // it's in fact transfer->buffer
-    handler->m_transfer_mutex.unlock();
+    endpoint->m_transfer_buf.clear(); // it's in fact transfer->buffer
+    endpoint->m_transfer_mutex.unlock();
 
     if (received)
-        handler->readyRead();
+        endpoint->readyRead();
 
     // Start transfer over if polling is enabled
-    if (handler->m_poll) {
-        handler->readUsb(handler->m_poll_size);
+    if (endpoint->m_poll) {
+        endpoint->readUsb(endpoint->m_poll_size);
     }
 }
 
@@ -217,7 +217,7 @@ bool QUsbEndpointPrivate::prepareTransfer(libusb_transfer **tr, libusb_transfer_
 
     if (tr == Q_NULLPTR) {
         if (this->logLevel() >= QUsbDevice::logWarning)
-            qWarning("QUsbEndpointHandler: Transfer buffer allocation failed");
+            qWarning("QUsbEndpoint: Transfer buffer allocation failed");
         return false;
     }
 
@@ -638,19 +638,19 @@ bool QUsbEndpoint::poll()
 
     if (!isOpen()) {
         if (d->logLevel() >= QUsbDevice::logWarning)
-            qWarning("QUsbEndpointHandler: Handle not open. Ignoring.");
+            qWarning("QUsbEndpoint: Handle not open. Ignoring.");
         return false;
     }
 
     if (!(openMode() & ReadOnly)) {
         if (d->logLevel() >= QUsbDevice::logWarning)
-            qWarning("QUsbEndpointHandler: Trying to poll without read mode. Ignoring.");
+            qWarning("QUsbEndpoint: Trying to poll without read mode. Ignoring.");
         return false;
     }
 
     if (polling()) {
         if (d->logLevel() >= QUsbDevice::logWarning)
-            qWarning("QUsbEndpointHandler: Trying to poll with automatic polling enabled. Ignoring.");
+            qWarning("QUsbEndpoint: Trying to poll with automatic polling enabled. Ignoring.");
         return false;
     }
 
