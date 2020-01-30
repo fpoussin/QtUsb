@@ -72,4 +72,4 @@ void tst_QUsbEndpoint::polling()
 }
 
 QTEST_MAIN(tst_QUsbEndpoint)
-#include "tst_QUsbEndpoint.moc"
+#include "tst_qusbendpoint.moc"
