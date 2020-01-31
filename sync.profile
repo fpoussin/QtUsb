@@ -2,9 +2,9 @@
     "QtUsb" => "$basedir/src/usb",
 );
 
-
 %classnames = (
     "qusbdevice.h" => "QUsbDevice",
     "qusbinfo.h" => "QUsbInfo",
-    "qusbtransfer.h" => "QUsbTransfer"
+    "qusbendpoint.h" => "QUsbEndpoint",
+    "qhiddevice.h" => "QHidDevice"
 );

@@ -13,6 +13,8 @@ class QHidDevicePrivate : public QObjectPrivate
 
 public:
     QHidDevicePrivate();
+    ~QHidDevicePrivate();
+
     hid_device *m_devHandle;
 };
 

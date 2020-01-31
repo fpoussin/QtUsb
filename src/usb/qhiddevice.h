@@ -8,13 +8,25 @@ QT_BEGIN_NAMESPACE
 
 class QHidDevicePrivate;
 
-class QHidDevice : public QObject
+class Q_USB_EXPORT QHidDevice : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QHidDevice)
 
 public:
     explicit QHidDevice(QObject *parent = Q_NULLPTR);
+    ~QHidDevice();
+    bool open(quint16 vid, quint16 pid, const QString &serial = QString::fromLocal8Bit(""));
+    void close();
+
+    bool isOpen() const;
+
+    qint32 write(const QByteArray *data, qint32 len = -1);
+    qint32 read(QByteArray *data, qint32 len = -1);
+
+    QString serialNumber();
+    QString manufacturer();
+    QString product();
 
 private:
     QHidDevicePrivate *const d_dummy;

@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = SimpleBulkTransfer UsbNotifications
+SUBDIRS = SimpleBulkTransfer UsbNotifications Hid
