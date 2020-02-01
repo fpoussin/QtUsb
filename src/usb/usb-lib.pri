@@ -27,12 +27,14 @@ win32 {
     CONFIG(release, debug|release) {
         LIBS_PRIVATE += libusb-1.0.lib
     }
+    # Build the hid library ourselves since it's only one file
     SOURCES += $$PWD/../../hidapi/windows/hid.c
+
     INCLUDEPATH += $$PWD/libusb $$PWD/../../libusb
     INCLUDEPATH += $$PWD/hidapi $$PWD/../../hidapi/hidapi
 }
 
-# We build libusb ourselves instead of using a library
+# We build libusb and hidapi ourselves instead of using a library
 android {
     LIBUSB_ROOT_REL = $$PWD/../../libusb
     SOURCES += \
@@ -50,7 +52,15 @@ android {
     # We have to copy the header for includes to work in our library
     system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h $$PWD/libusb-1.0/")
 
-    INCLUDEPATH += $$LIBUSB_ROOT_REL/libusb $$LIBUSB_ROOT_REL/libusb/os $$LIBUSB_ROOT_REL/android $$PWD/libusb-1.0
+    INCLUDEPATH += \
+    $$LIBUSB_ROOT_REL/libusb \
+    $$LIBUSB_ROOT_REL/libusb/os \
+    $$LIBUSB_ROOT_REL/android $$PWD/libusb-1.0
+
+    # HIDAPI
+    HIDAPI_ROOT_REL = $$PWD/../../hidapi
+    SOURCES += $$HIDAPI_ROOT_REL/libusb/hid.c
+    INCLUDEPATH += $$HIDAPI_ROOT_REL/hidapi
 }
 else:unix {
     !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
