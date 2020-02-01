@@ -9,26 +9,26 @@ matrix:
 environment:
   matrix:
   - arch: x64
-    qt: 5.13
-    cc: VS2017
+    qt: 5.14
+    cc: VS2019
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017_64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
   - arch: x86
-    qt: 5.13
-    cc: VS2017
+    qt: 5.14
+    cc: VS2019
     mode: release
     QTDIR: C:\Qt\%qt%\msvc2017
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 init:
   - set vcarch=%arch%
   - set usbarch=%arch%
   - if "%arch%" == "x64" set vcarch=amd64
   - if "%arch%" == "x86" set usbarch=Win32
-  - if %cc%==VS2017 (
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
+  - if %cc%==VS2019 (
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
     ) else if not %cc%==MinGW (
       call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
     )
