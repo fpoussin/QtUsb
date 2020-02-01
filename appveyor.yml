@@ -12,14 +12,14 @@ environment:
     qt: 5.14
     cc: VS2019
     mode: release
-    QTDIR: C:\Qt\%qt%\msvc2019_64
+    QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
   - arch: x86
     qt: 5.14
     cc: VS2019
     mode: release
-    QTDIR: C:\Qt\%qt%\msvc2019
+    QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 init:
