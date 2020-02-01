@@ -3,7 +3,7 @@
 
 #include "qhiddevice.h"
 #include <private/qobject_p.h>
-#include <hidapi/hidapi.h>
+#include <hidapi.h>
 
 QT_BEGIN_NAMESPACE
 

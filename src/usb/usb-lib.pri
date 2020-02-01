@@ -20,17 +20,16 @@ SOURCES += \
     $$PWD/qhiddevice.cpp
 
 win32 {
-    LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ Advapi32.lib
+    LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ Advapi32.lib Setupapi.lib
     CONFIG(debug, debug|release) {
         LIBS_PRIVATE += libusb-1.0d.lib
-        LIBS_PRIVATE += hidapid.lib
     }
     CONFIG(release, debug|release) {
         LIBS_PRIVATE += libusb-1.0.lib
-        LIBS_PRIVATE += hidapi.lib
     }
-    INCLUDEPATH += $$PWD/libusb $$PWD/../libusb $$PWD/../../libusb
-    INCLUDEPATH += $$PWD/hidapi $$PWD/../hidapi $$PWD/../../hidapi
+    SOURCES += $$PWD/../../hidapi/windows/hid.c
+    INCLUDEPATH += $$PWD/libusb $$PWD/../../libusb
+    INCLUDEPATH += $$PWD/hidapi $$PWD/../../hidapi/hidapi
 }
 
 # We build libusb ourselves instead of using a library
