@@ -32,35 +32,29 @@
     \qtvariable usb
     \brief List of C++ classes that enable access to usb devices.
 
-    To use QUsb in your application, add the following include
-    statement:
+    To import the module, add this line to your \l qmake \c project file:
+
+    \code
+    QT += usb
+    \endcode
+
+    To use QtUsb in your application, you will need the following include
+    statements:
 
     \code
     #include <QUsbDevice>
+    #include <QUsbEndpoint>
     \endcode
 
-    For QUsbTransfer, use the following include statement:
-
-    \code
-    #include <QUsbTransfer>
-    \endcode
-
-    For QUsbInfo, use the following include statement:
+    For QUsbInfo (listing devices, hotplug), use the following include statement:
 
     \code
     #include <QUsbInfo>
     \endcode
 
-    For QHidDevice, use the following include statement:
+    For for HID, only the QHidDevice class is needed:
 
     \code
     #include <QHidDevice>
-    \endcode
-
-    To import the module, add this line to your \l qmake \c
-    .pro file:
-
-    \code
-    QT += usb
     \endcode
 */
