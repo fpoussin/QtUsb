@@ -1,6 +1,16 @@
 #include "qhiddevice.h"
 #include "qhiddevice_p.h"
 
+/*!
+    \class QHidDevice
+
+    \brief This class handles all HID operations
+
+    \reentrant
+    \ingroup usb-main
+    \inmodule QtUsb
+*/
+
 QHidDevice::QHidDevice(QObject *parent)
     : QObject(*(new QHidDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
@@ -10,19 +20,25 @@ QHidDevice::~QHidDevice()
 {
 }
 
-bool QHidDevice::open(quint16 vid, quint16 pid, const QString &serial)
+/*!
+    \brief Opens the HID device, using \a vid Vendor ID, \a pid Product ID, and an optional \a serial number. Returns \c true on sucess.
+ */
+bool QHidDevice::open(quint16 vid, quint16 pid, const QString *serial)
 {
     Q_D(QHidDevice);
     wchar_t *s = Q_NULLPTR;
-    if (!serial.isEmpty()) {
-        s = new wchar_t[50];
-        serial.left(50).toWCharArray(s);
+    if (serial != Q_NULLPTR && !serial->isEmpty()) {
+        s = new wchar_t[serial->size()];
+        serial->toWCharArray(s);
     }
     d->m_devHandle = hid_open(vid, pid, s);
     delete[] s;
     return d->m_devHandle != Q_NULLPTR;
 }
 
+/*!
+    \brief Close the device.
+ */
 void QHidDevice::close()
 {
     Q_D(QHidDevice);
@@ -30,22 +46,36 @@ void QHidDevice::close()
     d->m_devHandle = Q_NULLPTR;
 }
 
+/*!
+    \brief Returns \c true if device is open.
+ */
 bool QHidDevice::isOpen() const
 {
     return d_func()->m_devHandle != Q_NULLPTR;
 }
 
-qint32 QHidDevice::write(const QByteArray *data, qint32 len)
+/*!
+    \brief Write \a data to device.
+
+    \a len defaults to the size of \a data.
+ */
+qint32 QHidDevice::write(const QByteArray *data, int len)
 {
     Q_CHECK_PTR(data);
     Q_D(QHidDevice);
     // Default is buffer size
     if (len == -1)
         len = data->size();
-    return hid_write(d->m_devHandle, (const unsigned char *)data->constData(), len);
+    return hid_write(d->m_devHandle, reinterpret_cast<const unsigned char *>(data->constData()), static_cast<size_t>(len));
 }
 
-qint32 QHidDevice::read(QByteArray *data, qint32 len)
+/*!
+    \brief Read from device to \a data.
+
+    \a len defaults to the size of \a data.
+    \a timeout defaults to -1 (unlimited, blocking).
+ */
+qint32 QHidDevice::read(QByteArray *data, int len, int timeout)
 {
     Q_CHECK_PTR(data);
     Q_D(QHidDevice);
@@ -54,12 +84,15 @@ qint32 QHidDevice::read(QByteArray *data, qint32 len)
         len = data->size();
     // Allocate max read size
     data->fill(0, len);
-    int res = hid_read(d->m_devHandle, (unsigned char *)data->data(), len);
+    int res = hid_read_timeout(d->m_devHandle, reinterpret_cast<unsigned char *>(data->data()), static_cast<size_t>(len), timeout);
     // Resize to actual read size
     data->resize(res);
     return res;
 }
 
+/*!
+    \brief Returns the serial number string.
+ */
 QString QHidDevice::serialNumber()
 {
     if (!isOpen())
@@ -75,6 +108,9 @@ QString QHidDevice::serialNumber()
     return out;
 }
 
+/*!
+    \brief Returns the manufacturer string.
+ */
 QString QHidDevice::manufacturer()
 {
     if (!isOpen())
@@ -90,6 +126,9 @@ QString QHidDevice::manufacturer()
     return out;
 }
 
+/*!
+    \brief Returns the product string.
+ */
 QString QHidDevice::product()
 {
     if (!isOpen())

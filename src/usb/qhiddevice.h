@@ -16,13 +16,13 @@ class Q_USB_EXPORT QHidDevice : public QObject
 public:
     explicit QHidDevice(QObject *parent = Q_NULLPTR);
     ~QHidDevice();
-    bool open(quint16 vid, quint16 pid, const QString &serial = QString::fromLocal8Bit(""));
+    bool open(quint16 vid, quint16 pid, const QString *serial = Q_NULLPTR);
     void close();
 
     bool isOpen() const;
 
-    qint32 write(const QByteArray *data, qint32 len = -1);
-    qint32 read(QByteArray *data, qint32 len = -1);
+    qint32 write(const QByteArray *data, int len = -1);
+    qint32 read(QByteArray *data, int len = -1, int timeout = -1);
 
     QString serialNumber();
     QString manufacturer();

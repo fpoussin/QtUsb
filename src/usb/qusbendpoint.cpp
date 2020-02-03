@@ -420,7 +420,7 @@ QUsbDevice::LogLevel QUsbEndpointPrivate::logLevel()
 /*!
     \brief QUsbEndpoint constructor.
 
-    This create an object of the given transfer \a type, using endpoints \a in and \a out.
+    This create an object of the given \a type for the \a ep endpoint.
 
     \a dev will be set as parent object.
  */
