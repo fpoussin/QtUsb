@@ -51,6 +51,12 @@
     #include <QUsbInfo>
     \endcode
 
+    For QHidDevice, use the following include statement:
+
+    \code
+    #include <QHidDevice>
+    \endcode
+
     To import the module, add this line to your \l qmake \c
     .pro file:
 
