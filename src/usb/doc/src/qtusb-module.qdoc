@@ -52,7 +52,7 @@
     #include <QUsbInfo>
     \endcode
 
-    For for HID, only the QHidDevice class is needed:
+    For HID, only the QHidDevice class is needed:
 
     \code
     #include <QHidDevice>
