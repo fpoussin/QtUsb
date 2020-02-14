@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
-import sys, os, re, argparse, shutil, time
-from subprocess import call, check_output, Popen, CalledProcessError, STDOUT, PIPE
-from xml.etree import ElementTree as ET
+import os, re, argparse, shutil
+from subprocess import Popen, CalledProcessError, STDOUT, PIPE
 from traceback import print_exc
 from glob import glob
 import requests
@@ -168,7 +167,7 @@ if __name__ == '__main__':
     print('Suffix:', suffix)
     print('Build dir:', build_dir)
 
-    folder_name = '{0}/qtusb-{0}.orig.tar.gz'.format(build_dir, ver_suffix)
+    folder_name = '{0}/qtusb-{1}.orig.tar.gz'.format(build_dir, ver_suffix)
     dsc_name = '{0}/../qtusb_{1}-{2}{3}'.format(build_dir, ver_suffix, args.distro, args.release)
 
     print('Package location:', folder_name)
@@ -188,7 +187,7 @@ if __name__ == '__main__':
         print(e.output)
     except OSError as e:
         print(e.filename, e)
-        print(print_exc())
+        print_exc()
     finally:
         if not args.keep:
             run_cmd('schroot -e --all-sessions')
