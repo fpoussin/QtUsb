@@ -1,4 +1,5 @@
-# QtUsb [![GitHub version](https://badge.fury.io/gh/fpoussin%2Fqtusb.svg)](https://badge.fury.io/gh/fpoussin%2Fqtusb)
+# QtUsb [![GitHub version](https://badge.fury.io/gh/fpoussin%2Fqtusb.svg)](https://badge.fury.io/gh/fpoussin%2Fqtusb) [![Total alerts](https://img.shields.io/lgtm/alerts/g/fpoussin/QtUsb.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fpoussin/QtUsb/alerts/) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/fpoussin/QtUsb.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fpoussin/QtUsb/context:cpp)
+
 
 GCC: [![Build Status](https://jenkins.netyxia.net/buildStatus/icon?job=QtUsb%2Fmaster)](https://jenkins.netyxia.net/blue/organizations/jenkins/QtUsb/branches/)  
 MSVC: [![Build status](https://ci.appveyor.com/api/projects/status/4ns2jbdoveyj8n0y?svg=true)](https://ci.appveyor.com/project/fpoussin/qtusb)  
