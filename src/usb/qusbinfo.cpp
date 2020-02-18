@@ -20,6 +20,7 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     struct libusb_device_descriptor desc;
     (void)ctx;
     QUsbDevice::IdList device_list;
+    QUsbDevice::Id id;
     QUsbInfo *info = reinterpret_cast<QUsbInfo *>(user_data);
     DbgPrintCB();
 
@@ -29,16 +30,23 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     if (info->logLevel() >= QUsbDevice::logDebug)
         qDebug("hotplugCallback");
 
+    id.vid = desc.idVendor;
+    id.pid = desc.idProduct;
+    id.bus = bus;
+    id.port = port;
+    id.dClass = desc.bDeviceClass;
+    id.dSubClass = desc.bDeviceSubClass;
+
     (void)libusb_get_device_descriptor(device, &desc);
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
 
         // Add to list
-        emit info->deviceInserted({ desc.idProduct, desc.idVendor, bus, port, desc.bDeviceClass, desc.bDeviceSubClass });
+        emit info->deviceInserted(id);
 
     } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
 
         // Remove from list
-        emit info->deviceRemoved({ desc.idProduct, desc.idVendor, bus, port, desc.bDeviceClass, desc.bDeviceSubClass });
+        emit info->deviceRemoved(id);
 
     } else {
         if (info->logLevel() >= QUsbDevice::logWarning)
