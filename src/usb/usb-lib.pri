@@ -1,4 +1,5 @@
 QT += core-private
+CONFIG += c++11
 
 INCLUDEPATH += $$PWD
 
