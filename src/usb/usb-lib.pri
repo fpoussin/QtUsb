@@ -1,3 +1,5 @@
+QT += core-private
+
 INCLUDEPATH += $$PWD
 
 PUBLIC_HEADERS += \
