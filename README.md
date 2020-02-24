@@ -5,6 +5,7 @@ GCC: [![Build Status](https://jenkins.netyxia.net/buildStatus/icon?job=QtUsb%2Fm
 MSVC: [![Build status](https://ci.appveyor.com/api/projects/status/4ns2jbdoveyj8n0y?svg=true)](https://ci.appveyor.com/project/fpoussin/qtusb)  
 
 A Cross-platform USB Module for Qt built around libusb-1.0 and libhidapi  
+Can be used as a library, or included directly into the project  
 
 ## Features
 
@@ -14,9 +15,9 @@ A Cross-platform USB Module for Qt built around libusb-1.0 and libhidapi
 - Device enumeration and filtering
 - HID
 
-## Install
+## Install library 
 
-**Ubuntu**  
+**Ubuntu** (stable versions only)  
 ```
 sudo add-apt-repository ppa:fpoussin/ppa
 sudo apt install libqt5usb5 libqt5usb5-dev
@@ -25,7 +26,7 @@ sudo apt install libqt5usb5 libqt5usb5-dev
 **Windows**  
 Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appveyor build artifacts](https://ci.appveyor.com/project/fpoussin/qtusb) for binary archives  
 
-## Build
+## Build the library
 
 **Unix**  
 You need libusb-1.0-0-dev, libhidapi-dev and pkg-config packages installed  
@@ -34,7 +35,8 @@ mkdir build && cd build
 qmake ..
 make install
 ```
-Alternatively build as static lib while still using a dynamic Qt lib  
+
+Alternatively build as static library (best for portability)  
 ```shell
 mkdir build && cd build
 qmake CONFIG+=static_lib ..
@@ -49,13 +51,22 @@ build_msvc2017.bat [x64|x86] QT_PATH
 ie: build_msvc2017.bat x64 C:\Qt\5.14.1\msvc2017_64
 ```
 
-## Using  
+## Using the library or code directly  
+
+**Option 1: Using the library**  
 You'll need to add the module to your project file:  
 ```
 qt += usb
 ```
 
-Then include it into your headers:  
+**Option 2: Importing the code in your project**  
+This will tie your app to a specific Qt version as it uses private headers  
+You need to include the pri file into your qmake file:
+```
+include(QtUsb/src/usb/usb-lib.pri)
+```
+
+Include headers:  
 ```
 #include <QUsbDevice>
 #include <QUsbInfo>
