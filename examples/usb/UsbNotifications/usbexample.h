@@ -15,8 +15,8 @@ public:
 signals:
 
 public slots:
-    void onDevInserted(QUsbDevice::IdList list);
-    void onDevRemoved(QUsbDevice::IdList list);
+    void onDevInserted(QUsbDevice::Id id);
+    void onDevRemoved(QUsbDevice::Id id);
 
 private:
     QUsbInfo m_usb_info;

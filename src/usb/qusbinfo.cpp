@@ -30,6 +30,7 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     if (info->logLevel() >= QUsbDevice::logDebug)
         qDebug("hotplugCallback");
 
+    libusb_get_device_descriptor(device, &desc);
     id.vid = desc.idVendor;
     id.pid = desc.idProduct;
     id.bus = bus;
@@ -37,7 +38,6 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     id.dClass = desc.bDeviceClass;
     id.dSubClass = desc.bDeviceSubClass;
 
-    (void)libusb_get_device_descriptor(device, &desc);
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
 
         // Add to list
