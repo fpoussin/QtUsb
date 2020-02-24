@@ -58,6 +58,12 @@ You'll need to add the module to your project file:
 ```
 qt += usb
 ```
+Include headers:  
+```
+#include <QUsbDevice>
+#include <QUsbInfo>
+#include <QUsbEndpoint>
+```
 
 **Option 2: Importing the code in your project**  
 This will tie your app to a specific Qt version as it uses private headers  
@@ -65,12 +71,11 @@ You need to include the pri file into your qmake file:
 ```
 include(QtUsb/src/usb/usb-lib.pri)
 ```
-
 Include headers:  
 ```
-#include <QUsbDevice>
-#include <QUsbInfo>
-#include <QUsbEndpoint>
+#include "qusbdevice.h"
+#include "qusbinfo.h"
+#include "qusbendpoint.h"
 ```
 
 ## Documentation
