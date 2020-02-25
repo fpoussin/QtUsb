@@ -4,19 +4,12 @@
 class tst_QUsbEndpoint : public QObject
 {
     Q_OBJECT
-public:
-    explicit tst_QUsbEndpoint();
-
 private slots:
     void constructors();
     void polling();
 
 private:
 };
-
-tst_QUsbEndpoint::tst_QUsbEndpoint()
-{
-}
 
 void tst_QUsbEndpoint::constructors()
 {

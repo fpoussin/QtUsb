@@ -4,18 +4,11 @@
 class tst_QHidDevice : public QObject
 {
     Q_OBJECT
-public:
-    explicit tst_QHidDevice();
-
 private slots:
     void constructors();
 
 private:
 };
-
-tst_QHidDevice::tst_QHidDevice()
-{
-}
 
 void tst_QHidDevice::constructors()
 {

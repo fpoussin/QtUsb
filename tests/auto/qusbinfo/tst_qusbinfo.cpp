@@ -4,9 +4,6 @@
 class tst_QUsbInfo : public QObject
 {
     Q_OBJECT
-public:
-    explicit tst_QUsbInfo();
-
 private slots:
     void constructors();
     void assignment();
@@ -14,10 +11,6 @@ private slots:
 
 private:
 };
-
-tst_QUsbInfo::tst_QUsbInfo()
-{
-}
 
 void tst_QUsbInfo::constructors()
 {
