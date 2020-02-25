@@ -43,7 +43,7 @@ public:
     class Q_USB_EXPORT Config
     {
     public:
-        Config(quint8 _config = 1, quint8 _interface = 1, quint8 _alternate = 1);
+        Config(quint8 _config = 1, quint8 _interface = 0, quint8 _alternate = 0);
         Config(const QUsbDevice::Config &other);
         QUsbDevice::Config &operator=(QUsbDevice::Config other);
 

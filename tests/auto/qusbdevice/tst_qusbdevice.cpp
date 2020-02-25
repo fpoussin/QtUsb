@@ -24,7 +24,7 @@ void tst_QUsbDevice::constructors()
 {
     QUsbDevice dev;
     int timeout = QUsbDevice::DefaultTimeout; // We can't use references with this var
-    const QUsbDevice::Config c(1, 2, 3);
+    const QUsbDevice::Config c;
 
     QVERIFY(!dev.isConnected());
     QCOMPARE(dev.logLevel(), QUsbDevice::logInfo);
