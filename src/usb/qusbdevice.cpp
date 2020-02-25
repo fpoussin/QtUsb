@@ -632,6 +632,16 @@ bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
 }
 
 /*!
+    \brief Default constructor.
+*/
+QUsbDevice::Config::Config(quint8 _config, quint8 _interface, quint8 _alternate)
+{
+    config = _config;
+    interface = _interface;
+    alternate = _alternate;
+}
+
+/*!
     \brief Copy constructor.
 */
 QUsbDevice::Config::Config(const QUsbDevice::Config &other)
@@ -646,6 +656,19 @@ QUsbDevice::Config &QUsbDevice::Config::operator=(QUsbDevice::Config other)
 {
     std::swap(other, *this);
     return *this;
+}
+
+/*!
+    \brief Default constructor.
+*/
+QUsbDevice::Id::Id(quint16 _pid, quint16 _vid, quint8 _bus, quint8 _port, quint8 _class, quint8 _subclass)
+{
+    pid = _pid;
+    vid = _vid;
+    bus = _bus;
+    port = _port;
+    dClass = _class;
+    dSubClass = _subclass;
 }
 
 /*!

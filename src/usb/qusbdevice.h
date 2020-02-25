@@ -43,7 +43,7 @@ public:
     class Q_USB_EXPORT Config
     {
     public:
-        Config(){};
+        Config(quint8 _config = 1, quint8 _interface = 1, quint8 _alternate = 1);
         Config(const QUsbDevice::Config &other);
         QUsbDevice::Config &operator=(QUsbDevice::Config other);
 
@@ -57,17 +57,17 @@ public:
     class Q_USB_EXPORT Id
     {
     public:
-        Id(){};
+        Id(quint16 _pid = 0, quint16 _vid = 0, quint8 _bus = busAny, quint8 _port = portAny, quint8 _class = 0, quint8 _subclass = 0);
         Id(const QUsbDevice::Id &other);
         bool operator==(const QUsbDevice::Id &other) const;
         QUsbDevice::Id &operator=(QUsbDevice::Id other);
 
-        quint16 pid = 0;
-        quint16 vid = 0;
-        quint8 bus = busAny;
-        quint8 port = portAny;
-        quint8 dClass = 0;
-        quint8 dSubClass = 0;
+        quint16 pid;
+        quint16 vid;
+        quint8 bus;
+        quint8 port;
+        quint8 dClass;
+        quint8 dSubClass;
     };
 
     typedef QList<Id> IdList;
