@@ -19,7 +19,7 @@ UsbExample::~UsbExample()
 
 void UsbExample::onDevInserted(QUsbDevice::Id id)
 {
-    qInfo("Devices inserted: %04x:%04x", id.vid, id.pid);
+    qInfo("Device inserted: %04x:%04x", id.vid, id.pid);
 }
 
 void UsbExample::onDevRemoved(QUsbDevice::Id id)

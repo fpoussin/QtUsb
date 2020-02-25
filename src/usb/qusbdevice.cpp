@@ -631,12 +631,29 @@ bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
     return other.config == config && other.interface == interface && other.alternate == alternate;
 }
 
-QUsbDevice::Config &QUsbDevice::Config::operator=(const QUsbDevice::Config &other)
+/*!
+    \brief Copy constructor.
+*/
+QUsbDevice::Config::Config(const QUsbDevice::Config &other)
 {
-    config = other.config;
-    alternate = other.alternate;
-    interface = other.interface;
+    operator=(other);
+}
+
+/*!
+    \brief Copy operator.
+*/
+QUsbDevice::Config &QUsbDevice::Config::operator=(QUsbDevice::Config other)
+{
+    std::swap(other, *this);
     return *this;
+}
+
+/*!
+    \brief Copy constructor.
+*/
+QUsbDevice::Id::Id(const QUsbDevice::Id &other)
+{
+    operator=(other);
 }
 
 /*!
@@ -652,13 +669,8 @@ bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
 /*!
     \brief Copy operator.
  */
-QUsbDevice::Id &QUsbDevice::Id::operator=(const QUsbDevice::Id &other)
+QUsbDevice::Id &QUsbDevice::Id::operator=(QUsbDevice::Id other)
 {
-    pid = other.pid;
-    vid = other.vid;
-    bus = other.bus;
-    port = other.port;
-    dClass = other.dClass;
-    dSubClass = other.dSubClass;
+    std::swap(other, *this);
     return *this;
 }

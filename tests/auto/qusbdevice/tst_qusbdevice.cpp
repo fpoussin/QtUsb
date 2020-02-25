@@ -49,6 +49,18 @@ void tst_QUsbDevice::assignment()
 
     dev.setTimeout(timeout);
     QCOMPARE(dev.timeout(), timeout);
+
+    QUsbDevice::Config c2 = c;
+    QUsbDevice::Config c3(c);
+
+    QCOMPARE(c, c2);
+    QCOMPARE(c, c3);
+
+    QUsbDevice::Id f2 = f;
+    QUsbDevice::Id f3(f);
+
+    QCOMPARE(f, f2);
+    QCOMPARE(f, f3);
 }
 
 void tst_QUsbDevice::states()
