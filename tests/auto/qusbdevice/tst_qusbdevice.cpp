@@ -30,8 +30,8 @@ void tst_QUsbDevice::constructors()
 void tst_QUsbDevice::assignment()
 {
     QUsbDevice dev;
-    QUsbDevice::Config c(1, 2, 3);
-    QUsbDevice::Id f(1234, 4321);
+    const QUsbDevice::Config c(1, 2, 3);
+    const QUsbDevice::Id f(1234, 4321);
     const quint16 timeout = (rand() % 200) + 10;
 
     dev.setConfig(c);
@@ -43,14 +43,14 @@ void tst_QUsbDevice::assignment()
     dev.setTimeout(timeout);
     QCOMPARE(dev.timeout(), timeout);
 
-    QUsbDevice::Config c2 = c;
-    QUsbDevice::Config c3(c);
+    const QUsbDevice::Config c2 = c;
+    const QUsbDevice::Config c3(c);
 
     QCOMPARE(c, c2);
     QCOMPARE(c, c3);
 
-    QUsbDevice::Id f2 = f;
-    QUsbDevice::Id f3(f);
+    const QUsbDevice::Id f2 = f;
+    const QUsbDevice::Id f3(f);
 
     QCOMPARE(f, f2);
     QCOMPARE(f, f3);

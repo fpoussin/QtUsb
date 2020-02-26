@@ -646,7 +646,9 @@ QUsbDevice::Config::Config(quint8 _config, quint8 _interface, quint8 _alternate)
 */
 QUsbDevice::Config::Config(const QUsbDevice::Config &other)
 {
-    operator=(other);
+    config = other.config;
+    alternate = other.alternate;
+    interface = other.interface;
 }
 
 /*!
@@ -654,7 +656,9 @@ QUsbDevice::Config::Config(const QUsbDevice::Config &other)
 */
 QUsbDevice::Config &QUsbDevice::Config::operator=(QUsbDevice::Config other)
 {
-    std::swap(other, *this);
+    config = other.config;
+    alternate = other.alternate;
+    interface = other.interface;
     return *this;
 }
 
@@ -676,7 +680,12 @@ QUsbDevice::Id::Id(quint16 _pid, quint16 _vid, quint8 _bus, quint8 _port, quint8
 */
 QUsbDevice::Id::Id(const QUsbDevice::Id &other)
 {
-    operator=(other);
+    pid = other.pid;
+    vid = other.vid;
+    bus = other.bus;
+    port = other.port;
+    dClass = other.dClass;
+    dSubClass = other.dSubClass;
 }
 
 /*!
@@ -694,6 +703,11 @@ bool QUsbDevice::Id::operator==(const QUsbDevice::Id &other) const
  */
 QUsbDevice::Id &QUsbDevice::Id::operator=(QUsbDevice::Id other)
 {
-    std::swap(other, *this);
+    pid = other.pid;
+    vid = other.vid;
+    bus = other.bus;
+    port = other.port;
+    dClass = other.dClass;
+    dSubClass = other.dSubClass;
     return *this;
 }
