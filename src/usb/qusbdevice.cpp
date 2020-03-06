@@ -340,13 +340,13 @@ QUsbDevice::IdList QUsbDevice::devices()
         libusb_device_descriptor desc;
 
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
-            Id filter;
-            filter.pid = desc.idProduct;
-            filter.vid = desc.idVendor;
-            filter.bus = libusb_get_bus_number(dev);
-            filter.port = libusb_get_port_number(dev);
+            Id id;
+            id.pid = desc.idProduct;
+            id.vid = desc.idVendor;
+            id.bus = libusb_get_bus_number(dev);
+            id.port = libusb_get_port_number(dev);
 
-            list.append(filter);
+            list.append(id);
         }
     }
 
@@ -719,5 +719,11 @@ QUsbDevice::Id &QUsbDevice::Id::operator=(QUsbDevice::Id other)
 
 QUsbDevice::Id::operator QString() const
 {
-    return QString::fromUtf8("Id(Pid: %1, Vid: %2, Bus: %3, Port: %4, Class: %5, Subclass: %6)").arg(pid).arg(vid).arg(bus).arg(port).arg(dClass).arg(dSubClass);
+    return QString::fromUtf8("Id(Vid: %1, Pid: %2, Bus: %3, Port: %4, Class: %5, Subclass: %6)")
+            .arg(vid, 4, 16, QChar::fromLatin1('0'))
+            .arg(pid, 4, 16, QChar::fromLatin1('0'))
+            .arg(bus)
+            .arg(port)
+            .arg(dClass)
+            .arg(dSubClass);
 }
