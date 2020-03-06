@@ -4,7 +4,10 @@
 UsbExample::UsbExample(QObject *parent)
     : QObject(parent)
 {
-    qDebug() << m_usb_info.getPresentDevices();
+    auto list = m_usb_info.getPresentDevices();
+
+    qDebug() << list.size() << "devices present";
+    qDebug() << list;
 
     exit(0);
 }
