@@ -19,7 +19,7 @@ public:
     explicit QUsbInfo(QObject *parent = Q_NULLPTR);
     ~QUsbInfo(void);
 
-    QUsbDevice::IdList getPresentDevices() const;
+    static QUsbDevice::IdList devices();
     bool isPresent(const QUsbDevice::Id &id) const;
     int findDevice(const QUsbDevice::Id &id,
                    const QUsbDevice::IdList &list) const;

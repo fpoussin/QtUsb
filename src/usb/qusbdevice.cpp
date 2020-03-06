@@ -317,45 +317,6 @@ void QUsbDevice::handleUsbError(int error_code)
 }
 
 /*!
-    \brief Returns all present \c devices.
- */
-QUsbDevice::IdList QUsbDevice::devices()
-{
-    IdList list;
-    ssize_t cnt; // holding number of devices in list
-    libusb_device **devs;
-    libusb_context *ctx;
-
-    libusb_init(&ctx);
-    libusb_set_debug(ctx, LIBUSB_LOG_LEVEL_NONE);
-    cnt = libusb_get_device_list(ctx, &devs); // get the list of devices
-    if (cnt < 0) {
-        qCritical("libusb_get_device_list Error");
-        libusb_free_device_list(devs, 1);
-        return list;
-    }
-
-    for (int i = 0; i < cnt; i++) {
-        libusb_device *dev = devs[i];
-        libusb_device_descriptor desc;
-
-        if (libusb_get_device_descriptor(dev, &desc) == 0) {
-            Id id;
-            id.pid = desc.idProduct;
-            id.vid = desc.idVendor;
-            id.bus = libusb_get_bus_number(dev);
-            id.port = libusb_get_port_number(dev);
-
-            list.append(id);
-        }
-    }
-
-    libusb_free_device_list(devs, 1);
-    libusb_exit(ctx);
-    return list;
-}
-
-/*!
     \brief Open the device. Returns \c 0 on success
  */
 qint32 QUsbDevice::open()

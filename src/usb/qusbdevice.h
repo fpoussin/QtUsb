@@ -130,7 +130,6 @@ public:
     QByteArray speedString() const;
     DeviceStatus status() const;
     QByteArray statusString() const;
-    static IdList devices();
 
 private:
     void handleUsbError(int error_code);

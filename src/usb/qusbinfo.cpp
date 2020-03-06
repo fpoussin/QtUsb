@@ -137,7 +137,7 @@ QUsbInfo::QUsbInfo(QObject *parent)
     libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
 
     // Populate list once
-    m_system_list = QUsbDevice::devices();
+    m_system_list = devices();
 
     // Try hotplug first
     d->m_has_hotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
@@ -189,19 +189,48 @@ void QUsbInfo::checkDevices()
     if (d->m_has_hotplug) {
         libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);
     } else {
-        list = QUsbDevice::devices();
+        list = devices();
         monitorDevices(list);
     }
 }
 
 /*!
-   Gets a list of devices present in the system.
-
+    \brief Returns all present \c devices.
  */
-QUsbDevice::IdList QUsbInfo::getPresentDevices() const
+QUsbDevice::IdList QUsbInfo::devices()
 {
-    DbgPrintFuncName();
-    return m_system_list;
+    QUsbDevice::IdList list;
+    ssize_t cnt; // holding number of devices in list
+    libusb_device **devs;
+    libusb_context *ctx;
+
+    libusb_init(&ctx);
+    libusb_set_debug(ctx, LIBUSB_LOG_LEVEL_NONE);
+    cnt = libusb_get_device_list(ctx, &devs); // get the list of devices
+    if (cnt < 0) {
+        qCritical("libusb_get_device_list Error");
+        libusb_free_device_list(devs, 1);
+        return list;
+    }
+
+    for (int i = 0; i < cnt; i++) {
+        libusb_device *dev = devs[i];
+        libusb_device_descriptor desc;
+
+        if (libusb_get_device_descriptor(dev, &desc) == 0) {
+            QUsbDevice::Id id;
+            id.pid = desc.idProduct;
+            id.vid = desc.idVendor;
+            id.bus = libusb_get_bus_number(dev);
+            id.port = libusb_get_port_number(dev);
+
+            list.append(id);
+        }
+    }
+
+    libusb_free_device_list(devs, 1);
+    libusb_exit(ctx);
+    return list;
 }
 
 /*!

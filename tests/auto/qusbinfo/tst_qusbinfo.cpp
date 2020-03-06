@@ -33,7 +33,7 @@ void tst_QUsbInfo::assignment()
 void tst_QUsbInfo::features()
 {
     QUsbInfo info;
-    info.getPresentDevices();
+    info.devices();
 }
 
 QTEST_MAIN(tst_QUsbInfo)
