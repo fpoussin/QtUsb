@@ -69,7 +69,6 @@ void tst_QUsbDevice::states()
 
 void tst_QUsbDevice::staticfuncs()
 {
-    QUsbDevice::devices();
 }
 
 QTEST_MAIN(tst_QUsbDevice)

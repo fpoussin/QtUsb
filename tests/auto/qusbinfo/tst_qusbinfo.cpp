@@ -8,6 +8,7 @@ private slots:
     void constructors();
     void assignment();
     void features();
+    void staticFunctions();
 
 private:
 };
@@ -34,6 +35,11 @@ void tst_QUsbInfo::features()
 {
     QUsbInfo info;
     info.devices();
+}
+
+void tst_QUsbInfo::staticFunctions()
+{
+    QUsbInfo::devices();
 }
 
 QTEST_MAIN(tst_QUsbInfo)
