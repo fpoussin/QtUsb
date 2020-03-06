@@ -201,17 +201,7 @@ void QUsbInfo::checkDevices()
 QUsbDevice::IdList QUsbInfo::getPresentDevices() const
 {
     DbgPrintFuncName();
-    QUsbDevice::IdList list;
-    QUsbDevice::Id filter;
-
-    /* Search the system list with our own list */
-    for (int i = 0; i < m_list.length(); i++) {
-        filter = m_list.at(i);
-        if (this->findDevice(filter, m_system_list) < 0) {
-            list.append(filter);
-        }
-    }
-    return list;
+    return m_system_list;
 }
 
 /*!
