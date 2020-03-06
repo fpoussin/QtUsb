@@ -45,9 +45,9 @@ public:
     public:
         Config(quint8 _config = 1, quint8 _interface = 0, quint8 _alternate = 0);
         Config(const QUsbDevice::Config &other);
-        QUsbDevice::Config &operator=(QUsbDevice::Config other);
-
         bool operator==(const QUsbDevice::Config &other) const;
+        QUsbDevice::Config &operator=(QUsbDevice::Config other);
+        operator QString() const;
 
         quint8 config;
         quint8 interface;
@@ -61,6 +61,7 @@ public:
         Id(const QUsbDevice::Id &other);
         bool operator==(const QUsbDevice::Id &other) const;
         QUsbDevice::Id &operator=(QUsbDevice::Id other);
+        operator QString() const;
 
         quint16 pid;
         quint16 vid;

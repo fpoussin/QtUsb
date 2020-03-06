@@ -631,6 +631,11 @@ bool QUsbDevice::Config::operator==(const QUsbDevice::Config &other) const
     return other.config == config && other.interface == interface && other.alternate == alternate;
 }
 
+QUsbDevice::Config::operator QString() const
+{
+    return QString::fromUtf8("Config(Config: %1, Interface: %2, Alternate: %3)").arg(config).arg(interface).arg(alternate);
+}
+
 /*!
     \brief Default constructor.
 */
@@ -710,4 +715,9 @@ QUsbDevice::Id &QUsbDevice::Id::operator=(QUsbDevice::Id other)
     dClass = other.dClass;
     dSubClass = other.dSubClass;
     return *this;
+}
+
+QUsbDevice::Id::operator QString() const
+{
+    return QString::fromUtf8("Id(Pid: %1, Vid: %2, Bus: %3, Port: %4, Class: %5, Subclass: %6)").arg(pid).arg(vid).arg(bus).arg(port).arg(dClass).arg(dSubClass);
 }

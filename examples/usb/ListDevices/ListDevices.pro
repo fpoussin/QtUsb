@@ -7,14 +7,14 @@
 QT += core usb
 QT -= gui
 
-TARGET = Hid
+TARGET = ListDevices
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    hidexample.cpp
+    usbexample.cpp
 
 HEADERS += \
-    hidexample.h
+    usbexample.h
 
-target.path = $$[QT_INSTALL_EXAMPLES]/usb/Hid
+target.path = $$[QT_INSTALL_EXAMPLES]/usb/ListDevices
 INSTALLS += target
