@@ -2,19 +2,26 @@
 setlocal
 
 IF "%1"=="" (
-  echo "Missing architecture [x86|x64]"
+  echo "Missing MSVC version [2017|2019]"
   pause
   exit /b 1c
 )
 
 IF "%2"=="" (
-  echo "Missing QT path ie: C:\Qt\5.12.2\msvc2017"
+  echo "Missing architecture [x86|x64]"
   pause
   exit /b 1c
 )
 
-SET ARCH=%1
-SET QTDIR=%2
+IF "%3"=="" (
+  echo "Missing QT path ie: C:\Qt\5.14.1\msvc2017"
+  pause
+  exit /b 1c
+)
+
+SET MSVC=%1
+SET ARCH=%2
+SET QTDIR=%3
 
 SET BUILDTOOL=jom
 SET vcarch=%ARCH%
@@ -22,7 +29,7 @@ SET usbarch=%ARCH%
 IF "%ARCH%" == "x64" SET vcarch=amd64
 IF "%ARCH%" == "x86" SET usbarch=Win32
 
-CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
+CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
 
 SET PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
 
