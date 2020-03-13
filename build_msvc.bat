@@ -28,6 +28,8 @@ SET vcarch=%ARCH%
 SET usbarch=%ARCH%
 IF "%ARCH%" == "x64" SET vcarch=amd64
 IF "%ARCH%" == "x86" SET usbarch=Win32
+IF "%MSVC%" == "2017" SET MSVC_VER=v141
+IF "%MSVC%" == "2019" SET MSVC_VER=v142
 
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
 
@@ -38,8 +40,8 @@ IF %errorlevel% NEQ 0 set BUILDTOOL=nmake
 
 git submodule update --init --recursive
 CD libusb
-msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release
-msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Debug
+msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release;PlatformToolset=%MSVC_VER%
+msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Debug;PlatformToolset=%MSVC_VER%
 COPY %usbarch%\Release\lib\libusb-1.0.lib ..\libusb-1.0.lib
 COPY %usbarch%\Debug\lib\libusb-1.0.lib ..\libusb-1.0d.lib
 CD ..
