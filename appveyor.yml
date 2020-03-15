@@ -23,15 +23,6 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 init:
-  - set vcarch=%arch%
-  - set usbarch=%arch%
-  - if "%arch%" == "x64" set vcarch=amd64
-  - if "%arch%" == "x86" set usbarch=Win32
-  - if %cc%==VS2019 (
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
-    ) else if not %cc%==MinGW (
-      call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
-    )
   - set PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
   - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
@@ -39,17 +30,12 @@ init:
 install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - git submodule update --init --recursive
-  - cd libusb
-  - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Release /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - msbuild msvc\libusb_static_2017.vcxproj /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cp -v %usbarch%/Release/lib/libusb-1.0.lib %APPVEYOR_BUILD_FOLDER%/libusb-1.0.lib
-  - cp -v %usbarch%/Debug/lib/libusb-1.0.lib %APPVEYOR_BUILD_FOLDER%/libusb-1.0d.lib
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" "LIBS_PRIVATE += -L%APPVEYOR_BUILD_FOLDER%" ..
+  - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" ..
   - jom INSTALL_ROOT=\projects\install install docs install_docs
   - jom sub-tests
 
