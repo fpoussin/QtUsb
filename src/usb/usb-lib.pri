@@ -23,18 +23,26 @@ SOURCES += \
     $$PWD/qhiddevice.cpp
 
 win32 {
-    LIBS_PRIVATE += -L$$PWD/../ -L$$PWD/../../ Advapi32.lib Setupapi.lib
-    CONFIG(debug, debug|release) {
-        LIBS_PRIVATE += libusb-1.0d.lib
-    }
-    CONFIG(release, debug|release) {
-        LIBS_PRIVATE += libusb-1.0.lib
-    }
+    LIBS_PRIVATE += Advapi32.lib Setupapi.lib
     # Build the hid library ourselves since it's only one file
-    SOURCES += $$PWD/../../hidapi/windows/hid.c
+    HIDAPI_ROOT_REL = $$PWD/../../hidapi
+    SOURCES += $$HIDAPI_ROOT_REL/windows/hid.c
 
-    INCLUDEPATH += $$PWD/libusb $$PWD/../../libusb
-    INCLUDEPATH += $$PWD/hidapi $$PWD/../../hidapi/hidapi
+    LIBUSB_ROOT_REL = $$PWD/../../libusb
+    SOURCES += \
+    $$LIBUSB_ROOT_REL/libusb/core.c \
+    $$LIBUSB_ROOT_REL/libusb/descriptor.c \
+    $$LIBUSB_ROOT_REL/libusb/hotplug.c \
+    $$LIBUSB_ROOT_REL/libusb/io.c \
+    $$LIBUSB_ROOT_REL/libusb/os/poll_windows.c \
+    $$LIBUSB_ROOT_REL/libusb/strerror.c \
+    $$LIBUSB_ROOT_REL/libusb/sync.c \
+    $$LIBUSB_ROOT_REL/libusb/os/threads_windows.c \
+    $$LIBUSB_ROOT_REL/libusb/os/windows_nt_common.c \
+    $$LIBUSB_ROOT_REL/libusb/os/windows_usbdk.c \
+    $$LIBUSB_ROOT_REL/libusb/os/windows_winusb.c
+
+    INCLUDEPATH += $$LIBUSB_ROOT_REL $$LIBUSB_ROOT_REL/libusb $$HIDAPI_ROOT_REL/hidapi
 }
 
 # We build libusb and hidapi ourselves instead of using a library
