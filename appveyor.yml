@@ -23,6 +23,15 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 init:
+  - set vcarch=%arch%
+  - set usbarch=%arch%
+  - if "%arch%" == "x64" set vcarch=amd64
+  - if "%arch%" == "x86" set usbarch=Win32
+  - if %cc%==VS2019 (
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
+    ) else if not %cc%==MinGW (
+      call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
+    )
   - set PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
   - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
