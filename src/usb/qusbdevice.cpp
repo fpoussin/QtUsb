@@ -350,31 +350,33 @@ qint32 QUsbDevice::open()
         libusb_device_descriptor desc;
 
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
-
+            Id tmp_id(m_id);
             // Assign default properties in order to match
-            if (m_id.pid == 0)
-                m_id.pid = desc.idProduct;
-            if (m_id.vid == 0)
-                m_id.vid = desc.idVendor;
-            if (m_id.bus == busAny)
-                m_id.bus = bus;
-            if (m_id.port == portAny)
-                m_id.port = port;
-            if (m_id.dClass == 0)
-                m_id.dClass = desc.bDeviceClass;
-            if (m_id.dSubClass == 0)
-                m_id.dSubClass = desc.bDeviceSubClass;
+            if (tmp_id.pid == 0)
+                tmp_id.pid = desc.idProduct;
+            if (tmp_id.vid == 0)
+                tmp_id.vid = desc.idVendor;
+            if (tmp_id.bus == busAny)
+                tmp_id.bus = bus;
+            if (tmp_id.port == portAny)
+                tmp_id.port = port;
+            if (tmp_id.dClass == 0)
+                tmp_id.dClass = desc.bDeviceClass;
+            if (tmp_id.dSubClass == 0)
+                tmp_id.dSubClass = desc.bDeviceSubClass;
 
             // Check all properties match. Defaults have been assigned above.
-            if (desc.idProduct == m_id.pid && desc.idVendor == m_id.vid
-                && bus == m_id.bus && port == m_id.port
-                && desc.bDeviceClass == m_id.dClass && desc.bDeviceSubClass == m_id.dSubClass) {
+            if (desc.idProduct == tmp_id.pid && desc.idVendor == tmp_id.vid
+                && bus == tmp_id.bus && port == tmp_id.port
+                && desc.bDeviceClass == tmp_id.dClass && desc.bDeviceSubClass == tmp_id.dSubClass) {
                 if (m_log_level >= logInfo)
                     qInfo("Found device");
 
                 rc = libusb_open(dev, &d->m_devHandle);
-                if (rc == 0)
+                if (rc == 0) {
+                    m_id = tmp_id;
                     break;
+                }
                 else if (m_log_level >= logWarning) {
                     qWarning("Failed to open device: %s", libusb_strerror(static_cast<enum libusb_error>(rc)));
                 }
