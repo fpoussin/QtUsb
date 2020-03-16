@@ -69,7 +69,8 @@ IF NOT "%INSTALLPATH%"=="" (
 ) ELSE (
   %BUILDTOOL% install docs install_docs
 )
-%BUILDTOOL% sub-tests
 
+cd tests
+%BUILDTOOL% all check TESTARGS="-o xunit.xml,xunitxml"
 
 endlocal

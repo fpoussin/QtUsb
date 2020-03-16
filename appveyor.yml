@@ -48,8 +48,6 @@ after_build:
     ) else (
       7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\install\*
     )
-  - cd tests
-  - nmake /I check TESTARGS="-o xunit.xml,xunitxml"
 
 artifacts:
   - path: build\*.7z
