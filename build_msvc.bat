@@ -66,8 +66,7 @@ IF NOT "%INSTALLPATH%"=="" (
   RMDIR /S /Q %INSTALLPATH%
   MKDIR %INSTALLPATH%
   %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install docs install_docs
-)
-ELSE (
+) ELSE (
   %BUILDTOOL% install docs install_docs
 )
 %BUILDTOOL% sub-tests
