@@ -7,9 +7,8 @@ DEFINES += QT_BUILD_USB_LIB
 
 include($$PWD/usb-lib.pri)
 
-CONFIG(static_lib) {
+CONFIG(staticlib) {
     message("Build as Qt module (static library)")
-    CONFIG += staticlib
 } else {
     message("Build as Qt module (dynamic library)")
 }

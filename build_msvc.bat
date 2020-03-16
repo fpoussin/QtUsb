@@ -39,7 +39,7 @@ SET PROJDIR=%CD%
 SET BUILDDIR=%PROJDIR%\..\build-qtusb-%ARCH%
 
 SET STATIC=""
-IF "%LIBTYPE%" == "static" SET STATIC="CONFIG+=static_lib"
+IF "%LIBTYPE%" == "static" SET STATIC="CONFIG+=staticlib"
 
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
 

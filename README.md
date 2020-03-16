@@ -39,7 +39,7 @@ make install
 Alternatively build as static library (best for portability)  
 ```shell
 mkdir build && cd build
-qmake CONFIG+=static_lib ..
+qmake CONFIG+=staticlib ..
 make install
 ```
 
