@@ -41,13 +41,8 @@ init:
   - set usbarch=%arch%
   - if "%arch%" == "x64" set vcarch=amd64
   - if "%arch%" == "x86" set usbarch=Win32
-  - if %cc%==VS2019 (
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
-    ) else if not %cc%==MinGW (
-      call "C:\Program Files (x86)\Microsoft Visual Studio %toolchain_version%.0\VC\vcvarsall.bat" %vcarch%
-    )
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
   - set PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
-  - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
   - set STATIC=""
   - if "%mode%" == "static" set STATIC="CONFIG+=staticlib"
@@ -60,7 +55,7 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" %STATIC% ..
+  - qmake %STATIC% ..
   - jom INSTALL_ROOT=\projects\install install docs install_docs
   - jom sub-tests
 
