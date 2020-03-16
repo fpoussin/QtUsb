@@ -11,14 +11,28 @@ environment:
   - arch: x64
     qt: 5.14
     cc: VS2019
-    mode: release
+    mode: dynamic
+    QTDIR: C:\Qt\%qt%\msvc2017_64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+
+  - arch: x64
+    qt: 5.14
+    cc: VS2019
+    mode: static
     QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
   - arch: x86
     qt: 5.14
     cc: VS2019
-    mode: release
+    mode: dynamic
+    QTDIR: C:\Qt\%qt%\msvc2017
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+
+  - arch: x86
+    qt: 5.14
+    cc: VS2019
+    mode: static
     QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
@@ -35,6 +49,8 @@ init:
   - set PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
   - if %cc%==MinGW set PATH=C:\Qt\Tools\mingw%toolchain_version%_32\bin;%PATH%
   - echo PATH=%PATH%
+  - set STATIC=""
+  - if "%mode%" == "static" set STATIC="CONFIG+=staticlib"
 
 install:
   - cd %APPVEYOR_BUILD_FOLDER%
@@ -44,7 +60,7 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build
   - cd build
-  - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" ..
+  - qmake "INCLUDEPATH += %APPVEYOR_BUILD_FOLDER%\libusb" %STATIC% ..
   - jom INSTALL_ROOT=\projects\install install docs install_docs
   - jom sub-tests
 
@@ -52,9 +68,9 @@ after_build:
   - cd %APPVEYOR_BUILD_FOLDER%
   - cd build
   - if %APPVEYOR_REPO_TAG%==true (
-      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
+      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\install\*
     ) else (
-      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%arch%.7z C:\projects\install\*
+      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\install\*
     )
   - cd tests
   - nmake /I check TESTARGS="-o xunit.xml,xunitxml"
