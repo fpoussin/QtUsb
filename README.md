@@ -40,15 +40,16 @@ Alternatively build as static library (best for portability)
 ```shell
 mkdir build && cd build
 qmake CONFIG+=static_lib ..
-# Link with '*.a' file later in you project
+make install
 ```
 
-**MSVC 2017**  
+**MSVC**  
 You need the Windows SDKs to compile libusb  
 These are available from the Visual Studio Installer  
+The following script builds and installs a static library into your Qt version  
 ```
-build_msvc2017.bat [x64|x86] QT_PATH
-ie: build_msvc2017.bat x64 C:\Qt\5.14.1\msvc2017_64
+build_msvc.bat 2017|2019 x64|x86 dynamic|static QT_PATH
+ie: build_msvc2017.bat 2017 x64 static C:\Qt\5.14.1\msvc2017_64
 ```
 
 ## Using the library or code directly  
