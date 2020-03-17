@@ -25,10 +25,6 @@ IF "%4"=="" (
   exit /b 1c
 )
 
-SET INSTALLPATH=""
-IF NOT "%5"=="" (
-  SET INSTALLPATH=%5
-)
 
 SET MSVC=%1
 SET ARCH=%2
@@ -42,6 +38,15 @@ IF "%ARCH%" == "x64" SET vcarch=amd64
 IF "%ARCH%" == "x86" SET usbarch=Win32
 SET PROJDIR=%CD%
 SET BUILDDIR=%PROJDIR%\..\qtusb-build
+SET INSTALLPATH=""
+
+IF NOT "%5"=="" (
+  SET BUILDDIR=%5
+)
+
+IF NOT "%6"=="" (
+  SET INSTALLPATH=%5
+)
 
 SET STATIC=""
 IF "%LIBTYPE%" == "static" SET STATIC="CONFIG+=qtusb-static"
