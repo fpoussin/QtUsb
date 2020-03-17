@@ -49,7 +49,7 @@ after_build:
     )
 
 artifacts:
-  - path: C:\projects\*.7z
+  - path: ..\*.7z
     name: QtUsb install files
 
 deploy:
