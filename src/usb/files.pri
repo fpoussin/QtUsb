@@ -3,8 +3,38 @@ CONFIG += c++11
 
 INCLUDEPATH += $$PWD
 
+H = $${LITERAL_HASH}
+
+QUSBGLOBAL_S_CONT = \
+    "$${H}pragma once" \
+    "$${H}define Q_USB_EXPORT" \
+    ""
+
+QUSBGLOBAL_M_CONT = \
+    "$${H}pragma once" \
+    "$${H}include <QtCore/qglobal.h>" \
+    "" \
+    "$${H}if !defined(QT_STATIC)" \
+    "  $${H}if defined(QT_BUILD_USB_LIB)" \
+    "    $${H}define Q_USB_EXPORT Q_DECL_EXPORT" \
+    "  $${H}else" \
+    "    $${H}define Q_USB_EXPORT Q_DECL_IMPORT" \
+    "  $${H}endif" \
+    "$${H}else" \
+    "  $${H}define Q_USB_EXPORT" \
+    "$${H}endif" \
+    ""
+
+CONFIG(qtusb-as-module) {
+    QUSBGLOBAL_CONT = $$QUSBGLOBAL_M_CONT
+}
+else {
+    QUSBGLOBAL_CONT = $$QUSBGLOBAL_S_CONT
+}
+
+write_file("$$PWD/qusbglobal.h", QUSBGLOBAL_CONT)|error()
+
 PUBLIC_HEADERS += \
-    $$PWD/qusbglobal.h \
     $$PWD/qusbdevice.h \
     $$PWD/qusbinfo.h \
     $$PWD/qusbendpoint.h \
@@ -42,7 +72,7 @@ win32 {
     $$LIBUSB_ROOT_REL/libusb/os/windows_usbdk.c \
     $$LIBUSB_ROOT_REL/libusb/os/windows_winusb.c
 
-    INCLUDEPATH += $$PWD/msvc $$LIBUSB_ROOT_REL $$LIBUSB_ROOT_REL/libusb $$HIDAPI_ROOT_REL/hidapi
+    INCLUDEPATH += $$PWD/../deps/msvc $$LIBUSB_ROOT_REL $$LIBUSB_ROOT_REL/libusb $$HIDAPI_ROOT_REL/hidapi
 }
 
 # We build libusb and hidapi ourselves instead of using a library

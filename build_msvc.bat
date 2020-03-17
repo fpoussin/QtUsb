@@ -14,7 +14,7 @@ IF "%2"=="" (
 )
 
 IF "%3"=="" (
-  echo "Missing lib type [dynamic|static]"
+  echo "Missing lib type [module|static]"
   pause
   exit /b 1c
 )
@@ -41,10 +41,10 @@ SET usbarch=%ARCH%
 IF "%ARCH%" == "x64" SET vcarch=amd64
 IF "%ARCH%" == "x86" SET usbarch=Win32
 SET PROJDIR=%CD%
-SET BUILDDIR=%PROJDIR%\build
+SET BUILDDIR=%PROJDIR%\..\qtusb-build
 
 SET STATIC=""
-IF "%LIBTYPE%" == "static" SET STATIC="CONFIG+=staticlib"
+IF "%LIBTYPE%" == "static" SET STATIC="CONFIG+=qtusb-static"
 
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
 
@@ -65,7 +65,8 @@ CD %BUILDDIR%
 IF NOT "%INSTALLPATH%"=="" (
   RMDIR /S /Q %INSTALLPATH%
   MKDIR %INSTALLPATH%
-  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install docs install_docs
+  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install
+  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% docs install_docs
 ) ELSE (
   %BUILDTOOL% install docs install_docs
 )
