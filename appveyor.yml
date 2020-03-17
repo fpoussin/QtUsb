@@ -38,7 +38,7 @@ environment:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
-  - build_msvc.bat %msvc% %arch% %mode% %QTDIR% %CD%\build %CD%\install
+  - build_msvc.bat %msvc% %arch% %mode% %QTDIR% build install
 
 after_build:
   - mkdir %APPVEYOR_BUILD_FOLDER%\artifacts
