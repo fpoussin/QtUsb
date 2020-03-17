@@ -67,6 +67,5 @@ test: off
 
 on_success:
   - ps: |
-      cd C:\projects\qtusb-build
       $wc = New-Object 'System.Net.WebClient'
-      Get-ChildItem -Recurse -Filter "xunit.xml" | ForEach-Object { Write-Host $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }
+      Get-ChildItem -Path C:\projects\qtusb-build\tests -Recurse -Filter "xunit.xml" | ForEach-Object { Write-Host $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $_.FullName) }
