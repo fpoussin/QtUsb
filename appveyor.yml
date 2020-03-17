@@ -38,18 +38,19 @@ environment:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
-  - build_msvc.bat %msvc% %arch% %mode% %QTDIR% \projects\build \projects\install
+  - build_msvc.bat %msvc% %arch% %mode% %QTDIR% %CD%\build %CD%\install
 
 after_build:
-  - cd C:\projects
+  - mkdir %APPVEYOR_BUILD_FOLDER%\artifacts
+  - cd %APPVEYOR_BUILD_FOLDER%\artifacts
   - if %APPVEYOR_REPO_TAG%==true (
-      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\install\*
+      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%mode%-%arch%.7z %APPVEYOR_BUILD_FOLDER%\install\*
     ) else (
-      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\install\*
+      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%mode%-%arch%.7z %APPVEYOR_BUILD_FOLDER%\install\*
     )
 
 artifacts:
-  - path: ..\*.7z
+  - path: artifacts\*.7z
     name: QtUsb install files
 
 deploy:
