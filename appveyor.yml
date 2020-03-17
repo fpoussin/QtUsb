@@ -38,15 +38,15 @@ environment:
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
-  - build_msvc.bat %msvc% %arch% %mode% %QTDIR% build install
+  - build_msvc.bat %msvc% %arch% %mode% %QTDIR% C:\projects\qtusb-build \projects\qtusb-install
 
 after_build:
   - mkdir %APPVEYOR_BUILD_FOLDER%\artifacts
   - cd %APPVEYOR_BUILD_FOLDER%\artifacts
   - if %APPVEYOR_REPO_TAG%==true (
-      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%mode%-%arch%.7z %APPVEYOR_BUILD_FOLDER%\install\*
+      7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\qtusb-install\*
     ) else (
-      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%mode%-%arch%.7z %APPVEYOR_BUILD_FOLDER%\install\*
+      7z a %APPVEYOR_REPO_COMMIT%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\qtusb-install\*
     )
 
 artifacts:
