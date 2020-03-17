@@ -41,8 +41,7 @@ build_script:
   - build_msvc.bat %msvc% %arch% %mode% %QTDIR% \projects\build \projects\install
 
 after_build:
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - cd build
+  - cd C:\projects
   - if %APPVEYOR_REPO_TAG%==true (
       7z a %APPVEYOR_REPO_TAG_NAME%-qt%qt%-usb-msvc-%mode%-%arch%.7z C:\projects\install\*
     ) else (
@@ -50,7 +49,7 @@ after_build:
     )
 
 artifacts:
-  - path: build\*.7z
+  - path: C:\projects\*.7z
     name: QtUsb install files
 
 deploy:
