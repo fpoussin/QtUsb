@@ -45,7 +45,7 @@ IF NOT "%5"=="" (
 )
 
 IF NOT "%6"=="" (
-  SET INSTALLPATH=%5
+  SET INSTALLPATH=%6
 )
 
 SET STATIC=""
@@ -60,7 +60,7 @@ IF %errorlevel% NEQ 0 set BUILDTOOL=nmake
 
 git submodule update --init --recursive
 
-echo %BUILDDIR%
+echo %BUILDDIR% %PROJDIR%
 
 RMDIR /S /Q %BUILDDIR%
 MKDIR %BUILDDIR%
@@ -68,8 +68,6 @@ CD %BUILDDIR%
 %QTDIR%\bin\qmake.exe %STATIC% %PROJDIR%
 
 IF NOT "%INSTALLPATH%"=="" (
-  RMDIR /S /Q %INSTALLPATH%
-  MKDIR %INSTALLPATH%
   %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install
   %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% docs install_docs
 ) ELSE (
