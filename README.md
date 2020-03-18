@@ -26,7 +26,7 @@ sudo apt install libqt5usb5 libqt5usb5-dev
 **Windows**  
 Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appveyor build artifacts](https://ci.appveyor.com/project/fpoussin/qtusb) for binary archives  
 
-## Build the library
+## Build  
 
 **Unix**  
 You need libusb-1.0-0-dev, libhidapi-dev and pkg-config packages installed  
@@ -36,25 +36,29 @@ qmake ..
 make install
 ```
 
-Alternatively build as static library (best for portability)  
+Alternatively build as static module (best for portability)  
 ```shell
 mkdir build && cd build
-qmake CONFIG+=staticlib ..
+qmake CONFIG+=qtusb-static ..
 make install
 ```
 
 **MSVC**  
 You need the Windows SDKs to compile libusb  
 These are available from the Visual Studio Installer  
-The following script builds and installs a static library into your Qt version  
+The following script builds and deploys QtUsb into your Qt installation  
 ```
-build_msvc.bat 2017|2019 x64|x86 dynamic|static QT_PATH
-ie: build_msvc2017.bat 2017 x64 static C:\Qt\5.14.1\msvc2017_64
+build_msvc.bat 2017|2019 x64|x86 module|static QT_PATH
+ie: build_msvc.bat 2017 x64 static C:\Qt\5.14.1\msvc2017_64
 ```
 
-## Using the library or code directly  
+**Qt Creator**  
+The module can also be built normally within QT creator regardless of the platform.  
+All dependencies are built with qmake.  
 
-**Option 1: Using the library**  
+## Using  
+
+**Option 1: Using the module (static or dynamic)**  
 You'll need to add the module to your project file:  
 ```
 qt += usb
@@ -70,7 +74,7 @@ Include headers:
 This will tie your app to a specific Qt version as it uses private headers  
 You need to include the pri file into your qmake file:
 ```
-include(QtUsb/src/usb/usb-lib.pri)
+include(QtUsb/src/usb/files.pri)
 ```
 Include headers:  
 ```
