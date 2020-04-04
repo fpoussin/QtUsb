@@ -76,7 +76,7 @@ win32 {
 }
 
 # We build libusb and hidapi ourselves instead of using a library
-android {
+else:android {
     LIBUSB_ROOT_REL = $$PWD/../../libusb
     SOURCES += \
     $$LIBUSB_ROOT_REL/libusb/core.c \
@@ -98,19 +98,30 @@ android {
     $$LIBUSB_ROOT_REL/libusb/os \
     $$LIBUSB_ROOT_REL/android $$PWD/libusb-1.0
 
-    # HIDAPI
+    # Build hidapi-libusb
     HIDAPI_ROOT_REL = $$PWD/../../hidapi
     SOURCES += $$HIDAPI_ROOT_REL/libusb/hid.c
     INCLUDEPATH += $$HIDAPI_ROOT_REL/hidapi
 }
+
 else:unix {
-    !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using PKGCONFIG")
+    !packagesExist(libusb-1.0):error("Could not find libusb-1.0 using pkg-config")
     PKGCONFIG += libusb-1.0
 
-    !packagesExist(hidapi-libusb):error("Could not find hidapi-libusb using PKGCONFIG")
-    PKGCONFIG += hidapi-libusb
+    osx {
+        !packagesExist(hidapi):error("Could not find hidapi using pkg-config")
+        PKGCONFIG += hidapi
+    }
 
+    else {
+        !packagesExist(hidapi-libusb):error("Could not find hidapi-libusb using pkg-config")
+        PKGCONFIG += hidapi-libusb
+    }
     CONFIG += link_pkgconfig
+}
+
+else {
+    error("Platform unsupported, aborting.")
 }
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
