@@ -7,9 +7,8 @@ from glob import glob
 import requests
 
 # qtsync.pl version for each distro release
-distros = {'xenial': '5.5',
-           'bionic': '5.9',
-           'disco': '5.12'}
+distros = {'bionic': '5.9',
+           'focal': '5.12'}
 
 build_dir = os.getcwd() + '/../qtusb-build'
 
@@ -123,7 +122,7 @@ def make_local_src(dest):
 
 def make_s_build(dest):
     print('Building binary package (sbuild)')
-    cmd = 'sbuild -vd {0} -c {0}-amd64 --no-apt-clean --no-apt-update --no-apt-upgrade --no-apt-distupgrade -j8 {1}'.format(args.distro, dest)
+    cmd = 'sbuild -vd {0} -c {0}-amd64 -j8 {1}'.format(args.distro, dest)
     print(cmd)
     run_cmd([cmd], cwd=build_dir)
 

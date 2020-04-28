@@ -2,7 +2,7 @@ Source: qtusb
 Section: libs
 Priority: optional
 Maintainer: Fabien Poussin <fabien.poussin@gmail.com>
-Build-Depends: debhelper (>= 9.2), qtbase5-dev, qtbase5-dev-tools, qtbase5-private-dev, qt5-qmake, qt5-default, libusb-1.0-0-dev, pkg-config, pkg-kde-tools, qttools5-dev-tools, qtbase5-doc, qtbase5-doc-html, libqt5sql5-sqlite
+Build-Depends: debhelper (>= 9.2), qtbase5-dev, qtbase5-dev-tools, qtbase5-private-dev, qt5-qmake, qt5-default, libusb-1.0-0-dev, pkg-config, pkg-kde-tools, qttools5-dev-tools, qtbase5-doc, qtbase5-doc-html, libqt5sql5-sqlite, libhidapi-dev
 Standards-Version: 4.1.1
 Homepage: https://github.com/fpoussin/QtUsb
  
@@ -10,7 +10,7 @@ Package: libqt5usb5
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, libusb-1.0-0, hidapi-libusb0
 Description: USB library for QT
  A convenient way to use libusb 1.0 with your QT applications.
 
