@@ -24,6 +24,9 @@ public:
     qint32 write(const QByteArray *data, int len = -1);
     qint32 read(QByteArray *data, int len = -1, int timeout = -1);
 
+    qint32 sendFeatureReport(const QByteArray *data, int len = -1);
+    qint32 getFeatureReport(QByteArray *data, int len = -1);
+
     QString serialNumber();
     QString manufacturer();
     QString product();

@@ -91,6 +91,36 @@ qint32 QHidDevice::read(QByteArray *data, int len, int timeout)
 }
 
 /*!
+    \brief Send a Feature report.
+ */
+qint32 QHidDevice::sendFeatureReport(const QByteArray *data, int len)
+{
+    Q_CHECK_PTR(data);
+    Q_D(QHidDevice);
+    // Default is buffer size
+    if (len == -1)
+        len = data->size();
+
+    return hid_send_feature_report(d->m_devHandle, reinterpret_cast<const unsigned char *>(data->constData()), static_cast<size_t>(len));
+}
+
+/*!
+    \brief Get a feature report.
+ */
+qint32 QHidDevice::getFeatureReport(QByteArray *data, int len)
+{
+    Q_CHECK_PTR(data);
+    Q_D(QHidDevice);
+    // Default is buffer size
+    if (len == -1)
+        len = data->size();
+    // Allocate max read size
+    data->fill(0, len);
+
+    return hid_get_feature_report(d->m_devHandle, reinterpret_cast<unsigned char *>(data->data()), static_cast<size_t>(len));
+}
+
+/*!
     \brief Returns the serial number string.
  */
 QString QHidDevice::serialNumber()
