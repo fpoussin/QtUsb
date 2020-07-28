@@ -687,7 +687,7 @@ qint64 QUsbEndpoint::readData(char *data, qint64 maxSize)
     if (maxSize <= 0)
         return 0;
 
-    QMutexLocker(&d->m_buf_mutex);
+    QMutexLocker locker(&d->m_buf_mutex);
     qint64 read_size = d->m_buf.size();
     if (read_size == 0)
         return 0;
