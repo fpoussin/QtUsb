@@ -34,10 +34,10 @@ public:
     Q_ENUM(Status)
 
     enum bmRequestType : quint8 {
-        requestStandard = (0x00 < 5),
-        requestClass = (0x01 < 5),
-        requestVendor = (0x02 < 5),
-        requestReserved = (0x03 < 5),
+        requestStandard = (0x00 << 5),
+        requestClass = (0x01 << 5),
+        requestVendor = (0x02 << 5),
+        requestReserved = (0x03 << 5),
         recipientDevice = 0x00,
         recipientInterface = 0x01,
         recipientEndpoint = 0x02,
