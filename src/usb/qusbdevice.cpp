@@ -440,6 +440,9 @@ qint32 QUsbDevice::open()
         break;
     }
 
+    if (!d->m_events->isRunning()) // if event handling thread is not running start it. The thread was stopped upon closing the device.
+        d->m_events->start();
+
     m_connected = true;
     emit connectionChanged(m_connected);
 
@@ -461,11 +464,15 @@ void QUsbDevice::close()
 
         libusb_release_interface(d->m_devHandle, 0); // release the claimed interface
         libusb_close(d->m_devHandle); // close the device we opened
+        d->m_events->exit(0); // stop event handling thread
+        d->m_events->wait();
         d->m_devHandle = Q_NULLPTR;
+        m_connected = false;
+        emit connectionChanged(m_connected);
+    } else { // do not emit signal if device is already closed.
+        if (m_log_level >= logInfo)
+            qInfo("USB connection already closed");
     }
-
-    m_connected = false;
-    emit connectionChanged(m_connected);
 }
 
 /*!
