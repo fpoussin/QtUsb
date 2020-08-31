@@ -121,10 +121,10 @@ QUsbInfo::QUsbInfo(QObject *parent)
     DbgPrintFuncName();
     int rc;
 
-    qRegisterMetaType<QUsbDevice::Id>("QUsbDevice::DeviceFilter");
-    qRegisterMetaType<QUsbDevice::Config>("QUsbDevice::DeviceConfig");
+    qRegisterMetaType<QUsbDevice::Id>("QUsbDevice::Id");
+    qRegisterMetaType<QUsbDevice::Config>("QUsbDevice::Config");
 
-    qRegisterMetaType<QUsbDevice::IdList>("QUsbDevice::FilterList");
+    qRegisterMetaType<QUsbDevice::IdList>("QUsbDevice::IdList");
     qRegisterMetaType<QUsbDevice::ConfigList>("QUsbDevice::ConfigList");
 
     rc = libusb_init(&d->m_ctx);

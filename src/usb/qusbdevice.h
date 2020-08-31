@@ -134,7 +134,7 @@ public:
 private:
     void handleUsbError(int error_code);
 
-signals:
+Q_SIGNALS:
     void statusChanged(QUsbDevice::DeviceStatus status);
     void connectionChanged(bool connected);
 

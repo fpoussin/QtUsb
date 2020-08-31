@@ -428,8 +428,11 @@ QUsbEndpoint::QUsbEndpoint(QUsbDevice *dev, QUsbEndpoint::Type type, quint8 ep)
     : QIODevice(*(new QUsbEndpointPrivate)), d_dummy(Q_NULLPTR), m_status(QUsbEndpoint::transferCanceled), m_dev(dev), m_type(type), m_ep(ep)
 {
     Q_CHECK_PTR(dev);
+    qRegisterMetaType<QUsbEndpoint::Status>("QUsbEndpoint::Status");
+
     Q_D(QUsbEndpoint);
     DbgPrintFuncName();
+
     setParent(dev);
 }
 

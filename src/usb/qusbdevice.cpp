@@ -212,6 +212,8 @@ QUsbDevice::QUsbDevice(QObject *parent)
     m_status = statusOK;
     this->setLogLevel(m_log_level); // Apply log level to libusb
 
+    qRegisterMetaType<QUsbDevice::DeviceStatus>("QUsbDevice::DeviceStatus");
+
     Q_D(QUsbDevice);
     if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
 
