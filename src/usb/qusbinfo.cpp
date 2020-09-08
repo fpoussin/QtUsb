@@ -3,10 +3,10 @@
 #include <QThread>
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define DbgPrintFuncName()                   \
+#define DbgPrintFuncName()                 \
     if (m_log_level >= QUsbInfo::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
-#define DbgPrintCB()                              \
+#define DbgPrintCB()                            \
     if (info->logLevel() >= QUsbInfo::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
@@ -123,7 +123,7 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
     \value logDebugAll  Everything + libusb debug output
                                              */
 
-                /*!
+/*!
     \property QUsbInfo::config
     \property QUsbInfo::id
     \property QUsbInfo::logLevel
@@ -135,44 +135,44 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
     \brief Various properties.
                                                      */
 
-                /*!
+/*!
     \typedef QUsbDevice::Endpoint
     \brief An endpoint ID.
  */
 
-                /*!
+/*!
     \typedef QUsbInfo::ConfigList
     \brief List of Config structs.
  */
 
-                /*!
+/*!
     \typedef QUsbInfo::IdList
     \brief List of Id structs.
  */
 
-                /*!
+/*!
     \class QUsbInfo::Config
     \brief Device configuration structure.
     \ingroup usb-main
     \inmodule QtUsb
  */
 
-                /*!
+/*!
     \variable QUsbInfo::Config::config
     \brief The configuration ID.
  */
 
-                /*!
+/*!
     \variable QUsbInfo::Config::interface
     \brief The interface ID.
  */
 
-                /*!
+/*!
     \variable QUsbInfo::Config::alternate
     \brief The alternate ID.
  */
 
-                /*!
+/*!
     \class QUsbInfo::Id
     \brief Device Ids structure.
 
@@ -182,36 +182,36 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
     \inmodule QtUsb
                                                             */
 
-                /*!
+/*!
     \variable QUsbInfo::Id::vid
     \brief The vendor ID.
 */
 
-                /*!
+/*!
     \variable QUsbInfo::Id::pid
     \brief The product ID.
 */
 
-                /*!
+/*!
     \variable QUsbInfo::Id::bus
     \brief The USB bus number.
 
                 Default is \a QUsbDevice::busAny, which matches all buses.
                 */
 
-        /*!
+/*!
     \variable QUsbInfo::Id::port
     \brief The USB port number.
 
         Default is \a QUsbDevice::portAny, which matches all ports.
                 */
 
-        /*!
+/*!
     \variable QUsbInfo::Id::dClass
     \brief The USB class.
 */
 
-        /*!
+/*!
     \variable QUsbInfo::Id::dSubClass
     \brief The USB Sub-class.
 */
@@ -482,7 +482,6 @@ void QUsbInfo::monitorDevices(const QUsbInfo::IdList &list)
     m_system_list = list;
 }
 
-
 /*!
     \brief Comparision operator.
 
@@ -502,20 +501,16 @@ QUsbInfo::Config::operator QString() const
     \brief Default constructor.
 */
 QUsbInfo::Config::Config(quint8 _config, quint8 _interface, quint8 _alternate)
+    : config(_config), interface(_interface), alternate(_alternate)
 {
-    config = _config;
-    interface = _interface;
-    alternate = _alternate;
 }
 
 /*!
     \brief Copy constructor.
 */
 QUsbInfo::Config::Config(const QUsbInfo::Config &other)
+    : config(other.config), interface(other.interface), alternate(other.alternate)
 {
-    config = other.config;
-    alternate = other.alternate;
-    interface = other.interface;
 }
 
 /*!
@@ -533,26 +528,16 @@ QUsbInfo::Config &QUsbInfo::Config::operator=(QUsbInfo::Config other)
     \brief Default constructor.
 */
 QUsbInfo::Id::Id(quint16 _pid, quint16 _vid, quint8 _bus, quint8 _port, quint8 _class, quint8 _subclass)
+    : pid(_pid), vid(_vid), bus(_bus), port(_port), dClass(_class), dSubClass(_subclass)
 {
-    pid = _pid;
-    vid = _vid;
-    bus = _bus;
-    port = _port;
-    dClass = _class;
-    dSubClass = _subclass;
 }
 
 /*!
     \brief Copy constructor.
 */
 QUsbInfo::Id::Id(const QUsbInfo::Id &other)
+    : pid(other.pid), vid(other.vid), bus(other.bus), port(other.port), dClass(other.dClass), dSubClass(other.dSubClass)
 {
-    pid = other.pid;
-    vid = other.vid;
-    bus = other.bus;
-    port = other.port;
-    dClass = other.dClass;
-    dSubClass = other.dSubClass;
 }
 
 /*!
@@ -562,7 +547,12 @@ QUsbInfo::Id::Id(const QUsbInfo::Id &other)
 */
 bool QUsbInfo::Id::operator==(const QUsbInfo::Id &other) const
 {
-    return other.pid == pid && other.vid == vid && other.bus == bus && other.port == port && other.dClass == dClass && other.dSubClass == dSubClass;
+    return other.pid == pid
+            && other.vid == vid
+            && other.bus == bus
+            && other.port == port
+            && other.dClass == dClass
+            && other.dSubClass == dSubClass;
 }
 
 /*!
