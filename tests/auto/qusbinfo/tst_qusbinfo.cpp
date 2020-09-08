@@ -17,18 +17,18 @@ void tst_QUsbInfo::constructors()
 {
     QUsbInfo info;
 
-    QCOMPARE(info.logLevel(), QUsbDevice::logInfo);
+    QCOMPARE(info.logLevel(), QUsbInfo::logInfo);
 }
 
 void tst_QUsbInfo::assignment()
 {
     QUsbInfo info;
 
-    info.setLogLevel(QUsbDevice::logDebug);
-    QCOMPARE(info.logLevel(), QUsbDevice::logDebug);
+    info.setLogLevel(QUsbInfo::logDebug);
+    QCOMPARE(info.logLevel(), QUsbInfo::logDebug);
 
-    info.setLogLevel(QUsbDevice::logNone);
-    QCOMPARE(info.logLevel(), QUsbDevice::logNone);
+    info.setLogLevel(QUsbInfo::logNone);
+    QCOMPARE(info.logLevel(), QUsbInfo::logNone);
 }
 
 void tst_QUsbInfo::features()

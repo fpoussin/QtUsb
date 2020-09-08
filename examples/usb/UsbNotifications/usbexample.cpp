@@ -17,12 +17,12 @@ UsbExample::~UsbExample()
     qInfo("Closing...");
 }
 
-void UsbExample::onDevInserted(QUsbDevice::Id id)
+void UsbExample::onDevInserted(QUsbInfo::Id id)
 {
     qInfo("Device inserted: %04x:%04x", id.vid, id.pid);
 }
 
-void UsbExample::onDevRemoved(QUsbDevice::Id id)
+void UsbExample::onDevRemoved(QUsbInfo::Id id)
 {
     qInfo("Device removed: %04x:%04x", id.vid, id.pid);
 }

@@ -2,6 +2,7 @@
 #define QUSBDEVICE_H
 
 #include "qusbglobal.h"
+#include "qusbinfo.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QString>
@@ -22,57 +23,6 @@ class Q_USB_EXPORT QUsbDevice : public QObject
 
 public:
     static const quint16 DefaultTimeout = 250;
-
-    enum LogLevel : quint8 {
-        logNone = 0,
-        logError = 1,
-        logWarning = 2,
-        logInfo = 3,
-        logDebug = 4,
-        logDebugAll = 5
-    };
-
-    enum Bus : quint8 {
-        busAny = 255,
-    };
-
-    enum Port : quint8 {
-        portAny = 255,
-    };
-
-    class Q_USB_EXPORT Config
-    {
-    public:
-        Config(quint8 _config = 1, quint8 _interface = 0, quint8 _alternate = 0);
-        Config(const QUsbDevice::Config &other);
-        bool operator==(const QUsbDevice::Config &other) const;
-        QUsbDevice::Config &operator=(QUsbDevice::Config other);
-        operator QString() const;
-
-        quint8 config;
-        quint8 interface;
-        quint8 alternate;
-    };
-
-    class Q_USB_EXPORT Id
-    {
-    public:
-        Id(quint16 _pid = 0, quint16 _vid = 0, quint8 _bus = busAny, quint8 _port = portAny, quint8 _class = 0, quint8 _subclass = 0);
-        Id(const QUsbDevice::Id &other);
-        bool operator==(const QUsbDevice::Id &other) const;
-        QUsbDevice::Id &operator=(QUsbDevice::Id other);
-        operator QString() const;
-
-        quint16 pid;
-        quint16 vid;
-        quint8 bus;
-        quint8 port;
-        quint8 dClass;
-        quint8 dSubClass;
-    };
-
-    typedef QList<Id> IdList;
-    typedef QList<Config> ConfigList;
 
     enum DeviceSpeed : qint8 {
         unknownSpeed = -1,
@@ -102,9 +52,9 @@ public:
     };
     Q_ENUM(DeviceStatus)
 
-    Q_PROPERTY(LogLevel logLevel READ logLevel WRITE setLogLevel)
-    Q_PROPERTY(Id id READ id WRITE setId)
-    Q_PROPERTY(Config config READ config WRITE setConfig)
+    Q_PROPERTY(QUsbInfo::LogLevel logLevel READ logLevel WRITE setLogLevel)
+    Q_PROPERTY(QUsbInfo::Id id READ id WRITE setId)
+    Q_PROPERTY(QUsbInfo::Config config READ config WRITE setConfig)
     Q_PROPERTY(quint16 pid READ pid)
     Q_PROPERTY(quint16 vid READ vid)
     Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
@@ -115,21 +65,22 @@ public:
     explicit QUsbDevice(QObject *parent = Q_NULLPTR);
     ~QUsbDevice();
 
-    void setLogLevel(LogLevel level);
-    void setId(const Id &id);
-    void setConfig(const Config &config);
+    void setLogLevel(QUsbInfo::LogLevel level);
+    void setId(const QUsbInfo::Id &id);
+    void setConfig(const QUsbInfo::Config &config);
     void setTimeout(quint16 timeout);
-    Id id() const;
-    Config config() const;
     bool isConnected() const;
     quint16 pid() const;
     quint16 vid() const;
     quint16 timeout() const;
-    LogLevel logLevel() const;
+    QUsbInfo::LogLevel logLevel() const;
     DeviceSpeed speed() const;
     QByteArray speedString() const;
     DeviceStatus status() const;
     QByteArray statusString() const;
+
+    QUsbInfo::Id id() const;
+    QUsbInfo::Config config() const;
 
 private:
     void handleUsbError(int error_code);
@@ -147,16 +98,13 @@ private:
     Q_DISABLE_COPY(QUsbDevice)
 
     quint16 m_timeout;
-    LogLevel m_log_level;
+    QUsbInfo::LogLevel m_log_level;
     bool m_connected;
-    Id m_id;
-    Config m_config;
+    QUsbInfo::Id m_id;
+    QUsbInfo::Config m_config;
     DeviceSpeed m_spd;
     DeviceStatus m_status;
 };
-
-Q_DECLARE_METATYPE(QUsbDevice::Config);
-Q_DECLARE_METATYPE(QUsbDevice::Id);
 
 QT_END_NAMESPACE
 

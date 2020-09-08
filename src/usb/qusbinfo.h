@@ -1,7 +1,7 @@
 #ifndef QUSBINFO_H
 #define QUSBINFO_H
 
-#include "qusbdevice.h"
+#include "qusbglobal.h"
 #include <QList>
 
 QT_BEGIN_NAMESPACE
@@ -13,40 +13,95 @@ class Q_USB_EXPORT QUsbInfo : public QObject
     Q_OBJECT
     Q_DECLARE_PRIVATE(QUsbInfo)
 
-    Q_PROPERTY(QUsbDevice::LogLevel logLevel READ logLevel WRITE setLogLevel)
+    Q_PROPERTY(QUsbInfo::LogLevel logLevel READ logLevel WRITE setLogLevel)
 
 public:
+
+    enum LogLevel : quint8 {
+        logNone = 0,
+        logError = 1,
+        logWarning = 2,
+        logInfo = 3,
+        logDebug = 4,
+        logDebugAll = 5
+    };
+
+    class Q_USB_EXPORT Config
+    {
+    public:
+        Config(quint8 _config = 1, quint8 _interface = 0, quint8 _alternate = 0);
+        Config(const QUsbInfo::Config &other);
+        bool operator==(const QUsbInfo::Config &other) const;
+        QUsbInfo::Config &operator=(QUsbInfo::Config other);
+        operator QString() const;
+
+        quint8 config;
+        quint8 interface;
+        quint8 alternate;
+    };
+
+    class Q_USB_EXPORT Id
+    {
+    public:
+        Id(quint16 _pid = 0, quint16 _vid = 0, quint8 _bus = busAny, quint8 _port = portAny, quint8 _class = 0, quint8 _subclass = 0);
+        Id(const QUsbInfo::Id &other);
+        bool operator==(const QUsbInfo::Id &other) const;
+        QUsbInfo::Id &operator=(QUsbInfo::Id other);
+        operator QString() const;
+
+        quint16 pid;
+        quint16 vid;
+        quint8 bus;
+        quint8 port;
+        quint8 dClass;
+        quint8 dSubClass;
+    };
+
+    typedef QList<Id> IdList;
+    typedef QList<Config> ConfigList;
+
+    enum Bus : quint8 {
+        busAny = 255,
+    };
+
+    enum Port : quint8 {
+        portAny = 255,
+    };
+
     explicit QUsbInfo(QObject *parent = Q_NULLPTR);
     ~QUsbInfo(void);
 
-    static QUsbDevice::IdList devices();
-    bool isPresent(const QUsbDevice::Id &id) const;
-    int findDevice(const QUsbDevice::Id &id,
-                   const QUsbDevice::IdList &list) const;
-    void setLogLevel(QUsbDevice::LogLevel level);
-    QUsbDevice::LogLevel logLevel() const;
+    static IdList devices();
+    bool isPresent(const Id &id) const;
+    int findDevice(const Id &id,
+                   const IdList &list) const;
+    void setLogLevel(LogLevel level);
+    LogLevel logLevel() const;
 
 Q_SIGNALS:
-    void deviceInserted(QUsbDevice::Id id);
-    void deviceRemoved(QUsbDevice::Id id);
+    void deviceInserted(Id id);
+    void deviceRemoved(Id id);
 
 public slots:
-    bool addDevice(const QUsbDevice::Id &id);
-    bool removeDevice(const QUsbDevice::Id &id);
+    bool addDevice(const Id &id);
+    bool removeDevice(const Id &id);
 
 protected slots:
-    void monitorDevices(const QUsbDevice::IdList &list);
+    void monitorDevices(const IdList &list);
     void checkDevices();
 
 protected:
-    QUsbDevice::LogLevel m_log_level; /*!< Log level */
-    QUsbDevice::IdList m_list; /*!< List of IDs we are using */
-    QUsbDevice::IdList m_system_list; /*!< List of all IDs in the system */
+    LogLevel m_log_level; /*!< Log level */
+    IdList m_list; /*!< List of IDs we are using */
+    IdList m_system_list; /*!< List of all IDs in the system */
 
 private:
     QUsbInfoPrivate *const d_dummy;
     Q_DISABLE_COPY(QUsbInfo)
 };
+
+Q_DECLARE_METATYPE(QUsbInfo::Config);
+Q_DECLARE_METATYPE(QUsbInfo::Id);
 
 QT_END_NAMESPACE
 

@@ -2,6 +2,7 @@
 #define QUSBENDPOINT_H
 
 #include "qusbdevice.h"
+#include "qusbinfo.h"
 #include <QIODevice>
 #include <QObject>
 

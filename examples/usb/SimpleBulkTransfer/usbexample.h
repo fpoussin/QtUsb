@@ -35,8 +35,8 @@ private:
 
     QByteArray m_send, m_recv;
 
-    QUsbDevice::Id m_filter;
-    QUsbDevice::Config m_config;
+    QUsbInfo::Id m_filter;
+    QUsbInfo::Config m_config;
 
 };
 
