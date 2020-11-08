@@ -15,26 +15,26 @@ private:
 
 void tst_QUsb::constructors()
 {
-    QUsb info;
+    QUsb usb;
 
-    QCOMPARE(info.logLevel(), QUsb::logInfo);
+    QCOMPARE(usb.logLevel(), QUsb::logInfo);
 }
 
 void tst_QUsb::assignment()
 {
-    QUsb info;
+    QUsb usb;
 
-    info.setLogLevel(QUsb::logDebug);
-    QCOMPARE(info.logLevel(), QUsb::logDebug);
+    usb.setLogLevel(QUsb::logDebug);
+    QCOMPARE(usb.logLevel(), QUsb::logDebug);
 
-    info.setLogLevel(QUsb::logNone);
-    QCOMPARE(info.logLevel(), QUsb::logNone);
+    usb.setLogLevel(QUsb::logNone);
+    QCOMPARE(usb.logLevel(), QUsb::logNone);
 }
 
 void tst_QUsb::features()
 {
-    QUsb info;
-    info.devices();
+    QUsb usb;
+    usb.devices();
 }
 
 void tst_QUsb::staticFunctions()

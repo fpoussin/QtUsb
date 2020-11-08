@@ -3,9 +3,9 @@
 UsbExample::UsbExample(QObject *parent)
     : QObject(parent)
 {
-    QObject::connect(&m_usb_info, &QUsb::deviceInserted,
+    QObject::connect(&m_usb, &QUsb::deviceInserted,
                      this, &UsbExample::onDevInserted);
-    QObject::connect(&m_usb_info, &QUsb::deviceRemoved,
+    QObject::connect(&m_usb, &QUsb::deviceRemoved,
                      this, &UsbExample::onDevRemoved);
 
     qInfo("Starting...");

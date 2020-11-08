@@ -19,7 +19,7 @@ public slots:
     void onDevRemoved(QUsb::Id id);
 
 private:
-    QUsb m_usb_info;
+    QUsb m_usb;
 };
 
 #endif // USBEXAMPLE_H

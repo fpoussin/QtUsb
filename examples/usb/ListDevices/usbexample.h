@@ -12,7 +12,7 @@ public:
     explicit UsbExample(QObject *parent = Q_NULLPTR);
 
 private:
-    QUsb m_usb_info;
+    QUsb m_usb;
 };
 
 #endif // USBEXAMPLE_H
