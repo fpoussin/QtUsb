@@ -35,21 +35,21 @@ else {
 write_file("$$PWD/qusbglobal.h", QUSBGLOBAL_CONT)|error()
 
 PUBLIC_HEADERS += \
+    $$PWD/qusb.h \
     $$PWD/qusbdevice.h \
-    $$PWD/qusbinfo.h \
     $$PWD/qusbendpoint.h \
     $$PWD/qhiddevice.h
 
 PRIVATE_HEADERS += \
+    $$PWD/qusb_p.h \
     $$PWD/qusbdevice_p.h \
-    $$PWD/qusbinfo_p.h \
     $$PWD/qusbendpoint_p.h \
     $$PWD/qhiddevice_p.h
 
 SOURCES += \
+    $$PWD/qusb.cpp \
     $$PWD/qusbendpoint.cpp \
     $$PWD/qusbdevice.cpp \
-    $$PWD/qusbinfo.cpp \
     $$PWD/qhiddevice.cpp
 
 win32 {

@@ -15,3 +15,5 @@ mkspecs
 bin
 qtusb*
 libqt5usb*
+src/usb/qusbglobal.h
+

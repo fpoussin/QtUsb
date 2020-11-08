@@ -1,13 +1,13 @@
-#include "qusbinfo.h"
-#include "qusbinfo_p.h"
+#include "qusb.h"
+#include "qusb_p.h"
 #include <QThread>
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define DbgPrintFuncName()                   \
-    if (m_log_level >= QUsbDevice::logDebug) \
+#define DbgPrintFuncName()                 \
+    if (m_log_level >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
-#define DbgPrintCB()                              \
-    if (info->logLevel() >= QUsbDevice::logDebug) \
+#define DbgPrintCB()                            \
+    if (info->logLevel() >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
@@ -19,15 +19,15 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
 {
     struct libusb_device_descriptor desc;
     (void)ctx;
-    QUsbDevice::IdList device_list;
-    QUsbDevice::Id id;
-    QUsbInfo *info = reinterpret_cast<QUsbInfo *>(user_data);
+    QUsb::IdList device_list;
+    QUsb::Id id;
+    QUsb *info = reinterpret_cast<QUsb *>(user_data);
     DbgPrintCB();
 
     uint8_t bus = libusb_get_bus_number(device);
     uint8_t port = libusb_get_port_number(device);
 
-    if (info->logLevel() >= QUsbDevice::logDebug)
+    if (info->logLevel() >= QUsb::logDebug)
         qDebug("hotplugCallback");
 
     libusb_get_device_descriptor(device, &desc);
@@ -49,14 +49,14 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
         emit info->deviceRemoved(id);
 
     } else {
-        if (info->logLevel() >= QUsbDevice::logWarning)
+        if (info->logLevel() >= QUsb::logWarning)
             qWarning("Unhandled hotplug event %d", event);
         return -1;
     }
     return 0;
 }
 
-QUsbInfoPrivate::QUsbInfoPrivate()
+QUsbPrivate::QUsbPrivate()
     : m_has_hotplug(false), m_ctx(Q_NULLPTR), m_refresh_timer(new QTimer)
 {
     QThread *t = new QThread();
@@ -70,7 +70,7 @@ QUsbInfoPrivate::QUsbInfoPrivate()
     t->start();
 }
 
-QUsbInfoPrivate::~QUsbInfoPrivate()
+QUsbPrivate::~QUsbPrivate()
 {
     m_refresh_timer->thread()->exit();
     m_refresh_timer->thread()->wait();
@@ -81,7 +81,7 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
 }
 
 /*!
-    \class QUsbInfo
+    \class QUsb
 
     \brief This class handles hotplug and device detection.
 
@@ -96,36 +96,140 @@ QUsbInfoPrivate::~QUsbInfoPrivate()
 */
 
 /*!
-    \fn void QUsbInfo::deviceInserted(QUsbDevice::IdList list)
+    \fn void QUsb::deviceInserted(QUsbDevice::IdList list)
 
     This is signal is emited when one or more new devices are detected, providing a \a list.
 */
 
 /*!
-    \fn void QUsbInfo::deviceRemoved(QUsbDevice::IdList list)
+    \fn void QUsb::deviceRemoved(QUsbDevice::IdList list)
 
     This is signal is emited when one or more new devices are removed, providing a \a list.
 */
 
 /*!
-    \property QUsbInfo::logLevel
+    \property QUsb::logLevel
     \brief the log level for hotplug/detection.
 */
 
-QUsbInfo::QUsbInfo(QObject *parent)
-    : QObject(*(new QUsbInfoPrivate), parent), d_dummy(Q_NULLPTR)
-{
-    Q_D(QUsbInfo);
+/*!
+    \enum QUsb::LogLevel
 
-    m_log_level = QUsbDevice::logInfo;
+\value logNone      No debug output
+    \value logError     Errors only
+    \value logWarning   Warning and abose
+    \value logInfo      Info and above
+    \value logDebug     Everything
+    \value logDebugAll  Everything + libusb debug output
+                                             */
+
+/*!
+    \property QUsb::config
+    \property QUsb::id
+    \property QUsb::logLevel
+    \property QUsbDevice::pid
+    \property QUsbDevice::vid
+    \property QUsbDevice::speed
+    \property QUsbDevice::timeout
+
+    \brief Various properties.
+                                                     */
+
+/*!
+    \typedef QUsbDevice::Endpoint
+    \brief An endpoint ID.
+ */
+
+/*!
+    \typedef QUsb::ConfigList
+    \brief List of Config structs.
+ */
+
+/*!
+    \typedef QUsb::IdList
+    \brief List of Id structs.
+ */
+
+/*!
+    \class QUsb::Config
+    \brief Device configuration structure.
+    \ingroup usb-main
+    \inmodule QtUsb
+ */
+
+/*!
+    \variable QUsb::Config::config
+    \brief The configuration ID.
+ */
+
+/*!
+    \variable QUsb::Config::interface
+    \brief The interface ID.
+ */
+
+/*!
+    \variable QUsb::Config::alternate
+    \brief The alternate ID.
+ */
+
+/*!
+    \class QUsb::Id
+    \brief Device Ids structure.
+
+                If some properties are equal to 0, they won't be taken into account for filtering.
+        You only need PID and VID, or class and subclass to identify a device, but can be more specific if multiple devices using the same IDs are connected.
+    \ingroup usb-main
+    \inmodule QtUsb
+                                                            */
+
+/*!
+    \variable QUsb::Id::vid
+    \brief The vendor ID.
+*/
+
+/*!
+    \variable QUsb::Id::pid
+    \brief The product ID.
+*/
+
+/*!
+    \variable QUsb::Id::bus
+    \brief The USB bus number.
+
+                Default is \a QUsbDevice::busAny, which matches all buses.
+                */
+
+/*!
+    \variable QUsb::Id::port
+    \brief The USB port number.
+
+        Default is \a QUsbDevice::portAny, which matches all ports.
+                */
+
+/*!
+    \variable QUsb::Id::dClass
+    \brief The USB class.
+*/
+
+/*!
+    \variable QUsb::Id::dSubClass
+    \brief The USB Sub-class.
+*/
+
+QUsb::QUsb(QObject *parent)
+    : QObject(*(new QUsbPrivate), parent), d_dummy(Q_NULLPTR)
+{
+    Q_D(QUsb);
+
+    m_log_level = QUsb::logInfo;
     DbgPrintFuncName();
     int rc;
 
-    qRegisterMetaType<QUsbDevice::Id>("QUsbDevice::Id");
-    qRegisterMetaType<QUsbDevice::Config>("QUsbDevice::Config");
+    qRegisterMetaType<QUsb::Id>("QUsb::Id");
+    qRegisterMetaType<QUsb::Config>("QUsb::Config");
 
-    qRegisterMetaType<QUsbDevice::IdList>("QUsbDevice::IdList");
-    qRegisterMetaType<QUsbDevice::ConfigList>("QUsbDevice::ConfigList");
+    qRegisterMetaType<QUsb::IdList>("QUsb::IdList");
+    qRegisterMetaType<QUsb::ConfigList>("QUsb::ConfigList");
 
     rc = libusb_init(&d->m_ctx);
     if (rc < 0) {
@@ -134,7 +238,7 @@ QUsbInfo::QUsbInfo(QObject *parent)
         return;
     }
 
-    libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
+    libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
 
     // Populate list once
     m_system_list = devices();
@@ -165,9 +269,9 @@ QUsbInfo::QUsbInfo(QObject *parent)
 /*!
     Unregister callbacks and close the usb context.
  */
-QUsbInfo::~QUsbInfo()
+QUsb::~QUsb()
 {
-    Q_D(QUsbInfo);
+    Q_D(QUsb);
     DbgPrintFuncName();
     libusb_hotplug_deregister_callback(d->m_ctx, callback_handle);
     libusb_exit(d->m_ctx);
@@ -178,11 +282,11 @@ QUsbInfo::~QUsbInfo()
 
     This gets called by the internal timer.
  */
-void QUsbInfo::checkDevices()
+void QUsb::checkDevices()
 {
     DbgPrintFuncName();
-    Q_D(QUsbInfo);
-    QUsbDevice::IdList list;
+    Q_D(QUsb);
+    QUsb::IdList list;
 
     timeval t = { 0, 0 };
 
@@ -197,15 +301,16 @@ void QUsbInfo::checkDevices()
 /*!
     \brief Returns all present \c devices.
  */
-QUsbDevice::IdList QUsbInfo::devices()
+QUsb::IdList QUsb::devices()
 {
-    QUsbDevice::IdList list;
+    QUsb::IdList list;
     ssize_t cnt; // holding number of devices in list
     libusb_device **devs;
     libusb_context *ctx;
+    struct hid_device_info *hid_devs, *cur_hid_dev;
 
     libusb_init(&ctx);
-    libusb_set_debug(ctx, LIBUSB_LOG_LEVEL_NONE);
+    libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE);
     cnt = libusb_get_device_list(ctx, &devs); // get the list of devices
     if (cnt < 0) {
         qCritical("libusb_get_device_list Error");
@@ -218,7 +323,7 @@ QUsbDevice::IdList QUsbInfo::devices()
         libusb_device_descriptor desc;
 
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
-            QUsbDevice::Id id;
+            QUsb::Id id;
             id.pid = desc.idProduct;
             id.vid = desc.idVendor;
             id.bus = libusb_get_bus_number(dev);
@@ -230,6 +335,23 @@ QUsbDevice::IdList QUsbInfo::devices()
 
     libusb_free_device_list(devs, 1);
     libusb_exit(ctx);
+
+    hid_devs = hid_enumerate(0x0, 0x0);
+    cur_hid_dev = hid_devs;
+    while (cur_hid_dev) {
+
+        QUsb::Id id;
+        id.pid = cur_hid_dev->product_id;
+        id.vid = cur_hid_dev->vendor_id;
+        id.bus = 0;
+        id.port = 0;
+
+        list.append(id);
+
+        cur_hid_dev = hid_devs->next;
+    }
+    hid_free_enumeration(hid_devs);
+
     return list;
 }
 
@@ -238,7 +360,7 @@ QUsbDevice::IdList QUsbInfo::devices()
 
       Return bool true if present.
  */
-bool QUsbInfo::isPresent(const QUsbDevice::Id &id) const
+bool QUsb::isPresent(const QUsb::Id &id) const
 {
     DbgPrintFuncName();
     return this->findDevice(id, m_system_list) >= 0;
@@ -249,7 +371,7 @@ bool QUsbInfo::isPresent(const QUsbDevice::Id &id) const
 
       Returns false if device was already in the list, else true.
  */
-bool QUsbInfo::addDevice(const QUsbDevice::Id &id)
+bool QUsb::addDevice(const QUsb::Id &id)
 {
 
     DbgPrintFuncName();
@@ -265,7 +387,7 @@ bool QUsbInfo::addDevice(const QUsbDevice::Id &id)
 
       Return bool false if device was not in the list, else true.
  */
-bool QUsbInfo::removeDevice(const QUsbDevice::Id &id)
+bool QUsb::removeDevice(const QUsb::Id &id)
 {
 
     DbgPrintFuncName();
@@ -282,15 +404,15 @@ bool QUsbInfo::removeDevice(const QUsbDevice::Id &id)
 
       Return index of the filter, returns -1 if not found.
  */
-int QUsbInfo::findDevice(const QUsbDevice::Id &id,
-                         const QUsbDevice::IdList &list) const
+int QUsb::findDevice(const QUsb::Id &id,
+                         const QUsb::IdList &list) const
 {
     DbgPrintFuncName();
     for (int i = 0; i < list.length(); i++) {
-        const QUsbDevice::Id *d = &list.at(i);
+        const QUsb::Id *d = &list.at(i);
 
         if (d->pid == id.pid && d->vid == id.vid) {
-            if (id.bus == QUsbDevice::busAny && id.port == QUsbDevice::portAny) // Ignore bus/port if both == any
+            if (id.bus == QUsb::busAny && id.port == QUsb::portAny) // Ignore bus/port if both == any
                 return i;
             if (d->bus == id.bus && d->port == id.port) // Take bus/port into account for filtering when set
                 return i;
@@ -302,23 +424,23 @@ int QUsbInfo::findDevice(const QUsbDevice::Id &id,
 /*!
     Set log \a level (only hotplug/detection).
  */
-void QUsbInfo::setLogLevel(QUsbDevice::LogLevel level)
+void QUsb::setLogLevel(QUsb::LogLevel level)
 {
     DbgPrintFuncName();
-    Q_D(QUsbInfo);
+    Q_D(QUsb);
     m_log_level = level;
-    if (m_log_level >= QUsbDevice::logDebug)
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
-    else if (m_log_level >= QUsbDevice::logWarning)
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_WARNING);
+    if (m_log_level >= QUsb::logDebug)
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+    else if (m_log_level >= QUsb::logWarning)
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
     else
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_ERROR);
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_ERROR);
 }
 
 /*!
     Get current log level.
  */
-QUsbDevice::LogLevel QUsbInfo::logLevel() const
+QUsb::LogLevel QUsb::logLevel() const
 {
     return m_log_level;
 }
@@ -326,12 +448,12 @@ QUsbDevice::LogLevel QUsbInfo::logLevel() const
 /*!
     Add a \a list to monitor.
  */
-void QUsbInfo::monitorDevices(const QUsbDevice::IdList &list)
+void QUsb::monitorDevices(const QUsb::IdList &list)
 {
 
     DbgPrintFuncName();
-    QUsbDevice::IdList inserted, removed;
-    QUsbDevice::Id filter;
+    QUsb::IdList inserted, removed;
+    QUsb::Id filter;
 
     for (int i = 0; i < list.length(); i++) {
         filter = list.at(i);
@@ -358,4 +480,102 @@ void QUsbInfo::monitorDevices(const QUsbDevice::IdList &list)
     }
 
     m_system_list = list;
+}
+
+/*!
+    \brief Comparision operator.
+
+    Returns \c true if all \a other attributes match.
+*/
+bool QUsb::Config::operator==(const QUsb::Config &other) const
+{
+    return other.config == config && other.interface == interface && other.alternate == alternate;
+}
+
+QUsb::Config::operator QString() const
+{
+    return QString::fromUtf8("Config(Config: %1, Interface: %2, Alternate: %3)").arg(config).arg(interface).arg(alternate);
+}
+
+/*!
+    \brief Default constructor.
+*/
+QUsb::Config::Config(quint8 _config, quint8 _interface, quint8 _alternate)
+    : config(_config), interface(_interface), alternate(_alternate)
+{
+}
+
+/*!
+    \brief Copy constructor.
+*/
+QUsb::Config::Config(const QUsb::Config &other)
+    : config(other.config), interface(other.interface), alternate(other.alternate)
+{
+}
+
+/*!
+    \brief Copy operator.
+*/
+QUsb::Config &QUsb::Config::operator=(QUsb::Config other)
+{
+    config = other.config;
+    alternate = other.alternate;
+    interface = other.interface;
+    return *this;
+}
+
+/*!
+    \brief Default constructor.
+*/
+QUsb::Id::Id(quint16 _pid, quint16 _vid, quint8 _bus, quint8 _port, quint8 _class, quint8 _subclass)
+    : pid(_pid), vid(_vid), bus(_bus), port(_port), dClass(_class), dSubClass(_subclass)
+{
+}
+
+/*!
+    \brief Copy constructor.
+*/
+QUsb::Id::Id(const QUsb::Id &other)
+    : pid(other.pid), vid(other.vid), bus(other.bus), port(other.port), dClass(other.dClass), dSubClass(other.dSubClass)
+{
+}
+
+/*!
+    \brief Comparision operator.
+
+    Returns \c true if all \a other attributes match.
+*/
+bool QUsb::Id::operator==(const QUsb::Id &other) const
+{
+    return other.pid == pid
+            && other.vid == vid
+            && other.bus == bus
+            && other.port == port
+            && other.dClass == dClass
+            && other.dSubClass == dSubClass;
+}
+
+/*!
+    \brief Copy operator.
+ */
+QUsb::Id &QUsb::Id::operator=(QUsb::Id other)
+{
+    pid = other.pid;
+    vid = other.vid;
+    bus = other.bus;
+    port = other.port;
+    dClass = other.dClass;
+    dSubClass = other.dSubClass;
+    return *this;
+}
+
+QUsb::Id::operator QString() const
+{
+    return QString::fromUtf8("Id(Vid: %1, Pid: %2, Bus: %3, Port: %4, Class: %5, Subclass: %6)")
+            .arg(vid, 4, 16, QChar::fromLatin1('0'))
+            .arg(pid, 4, 16, QChar::fromLatin1('0'))
+            .arg(bus)
+            .arg(port)
+            .arg(dClass)
+            .arg(dSubClass);
 }

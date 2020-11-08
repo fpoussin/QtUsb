@@ -1,7 +1,7 @@
 QT = core testlib
-TARGET = tst_qusbinfo
+TARGET = tst_qusb
 CONFIG += testcase
 
 QT += usb
 
-SOURCES = tst_qusbinfo.cpp
+SOURCES = tst_qusb.cpp

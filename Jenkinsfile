@@ -1,5 +1,5 @@
 pipeline {
-    agent { docker { image 'fpoussin/jenkins:ubuntu-18.04-qt5' } }
+    agent { docker { image 'fpoussin/jenkins:ubuntu-20.04-qt5' } }
 
     stages {
         stage("Build and Test") {
