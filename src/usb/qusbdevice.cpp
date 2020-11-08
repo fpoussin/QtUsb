@@ -381,9 +381,9 @@ void QUsbDevice::setLogLevel(QUsb::LogLevel level)
     Q_D(QUsbDevice);
     m_log_level = level;
     if (level >= QUsb::logDebugAll)
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
     else
-        libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_NONE);
+        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE);
 }
 
 /*!
