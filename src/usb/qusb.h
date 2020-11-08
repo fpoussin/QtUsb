@@ -1,19 +1,19 @@
-#ifndef QUSBINFO_H
-#define QUSBINFO_H
+#ifndef QUSB_H
+#define QUSB_H
 
 #include "qusbglobal.h"
 #include <QList>
 
 QT_BEGIN_NAMESPACE
 
-class QUsbInfoPrivate;
+class QUsbPrivate;
 
-class Q_USB_EXPORT QUsbInfo : public QObject
+class Q_USB_EXPORT QUsb : public QObject
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QUsbInfo)
+    Q_DECLARE_PRIVATE(QUsb)
 
-    Q_PROPERTY(QUsbInfo::LogLevel logLevel READ logLevel WRITE setLogLevel)
+    Q_PROPERTY(QUsb::LogLevel logLevel READ logLevel WRITE setLogLevel)
 
 public:
 
@@ -30,9 +30,9 @@ public:
     {
     public:
         Config(quint8 _config = 1, quint8 _interface = 0, quint8 _alternate = 0);
-        Config(const QUsbInfo::Config &other);
-        bool operator==(const QUsbInfo::Config &other) const;
-        QUsbInfo::Config &operator=(QUsbInfo::Config other);
+        Config(const QUsb::Config &other);
+        bool operator==(const QUsb::Config &other) const;
+        QUsb::Config &operator=(QUsb::Config other);
         operator QString() const;
 
         quint8 config;
@@ -44,9 +44,9 @@ public:
     {
     public:
         Id(quint16 _pid = 0, quint16 _vid = 0, quint8 _bus = busAny, quint8 _port = portAny, quint8 _class = 0, quint8 _subclass = 0);
-        Id(const QUsbInfo::Id &other);
-        bool operator==(const QUsbInfo::Id &other) const;
-        QUsbInfo::Id &operator=(QUsbInfo::Id other);
+        Id(const QUsb::Id &other);
+        bool operator==(const QUsb::Id &other) const;
+        QUsb::Id &operator=(QUsb::Id other);
         operator QString() const;
 
         quint16 pid;
@@ -68,8 +68,8 @@ public:
         portAny = 255,
     };
 
-    explicit QUsbInfo(QObject *parent = Q_NULLPTR);
-    ~QUsbInfo(void);
+    explicit QUsb(QObject *parent = Q_NULLPTR);
+    ~QUsb(void);
 
     static IdList devices();
     bool isPresent(const Id &id) const;
@@ -96,13 +96,13 @@ protected:
     IdList m_system_list; /*!< List of all IDs in the system */
 
 private:
-    QUsbInfoPrivate *const d_dummy;
-    Q_DISABLE_COPY(QUsbInfo)
+    QUsbPrivate *const d_dummy;
+    Q_DISABLE_COPY(QUsb)
 };
 
-Q_DECLARE_METATYPE(QUsbInfo::Config);
-Q_DECLARE_METATYPE(QUsbInfo::Id);
+Q_DECLARE_METATYPE(QUsb::Config);
+Q_DECLARE_METATYPE(QUsb::Id);
 
 QT_END_NAMESPACE
 
-#endif // QUSBINFO_H
+#endif // QUSB_H

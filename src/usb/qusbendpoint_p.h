@@ -36,7 +36,7 @@ public:
     void setPolling(bool enable);
     bool polling() { return m_poll; }
 
-    QUsbInfo::LogLevel logLevel();
+    QUsb::LogLevel logLevel();
 
     bool m_poll;
     int m_poll_size;

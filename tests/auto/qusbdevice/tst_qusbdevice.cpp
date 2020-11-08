@@ -17,10 +17,10 @@ void tst_QUsbDevice::constructors()
 {
     QUsbDevice dev;
     int timeout = QUsbDevice::DefaultTimeout; // We can't use references with this var
-    const QUsbInfo::Config c;
+    const QUsb::Config c;
 
     QVERIFY(!dev.isConnected());
-    QCOMPARE(dev.logLevel(), QUsbInfo::logInfo);
+    QCOMPARE(dev.logLevel(), QUsb::logInfo);
     QCOMPARE(dev.speed(), QUsbDevice::unknownSpeed);
     QCOMPARE(dev.speedString(), QByteArray("Unknown speed"));
     QCOMPARE(dev.config(), c);
@@ -30,8 +30,8 @@ void tst_QUsbDevice::constructors()
 void tst_QUsbDevice::assignment()
 {
     QUsbDevice dev;
-    const QUsbInfo::Config c(1, 2, 3);
-    const QUsbInfo::Id f(1234, 4321);
+    const QUsb::Config c(1, 2, 3);
+    const QUsb::Id f(1234, 4321);
     const quint16 timeout = (rand() % 200) + 10;
 
     dev.setConfig(c);
@@ -43,14 +43,14 @@ void tst_QUsbDevice::assignment()
     dev.setTimeout(timeout);
     QCOMPARE(dev.timeout(), timeout);
 
-    const QUsbInfo::Config c2 = c;
-    const QUsbInfo::Config c3(c);
+    const QUsb::Config c2 = c;
+    const QUsb::Config c3(c);
 
     QCOMPARE(c, c2);
     QCOMPARE(c, c3);
 
-    const QUsbInfo::Id f2 = f;
-    const QUsbInfo::Id f3(f);
+    const QUsb::Id f2 = f;
+    const QUsb::Id f3(f);
 
     QCOMPARE(f, f2);
     QCOMPARE(f, f3);
@@ -60,11 +60,11 @@ void tst_QUsbDevice::states()
 {
     QUsbDevice dev;
 
-    dev.setLogLevel(QUsbInfo::logDebug);
-    QCOMPARE(dev.logLevel(), QUsbInfo::logDebug);
+    dev.setLogLevel(QUsb::logDebug);
+    QCOMPARE(dev.logLevel(), QUsb::logDebug);
 
-    dev.setLogLevel(QUsbInfo::logNone);
-    QCOMPARE(dev.logLevel(), QUsbInfo::logNone);
+    dev.setLogLevel(QUsb::logNone);
+    QCOMPARE(dev.logLevel(), QUsb::logNone);
 }
 
 void tst_QUsbDevice::staticfuncs()

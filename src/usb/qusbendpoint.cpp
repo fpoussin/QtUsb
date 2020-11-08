@@ -5,13 +5,13 @@
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define DbgPrintFuncName()                     \
-    if (d->logLevel() >= QUsbInfo::logDebug) \
+    if (d->logLevel() >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrivPrintFuncName()                    \
-    if (this->logLevel() >= QUsbInfo::logDebug) \
+    if (this->logLevel() >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrintCB(e)                          \
-    if (e->logLevel() >= QUsbInfo::logDebug) \
+    if (e->logLevel() >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 /* Write callback */
@@ -25,7 +25,7 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
     const int total = transfer->length;
     endpoint->setStatus(static_cast<QUsbEndpoint::Status>(s));
 
-    if (endpoint->logLevel() >= QUsbInfo::logDebug)
+    if (endpoint->logLevel() >= QUsb::logDebug)
         qDebug("OUT: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
                transfer->status,
                transfer->timeout,
@@ -67,7 +67,7 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
     libusb_transfer_status s = transfer->status;
     const int received = transfer->actual_length;
 
-    if (endpoint->logLevel() >= QUsbInfo::logDebug)
+    if (endpoint->logLevel() >= QUsb::logDebug)
         qDebug("IN: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
                transfer->status,
                transfer->timeout,
@@ -216,7 +216,7 @@ bool QUsbEndpointPrivate::prepareTransfer(libusb_transfer **tr, libusb_transfer_
     }
 
     if (tr == Q_NULLPTR) {
-        if (this->logLevel() >= QUsbInfo::logWarning)
+        if (this->logLevel() >= QUsb::logWarning)
             qWarning("QUsbEndpoint: Transfer buffer allocation failed");
         return false;
     }
@@ -311,7 +311,7 @@ void QUsbEndpointPrivate::setPolling(bool enable)
     }
 }
 
-QUsbInfo::LogLevel QUsbEndpointPrivate::logLevel()
+QUsb::LogLevel QUsbEndpointPrivate::logLevel()
 {
     Q_Q(QUsbEndpoint);
     return q->m_dev->logLevel();
@@ -640,19 +640,19 @@ bool QUsbEndpoint::poll()
     DbgPrintFuncName();
 
     if (!isOpen()) {
-        if (d->logLevel() >= QUsbInfo::logWarning)
+        if (d->logLevel() >= QUsb::logWarning)
             qWarning("QUsbEndpoint: Handle not open. Ignoring.");
         return false;
     }
 
     if (!(openMode() & ReadOnly)) {
-        if (d->logLevel() >= QUsbInfo::logWarning)
+        if (d->logLevel() >= QUsb::logWarning)
             qWarning("QUsbEndpoint: Trying to poll without read mode. Ignoring.");
         return false;
     }
 
     if (polling()) {
-        if (d->logLevel() >= QUsbInfo::logWarning)
+        if (d->logLevel() >= QUsb::logWarning)
             qWarning("QUsbEndpoint: Trying to poll with automatic polling enabled. Ignoring.");
         return false;
     }

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QUsbDevice>
-#include <QUsbInfo>
+#include <QUsb>
 
 class UsbExample : public QObject
 {
@@ -12,7 +12,7 @@ public:
     explicit UsbExample(QObject *parent = Q_NULLPTR);
 
 private:
-    QUsbInfo m_usb_info;
+    QUsb m_usb_info;
 };
 
 #endif // USBEXAMPLE_H

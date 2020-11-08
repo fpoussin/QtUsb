@@ -4,7 +4,7 @@
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define DbgPrintFuncName()       \
-    if (m_log_level >= QUsbInfo::logDebug) \
+    if (m_log_level >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
@@ -19,7 +19,7 @@ static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
     (void)libusb_get_device_descriptor(device, &desc);
     qusbdevice_classes_t *dev = reinterpret_cast<qusbdevice_classes_t *>(user_data);
 
-    if (dev->pub->logLevel() >= QUsbInfo::logDebug)
+    if (dev->pub->logLevel() >= QUsb::logDebug)
         qDebug("DeviceLeftCallback");
 
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
@@ -100,7 +100,7 @@ QUsbDevice::QUsbDevice(QObject *parent)
 {
     m_spd = unknownSpeed;
     m_connected = false;
-    m_log_level = QUsbInfo::logInfo;
+    m_log_level = QUsb::logInfo;
     m_timeout = DefaultTimeout;
     m_config.config = 0x01;
     m_config.interface = 0x00;
@@ -229,7 +229,7 @@ qint32 QUsbDevice::open()
     if (m_connected)
         return -1;
 
-    if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0) && (m_id.bus == QUsbInfo::busAny || m_id.port == QUsbInfo::portAny)) {
+    if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0) && (m_id.bus == QUsb::busAny || m_id.port == QUsb::portAny)) {
         qWarning("No device IDs or classes are defined. Aborting.");
         return -1;
     }
@@ -248,15 +248,15 @@ qint32 QUsbDevice::open()
         libusb_device_descriptor desc;
 
         if (libusb_get_device_descriptor(dev, &desc) == 0) {
-            QUsbInfo::Id tmp_id(m_id);
+            QUsb::Id tmp_id(m_id);
             // Assign default properties in order to match
             if (tmp_id.pid == 0)
                 tmp_id.pid = desc.idProduct;
             if (tmp_id.vid == 0)
                 tmp_id.vid = desc.idVendor;
-            if (tmp_id.bus == QUsbInfo::busAny)
+            if (tmp_id.bus == QUsb::busAny)
                 tmp_id.bus = bus;
-            if (tmp_id.port == QUsbInfo::portAny)
+            if (tmp_id.port == QUsb::portAny)
                 tmp_id.port = port;
             if (tmp_id.dClass == 0)
                 tmp_id.dClass = desc.bDeviceClass;
@@ -267,7 +267,7 @@ qint32 QUsbDevice::open()
             if (desc.idProduct == tmp_id.pid && desc.idVendor == tmp_id.vid
                 && bus == tmp_id.bus && port == tmp_id.port
                 && desc.bDeviceClass == tmp_id.dClass && desc.bDeviceSubClass == tmp_id.dSubClass) {
-                if (m_log_level >= QUsbInfo::logInfo)
+                if (m_log_level >= QUsb::logInfo)
                     qInfo("Found device");
 
                 rc = libusb_open(dev, &d->m_devHandle);
@@ -275,7 +275,7 @@ qint32 QUsbDevice::open()
                     m_id = tmp_id;
                     break;
                 }
-                else if (m_log_level >= QUsbInfo::logWarning) {
+                else if (m_log_level >= QUsb::logWarning) {
                     qWarning("Failed to open device: %s", libusb_strerror(static_cast<enum libusb_error>(rc)));
                 }
             }
@@ -287,14 +287,14 @@ qint32 QUsbDevice::open()
         return rc;
     }
 
-    if (m_log_level >= QUsbInfo::logInfo)
+    if (m_log_level >= QUsb::logInfo)
         qInfo("Device Open");
 
     if (libusb_kernel_driver_active(d->m_devHandle, m_config.interface) == 1) { // find out if kernel driver is attached
-        if (m_log_level >= QUsbInfo::logDebug)
+        if (m_log_level >= QUsb::logDebug)
             qDebug("Kernel Driver Active");
         if (libusb_detach_kernel_driver(d->m_devHandle, m_config.interface) == 0) // detach it
-            if (m_log_level >= QUsbInfo::logDebug)
+            if (m_log_level >= QUsb::logDebug)
                 qDebug("Kernel Driver Detached!");
     }
 
@@ -302,11 +302,11 @@ qint32 QUsbDevice::open()
     libusb_get_configuration(d->m_devHandle, &conf);
 
     if (conf != m_config.config) {
-        if (m_log_level >= QUsbInfo::logInfo)
+        if (m_log_level >= QUsb::logInfo)
             qInfo("Configuration needs to be changed");
         rc = libusb_set_configuration(d->m_devHandle, m_config.config);
         if (rc != 0) {
-            if (m_log_level >= QUsbInfo::logWarning)
+            if (m_log_level >= QUsb::logWarning)
                 qWarning("Cannot Set Configuration");
             handleUsbError(rc);
             return -3;
@@ -314,7 +314,7 @@ qint32 QUsbDevice::open()
     }
     rc = libusb_claim_interface(d->m_devHandle, m_config.interface);
     if (rc != 0) {
-        if (m_log_level >= QUsbInfo::logWarning)
+        if (m_log_level >= QUsb::logWarning)
             qWarning("Cannot Claim Interface");
         handleUsbError(rc);
         return -4;
@@ -357,7 +357,7 @@ void QUsbDevice::close()
 
     if (d->m_devHandle && m_connected) {
         // stop any further write attempts whilst we close down
-        if (m_log_level >= QUsbInfo::logInfo)
+        if (m_log_level >= QUsb::logInfo)
             qInfo("Closing USB connection");
 
         libusb_release_interface(d->m_devHandle, 0); // release the claimed interface
@@ -368,7 +368,7 @@ void QUsbDevice::close()
         m_connected = false;
         emit connectionChanged(m_connected);
     } else { // do not emit signal if device is already closed.
-        if (m_log_level >= QUsbInfo::logInfo)
+        if (m_log_level >= QUsb::logInfo)
             qInfo("USB connection already closed");
     }
 }
@@ -376,11 +376,11 @@ void QUsbDevice::close()
 /*!
     \brief Set the log \a level.
  */
-void QUsbDevice::setLogLevel(QUsbInfo::LogLevel level)
+void QUsbDevice::setLogLevel(QUsb::LogLevel level)
 {
     Q_D(QUsbDevice);
     m_log_level = level;
-    if (level >= QUsbInfo::logDebugAll)
+    if (level >= QUsb::logDebugAll)
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
     else
         libusb_set_debug(d->m_ctx, LIBUSB_LOG_LEVEL_NONE);
@@ -389,7 +389,7 @@ void QUsbDevice::setLogLevel(QUsbInfo::LogLevel level)
 /*!
     \brief Set the device \a id.
  */
-void QUsbDevice::setId(const QUsbInfo::Id &id)
+void QUsbDevice::setId(const QUsb::Id &id)
 {
     m_id = id;
 }
@@ -397,7 +397,7 @@ void QUsbDevice::setId(const QUsbInfo::Id &id)
 /*!
     \brief Set the device \a config.
  */
-void QUsbDevice::setConfig(const QUsbInfo::Config &config)
+void QUsbDevice::setConfig(const QUsb::Config &config)
 {
     m_config = config;
 }
@@ -413,7 +413,7 @@ void QUsbDevice::setTimeout(quint16 timeout)
 /*!
     \brief Returns the device \c id.
  */
-QUsbInfo::Id QUsbDevice::id() const
+QUsb::Id QUsbDevice::id() const
 {
     return m_id;
 }
@@ -421,7 +421,7 @@ QUsbInfo::Id QUsbDevice::id() const
 /*!
     \brief Returns the current \c config.
  */
-QUsbInfo::Config QUsbDevice::config() const
+QUsb::Config QUsbDevice::config() const
 {
     return m_config;
 }
@@ -461,7 +461,7 @@ quint16 QUsbDevice::timeout() const
 /*!
     \brief Returns the log \c level.
  */
-QUsbInfo::LogLevel QUsbDevice::logLevel() const
+QUsb::LogLevel QUsbDevice::logLevel() const
 {
     return m_log_level;
 }

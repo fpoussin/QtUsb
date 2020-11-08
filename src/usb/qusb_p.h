@@ -1,7 +1,7 @@
-#ifndef Q_USB_INFO_P_H
-#define Q_USB_INFO_P_H
+#ifndef Q_USB_P_H
+#define Q_USB_P_H
 
-#include "qusbinfo.h"
+#include "qusb.h"
 #include <private/qobject_p.h>
 #include <QTimer>
 
@@ -15,13 +15,13 @@
 
 QT_BEGIN_NAMESPACE
 
-class QUsbInfoPrivate : public QObjectPrivate
+class QUsbPrivate : public QObjectPrivate
 {
-    Q_DECLARE_PUBLIC(QUsbInfo)
+    Q_DECLARE_PUBLIC(QUsb)
 
 public:
-    QUsbInfoPrivate();
-    ~QUsbInfoPrivate();
+    QUsbPrivate();
+    ~QUsbPrivate();
 
     bool m_has_hotplug;
     libusb_context *m_ctx;

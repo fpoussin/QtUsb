@@ -66,7 +66,7 @@ qt += usb
 Include headers:  
 ```
 #include <QUsbDevice>
-#include <QUsbInfo>
+#include <QUsb>
 #include <QUsbEndpoint>
 ```
 
@@ -79,7 +79,7 @@ include(QtUsb/src/usb/files.pri)
 Include headers:  
 ```
 #include "qusbdevice.h"
-#include "qusbinfo.h"
+#include "qusb.h"
 #include "qusbendpoint.h"
 ```
 

@@ -2,7 +2,7 @@
 #define QUSBDEVICE_H
 
 #include "qusbglobal.h"
-#include "qusbinfo.h"
+#include "qusb.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QString>
@@ -52,9 +52,9 @@ public:
     };
     Q_ENUM(DeviceStatus)
 
-    Q_PROPERTY(QUsbInfo::LogLevel logLevel READ logLevel WRITE setLogLevel)
-    Q_PROPERTY(QUsbInfo::Id id READ id WRITE setId)
-    Q_PROPERTY(QUsbInfo::Config config READ config WRITE setConfig)
+    Q_PROPERTY(QUsb::LogLevel logLevel READ logLevel WRITE setLogLevel)
+    Q_PROPERTY(QUsb::Id id READ id WRITE setId)
+    Q_PROPERTY(QUsb::Config config READ config WRITE setConfig)
     Q_PROPERTY(quint16 pid READ pid)
     Q_PROPERTY(quint16 vid READ vid)
     Q_PROPERTY(quint16 timeout READ timeout WRITE setTimeout)
@@ -65,22 +65,22 @@ public:
     explicit QUsbDevice(QObject *parent = Q_NULLPTR);
     ~QUsbDevice();
 
-    void setLogLevel(QUsbInfo::LogLevel level);
-    void setId(const QUsbInfo::Id &id);
-    void setConfig(const QUsbInfo::Config &config);
+    void setLogLevel(QUsb::LogLevel level);
+    void setId(const QUsb::Id &id);
+    void setConfig(const QUsb::Config &config);
     void setTimeout(quint16 timeout);
     bool isConnected() const;
     quint16 pid() const;
     quint16 vid() const;
     quint16 timeout() const;
-    QUsbInfo::LogLevel logLevel() const;
+    QUsb::LogLevel logLevel() const;
     DeviceSpeed speed() const;
     QByteArray speedString() const;
     DeviceStatus status() const;
     QByteArray statusString() const;
 
-    QUsbInfo::Id id() const;
-    QUsbInfo::Config config() const;
+    QUsb::Id id() const;
+    QUsb::Config config() const;
 
 private:
     void handleUsbError(int error_code);
@@ -98,10 +98,10 @@ private:
     Q_DISABLE_COPY(QUsbDevice)
 
     quint16 m_timeout;
-    QUsbInfo::LogLevel m_log_level;
+    QUsb::LogLevel m_log_level;
     bool m_connected;
-    QUsbInfo::Id m_id;
-    QUsbInfo::Config m_config;
+    QUsb::Id m_id;
+    QUsb::Config m_config;
     DeviceSpeed m_spd;
     DeviceStatus m_status;
 };

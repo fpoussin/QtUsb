@@ -3,9 +3,9 @@
 UsbExample::UsbExample(QObject *parent)
     : QObject(parent)
 {
-    QObject::connect(&m_usb_info, &QUsbInfo::deviceInserted,
+    QObject::connect(&m_usb_info, &QUsb::deviceInserted,
                      this, &UsbExample::onDevInserted);
-    QObject::connect(&m_usb_info, &QUsbInfo::deviceRemoved,
+    QObject::connect(&m_usb_info, &QUsb::deviceRemoved,
                      this, &UsbExample::onDevRemoved);
 
     qInfo("Starting...");
@@ -17,12 +17,12 @@ UsbExample::~UsbExample()
     qInfo("Closing...");
 }
 
-void UsbExample::onDevInserted(QUsbInfo::Id id)
+void UsbExample::onDevInserted(QUsb::Id id)
 {
     qInfo("Device inserted: %04x:%04x", id.vid, id.pid);
 }
 
-void UsbExample::onDevRemoved(QUsbInfo::Id id)
+void UsbExample::onDevRemoved(QUsb::Id id)
 {
     qInfo("Device removed: %04x:%04x", id.vid, id.pid);
 }
