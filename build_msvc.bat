@@ -56,7 +56,7 @@ CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxilia
 SET PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
 
 WHERE /Q jom
-IF %errorlevel% NEQ 0 set BUILDTOOL=nmake
+IF %errorlevel% NEQ 0 SET BUILDTOOL=nmake
 
 git submodule update --init --recursive
 
@@ -73,9 +73,11 @@ IF NOT "%INSTALLPATH%"=="" (
 ) ELSE (
   %BUILDTOOL% install docs install_docs
 )
+if %errorlevel% NEQ 0 EXIT /b %errorlevel%
 
 %BUILDTOOL% sub-tests
 cd tests
 %BUILDTOOL% /I check TESTARGS="-o xunit.xml,xunitxml"
+if %errorlevel% NEQ 0 EXIT /b %errorlevel%
 
 endlocal
