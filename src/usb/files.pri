@@ -62,13 +62,13 @@ win32 {
     SOURCES += \
     $$LIBUSB_ROOT_REL/libusb/core.c \
     $$LIBUSB_ROOT_REL/libusb/descriptor.c \
+    $$LIBUSB_ROOT_REL/libusb/os/events_windows.c \
     $$LIBUSB_ROOT_REL/libusb/hotplug.c \
     $$LIBUSB_ROOT_REL/libusb/io.c \
-    $$LIBUSB_ROOT_REL/libusb/os/poll_windows.c \
     $$LIBUSB_ROOT_REL/libusb/strerror.c \
     $$LIBUSB_ROOT_REL/libusb/sync.c \
     $$LIBUSB_ROOT_REL/libusb/os/threads_windows.c \
-    $$LIBUSB_ROOT_REL/libusb/os/windows_nt_common.c \
+    $$LIBUSB_ROOT_REL/libusb/os/windows_common.c \
     $$LIBUSB_ROOT_REL/libusb/os/windows_usbdk.c \
     $$LIBUSB_ROOT_REL/libusb/os/windows_winusb.c
 
