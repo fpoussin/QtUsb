@@ -348,7 +348,7 @@ QUsb::IdList QUsb::devices()
 
         list.append(id);
 
-        cur_hid_dev = hid_devs->next;
+        cur_hid_dev = cur_hid_dev->next;
     }
     hid_free_enumeration(hid_devs);
 
