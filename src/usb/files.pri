@@ -72,7 +72,7 @@ win32 {
     $$LIBUSB_ROOT_REL/libusb/os/windows_usbdk.c \
     $$LIBUSB_ROOT_REL/libusb/os/windows_winusb.c
 
-    INCLUDEPATH += $$PWD/../deps/msvc $$LIBUSB_ROOT_REL $$LIBUSB_ROOT_REL/libusb $$HIDAPI_ROOT_REL/hidapi
+    INCLUDEPATH += $$PWD/../deps/msvc $$LIBUSB_ROOT_REL $$LIBUSB_ROOT_REL/libusb $$HIDAPI_ROOT_REL $$HIDAPI_ROOT_REL/hidapi
 }
 
 # We build libusb and hidapi ourselves instead of using a library
