@@ -9,28 +9,28 @@ matrix:
 environment:
   matrix:
   - arch: x64
-    qt: 5.14
+    qt: 5.15
     msvc: 2019
     mode: dynamic
     QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
   - arch: x64
-    qt: 5.14
+    qt: 5.15
     msvc: 2019
     mode: static
     QTDIR: C:\Qt\%qt%\msvc2017_64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
   - arch: x86
-    qt: 5.14
+    qt: 5.15
     msvc: 2019
     mode: dynamic
     QTDIR: C:\Qt\%qt%\msvc2017
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
   - arch: x86
-    qt: 5.14
+    qt: 5.15
     msvc: 2019
     mode: static
     QTDIR: C:\Qt\%qt%\msvc2017
