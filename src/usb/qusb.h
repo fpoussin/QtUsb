@@ -4,6 +4,11 @@
 #include "qusbglobal.h"
 #include <QList>
 
+// Stupid windows conflict
+#ifdef interface
+  #undef interface
+#endif
+
 QT_BEGIN_NAMESPACE
 
 class QUsbPrivate;
