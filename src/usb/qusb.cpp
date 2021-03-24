@@ -96,13 +96,13 @@ QUsbPrivate::~QUsbPrivate()
 */
 
 /*!
-    \fn void QUsb::deviceInserted(QUsbDevice::IdList list)
+    \fn void QUsb::deviceInserted(Id id)
 
     This is signal is emited when one or more new devices are detected, providing a \a list.
 */
 
 /*!
-    \fn void QUsb::deviceRemoved(QUsbDevice::IdList list)
+    \fn void QUsb::deviceRemoved(Id id)
 
     This is signal is emited when one or more new devices are removed, providing a \a list.
 */
@@ -124,8 +124,6 @@ QUsbPrivate::~QUsbPrivate()
                                              */
 
 /*!
-    \property QUsb::config
-    \property QUsb::id
     \property QUsb::logLevel
     \property QUsbDevice::pid
     \property QUsbDevice::vid
@@ -134,11 +132,6 @@ QUsbPrivate::~QUsbPrivate()
 
     \brief Various properties.
                                                      */
-
-/*!
-    \typedef QUsbDevice::Endpoint
-    \brief An endpoint ID.
- */
 
 /*!
     \typedef QUsb::ConfigList

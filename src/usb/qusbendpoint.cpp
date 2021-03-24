@@ -403,13 +403,8 @@ QUsb::LogLevel QUsbEndpointPrivate::logLevel()
  */
 
 /*!
-    \property QUsbEndpoint::endpointIn
-    \brief IN endpoint.
- */
-
-/*!
-    \property QUsbEndpoint::endpointOut
-    \brief OUT endpoint.
+    \property QUsbEndpoint::endpoint
+    \brief endpoint.
  */
 
 /*!
@@ -437,7 +432,7 @@ QUsbEndpoint::QUsbEndpoint(QUsbDevice *dev, QUsbEndpoint::Type type, quint8 ep)
 }
 
 /*!
-  \brief Will cancel all transfers on exit.
+    \brief Will cancel all transfers on exit.
  */
 QUsbEndpoint::~QUsbEndpoint()
 {
