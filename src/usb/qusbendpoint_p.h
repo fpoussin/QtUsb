@@ -5,10 +5,12 @@
 #include <QMutexLocker>
 #include <private/qiodevice_p.h>
 
-#ifdef Q_OS_UNIX
-#include <libusb-1.0/libusb.h>
+#if defined(Q_OS_MACOS)
+  #include <libusb.h>
+#elif defined(Q_OS_UNIX)
+  #include <libusb-1.0/libusb.h>
 #else
-#include <libusb/libusb.h>
+  #include <libusb/libusb.h>
 #endif
 
 QT_BEGIN_NAMESPACE
