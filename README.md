@@ -85,7 +85,7 @@ Include headers:
 
 QCH files can be found with each release, they are also included in ubuntu packages.  
 You have to manually install them in Qt Creator on Windows.  
-Online documentation can be found here: https://fpoussin.github.io/doxygen/qtusb/0.6.x/  
+Online documentation can be found here: https://fpoussin.github.io/doxygen/qtusb/0.7.x/  
 
 ## Downloads
 
