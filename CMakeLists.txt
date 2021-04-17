@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 
 include(.cmake.conf)
 project(QtUsb
-    VERSION         0.7.0
+    VERSION         6.0.3 # FIXME: this needs to match host's Qt version
     DESCRIPTION     "A cross-platform USB Module for Qt."
     HOMEPAGE_URL    "https://github.com/fpoussin/QtUsb"
     LANGUAGES       CXX C
