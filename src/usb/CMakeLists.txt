@@ -1,0 +1,141 @@
+# Generated from usb.pro.
+
+#####################################################################
+## Usb Module:
+#####################################################################
+
+option(QTUSB_STATIC "Build as static library" OFF)
+set(QTUSB_AS_MODULE OFF)
+set(QTUSB_AS_STATIC_MODULE OFF)
+
+qt_internal_add_module(Usb
+    SOURCES
+        qhiddevice.cpp qhiddevice.h qhiddevice_p.h
+        qusb.cpp qusb.h qusb_p.h
+        qusbdevice.cpp qusbdevice.h qusbdevice_p.h
+        qusbendpoint.cpp qusbendpoint.h qusbendpoint_p.h
+    DEFINES
+        QT_BUILD_USB_LIB
+    INCLUDE_DIRECTORIES
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    LIBRARIES
+        Qt::CorePrivate
+    PUBLIC_LIBRARIES
+        Qt::Core
+    PRIVATE_MODULE_INTERFACE
+        Qt::CorePrivate
+)
+
+if(QTUSB_STATIC)
+  message(STATUS "Build as static Qt module")
+  qt_internal_extend_target(Usb STATIC
+      DEFINES
+          QTUSB_STATIC)
+  set(QTUSB_AS_STATIC_MODULE ON)
+else()
+  message(STATUS "Build as Qt module")
+  set(QTUSB_AS_MODULE ON)
+endif()
+
+set(QUSBGLOBAL_S_CONT "\
+#define Q_USB_EXPORT")
+
+set(QUSBGLOBAL_M_CONT "\
+#include <QtCore>\n\
+\n\
+#if !defined(QT_STATIC)\n\
+  #if defined(QT_BUILD_USB_LIB)\n\
+    #define Q_USB_EXPORT Q_DECL_EXPORT\n\
+  #else\n\
+    #define Q_USB_EXPORT Q_DECL_IMPORT\n\
+  #endif\n\
+#else\n\
+  #define Q_USB_EXPORT\n\
+#endif")
+
+if(QTUSB_AS_MODULE)
+  set(QUSBGLOBAL_CONT ${QUSBGLOBAL_M_CONT})
+else()
+  set(QUSBGLOBAL_CONT ${QUSBGLOBAL_S_CONT})
+endif()
+configure_file(qusbglobal.h.in ${CMAKE_CURRENT_SOURCE_DIR}/qusbglobal.h)
+qt_internal_extend_target(Usb
+    SOURCES
+        qusbglobal.h)
+
+## Scopes:
+#####################################################################
+
+qt_internal_extend_target(Usb CONDITION WIN32
+    SOURCES
+        ../../hidapi/windows/hid.c
+        ../../libusb/libusb/core.c
+        ../../libusb/libusb/descriptor.c
+        ../../libusb/libusb/hotplug.c
+        ../../libusb/libusb/io.c
+        ../../libusb/libusb/os/events_windows.c
+        ../../libusb/libusb/os/threads_windows.c
+        ../../libusb/libusb/os/windows_common.c
+        ../../libusb/libusb/os/windows_usbdk.c
+        ../../libusb/libusb/os/windows_winusb.c
+        ../../libusb/libusb/strerror.c
+        ../../libusb/libusb/sync.c
+    INCLUDE_DIRECTORIES
+        ../../hidapi
+        ../../hidapi/hidapi
+        ../../libusb
+        ../../libusb/libusb
+        ../deps/msvc
+    LIBRARIES
+        Advapi32.lib
+        Setupapi.lib
+)
+
+qt_internal_extend_target(Usb CONDITION ANDROID
+    SOURCES
+        ../../hidapi/libusb/hid.c
+        ../../libusb/libusb/core.c
+        ../../libusb/libusb/descriptor.c
+        ../../libusb/libusb/hotplug.c
+        ../../libusb/libusb/io.c
+        ../../libusb/libusb/os/linux_netlink.c
+        ../../libusb/libusb/os/linux_usbfs.c
+        ../../libusb/libusb/os/poll_posix.c
+        ../../libusb/libusb/os/threads_posix.c
+        ../../libusb/libusb/strerror.c
+        ../../libusb/libusb/sync.c
+    INCLUDE_DIRECTORIES
+        ../../hidapi/hidapi
+        ../../libusb/android
+        ../../libusb/libusb
+        ../../libusb/libusb/os
+        libusb-1.0
+)
+
+# FIXME: files.pri does the following for ANDROID scope:
+#   # We have to copy the header for includes to work in our library
+#   system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h $$PWD/libusb-1.0/")
+
+find_package(PkgConfig QUIET)
+pkg_check_modules(Libusb        libusb-1.0    IMPORTED_TARGET)
+pkg_check_modules(Hidapi        hidapi        IMPORTED_TARGET)
+pkg_check_modules(HidapiLibusb  hidapi-libusb IMPORTED_TARGET)
+
+qt_internal_extend_target(Usb CONDITION UNIX
+    LIBRARIES
+        PkgConfig::Libusb
+)
+
+qt_internal_extend_target(Usb CONDITION MACOS
+    LIBRARIES
+        PkgConfig::Hidapi
+)
+
+qt_internal_extend_target(Usb CONDITION UNIX AND NOT MACOS
+    LIBRARIES
+        PkgConfig::HidapiLibusb
+)
+
+qt_internal_add_docs(Usb
+    doc/qtusb.qdocconf
+)
