@@ -8,36 +8,50 @@ option(QTUSB_STATIC "Build as static library" OFF)
 set(QTUSB_AS_MODULE OFF)
 set(QTUSB_AS_STATIC_MODULE OFF)
 
-qt_internal_add_module(Usb
-    SOURCES
-        qhiddevice.cpp qhiddevice.h qhiddevice_p.h
-        qusb.cpp qusb.h qusb_p.h
-        qusbdevice.cpp qusbdevice.h qusbdevice_p.h
-        qusbendpoint.cpp qusbendpoint.h qusbendpoint_p.h
-    DEFINES
-        QT_BUILD_USB_LIB
-    INCLUDE_DIRECTORIES
-        ${CMAKE_CURRENT_SOURCE_DIR}
-    LIBRARIES
-        Qt::CorePrivate
-    PUBLIC_LIBRARIES
-        Qt::Core
-    PRIVATE_MODULE_INTERFACE
-        Qt::CorePrivate
-)
+set(QTUSB_SOURCES qhiddevice.cpp qhiddevice.h qhiddevice_p.h
+qusb.cpp qusb.h qusb_p.h
+qusbdevice.cpp qusbdevice.h qusbdevice_p.h
+qusbendpoint.cpp qusbendpoint.h qusbendpoint_p.h)
 
 if(QTUSB_STATIC)
   message(STATUS "Build as static Qt module")
-  qt_internal_extend_target(Usb STATIC
-      DEFINES
-          QTUSB_STATIC)
   set(QTUSB_AS_STATIC_MODULE ON)
+  qt_internal_add_module(Usb
+      STATIC
+      SOURCES
+          ${QTUSB_SOURCES}
+      DEFINES
+          QT_BUILD_USB_LIB QTUSB_STATIC
+      INCLUDE_DIRECTORIES
+          ${CMAKE_CURRENT_SOURCE_DIR}
+      LIBRARIES
+          Qt::CorePrivate
+      PUBLIC_LIBRARIES
+          Qt::Core
+      PRIVATE_MODULE_INTERFACE
+          Qt::CorePrivate
+  )
 else()
   message(STATUS "Build as Qt module")
   set(QTUSB_AS_MODULE ON)
+  qt_internal_add_module(Usb
+      SOURCES
+          ${QTUSB_SOURCES}
+      DEFINES
+          QT_BUILD_USB_LIB
+      INCLUDE_DIRECTORIES
+          ${CMAKE_CURRENT_SOURCE_DIR}
+      LIBRARIES
+          Qt::CorePrivate
+      PUBLIC_LIBRARIES
+          Qt::Core
+      PRIVATE_MODULE_INTERFACE
+          Qt::CorePrivate
+  )
 endif()
 
 set(QUSBGLOBAL_S_CONT "\
+#include <QtCore>\n\
 #define Q_USB_EXPORT")
 
 set(QUSBGLOBAL_M_CONT "\
