@@ -87,11 +87,11 @@ Q_SIGNALS:
     void deviceInserted(Id id);
     void deviceRemoved(Id id);
 
-public slots:
+public Q_SLOTS:
     bool addDevice(const Id &id);
     bool removeDevice(const Id &id);
 
-protected slots:
+protected Q_SLOTS:
     void monitorDevices(const IdList &list);
     void checkDevices();
 

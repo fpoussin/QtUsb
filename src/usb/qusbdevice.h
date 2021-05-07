@@ -89,7 +89,7 @@ Q_SIGNALS:
     void statusChanged(QUsbDevice::DeviceStatus status);
     void connectionChanged(bool connected);
 
-public slots:
+public Q_SLOTS:
     qint32 open();
     void close();
 
