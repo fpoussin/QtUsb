@@ -130,26 +130,18 @@ qt_internal_extend_target(Usb CONDITION ANDROID
 #   # We have to copy the header for includes to work in our library
 #   system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h $$PWD/libusb-1.0/")
 
-find_package(PkgConfig QUIET)
-pkg_check_modules(Libusb        libusb-1.0    IMPORTED_TARGET)
-pkg_check_modules(Hidapi        hidapi        IMPORTED_TARGET)
-pkg_check_modules(HidapiLibusb  hidapi-libusb IMPORTED_TARGET)
+if(UNIX)
+    find_package(LibUSB1 REQUIRED)
+    if(MACOS)
+        find_package(HIDAPI REQUIRED)
+    else()
+        # NOTE: libusb already found earlier
+        find_package(HIDAPI REQUIRED COMPONENTS libusb)
+    endif()
+endif()
 
-qt_internal_extend_target(Usb CONDITION UNIX
-    LIBRARIES
-        PkgConfig::Libusb
-)
+qt_internal_extend_target(Usb CONDITION UNIX               LIBRARIES LibUSB1::LibUSB1)
+qt_internal_extend_target(Usb CONDITION MACOS              LIBRARIES HIDAPI::hidapi)
+qt_internal_extend_target(Usb CONDITION UNIX AND NOT MACOS LIBRARIES HIDAPI::hidapi-libusb)
 
-qt_internal_extend_target(Usb CONDITION MACOS
-    LIBRARIES
-        PkgConfig::Hidapi
-)
-
-qt_internal_extend_target(Usb CONDITION UNIX AND NOT MACOS
-    LIBRARIES
-        PkgConfig::HidapiLibusb
-)
-
-qt_internal_add_docs(Usb
-    doc/qtusb.qdocconf
-)
+qt_internal_add_docs(Usb doc/qtusb.qdocconf)
