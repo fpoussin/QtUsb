@@ -164,6 +164,10 @@ if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
 
   qt_internal_add_docs(Usb doc/qtusb.qdocconf)
 else()
+  if(NOT DEFINED UNIX)
+    # This is obviously not defined on Windows, so we define it to hard zero if not present
+    set(UNIX OFF)
+  endif()
   target_link_libraries(
     ${QTUSB_LIB_NAME} PRIVATE
     $<$<BOOL:${UNIX}>:LibUSB1::LibUSB1>
