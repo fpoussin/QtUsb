@@ -107,33 +107,43 @@ if(UNIX)
   endif()
 endif()
 
-if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
-  qt_internal_extend_target(Usb CONDITION WIN32
-      SOURCES
-          ../../hidapi/windows/hid.c
-          ../../libusb/libusb/core.c
-          ../../libusb/libusb/descriptor.c
-          ../../libusb/libusb/hotplug.c
-          ../../libusb/libusb/io.c
-          ../../libusb/libusb/os/events_windows.c
-          ../../libusb/libusb/os/threads_windows.c
-          ../../libusb/libusb/os/windows_common.c
-          ../../libusb/libusb/os/windows_usbdk.c
-          ../../libusb/libusb/os/windows_winusb.c
-          ../../libusb/libusb/strerror.c
-          ../../libusb/libusb/sync.c
-      INCLUDE_DIRECTORIES
-          ../../hidapi
-          ../../hidapi/hidapi
-          ../../libusb
-          ../../libusb/libusb
-          ../deps/msvc
-      LIBRARIES
-          Advapi32.lib
-          Setupapi.lib
-  )
+set(QTUSB_EXTRA_WIN32_SOURCES
+  ../../hidapi/windows/hid.c
+  ../../libusb/libusb/core.c
+  ../../libusb/libusb/descriptor.c
+  ../../libusb/libusb/hotplug.c
+  ../../libusb/libusb/io.c
+  ../../libusb/libusb/os/events_windows.c
+  ../../libusb/libusb/os/threads_windows.c
+  ../../libusb/libusb/os/windows_common.c
+  ../../libusb/libusb/os/windows_usbdk.c
+  ../../libusb/libusb/os/windows_winusb.c
+  ../../libusb/libusb/strerror.c
+  ../../libusb/libusb/sync.c
+)
 
-  qt_internal_extend_target(Usb CONDITION ANDROID
+set(QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES
+  ../../hidapi
+  ../../hidapi/hidapi
+  ../../libusb
+  ../../libusb/libusb
+  ../deps/msvc
+)
+
+set(QTUSB_EXTRA_WIN32_LIBRARIES
+  Advapi32.lib
+  Setupapi.lib
+)
+
+if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
+  qt_internal_extend_target(Usb
+      CONDITION           WIN32
+      SOURCES             ${QTUSB_WIN32_EXTRA_SOURCES}
+      INCLUDE_DIRECTORIES ${QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES}
+      LIBRARIES           ${QTUSB_EXTRA_WIN32_LIBRARIES})
+
+  qt_internal_extend_target(Usb
+      CONDITION ANDROID
       SOURCES
           ../../hidapi/libusb/hid.c
           ../../libusb/libusb/core.c
@@ -177,4 +187,12 @@ else()
     $<$<BOOL:${MACOS}>:HIDAPI::hidapi>
     $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:HIDAPI::hidapi-libusb>
   )
+
+  if(WIN32) # Poor man's implementation of qt_internal_extend_target()
+    target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_WIN32_LIBRARIES})
+    target_sources(${QTUSB_LIB_NAME}                     ${QTUSB_EXTRA_WIN32_SOURCES})
+    target_include_directories(${QTUSB_LIB_NAME} PRIVATE ${QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES})
+  endif()
+
+  # FIXME: missing ANDROID scope
 endif()
