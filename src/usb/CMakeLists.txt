@@ -48,8 +48,6 @@ set(QTUSB_PRIVATE_HEADERS qhiddevice_p.h qusb_p.h qusbdevice_p.h qusbendpoint_p.
 
 # Define the actual targets for building
 if(NOT QTUSB_MODULE)
-  set(CMAKE_AUTOMOC ON)
-
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static library")
     set(QTUSB_AS_STATIC_LIB ON)
@@ -65,6 +63,9 @@ if(NOT QTUSB_MODULE)
   target_include_directories(${QTUSB_LIB_NAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
   target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE Qt::CorePrivate)
   target_link_libraries(${QTUSB_LIB_NAME}      PUBLIC  Qt::Core)
+
+  qt_wrap_cpp(QTUSB_GENERATED_FILES ${QTUSB_PUBLIC_HEADERS} TARGET ${QTUSB_LIB_NAME})
+  target_sources(${QTUSB_LIB_NAME} PRIVATE ${QTUSB_GENERATED_FILES})
 
   install(TARGETS ${QTUSB_LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
   install(FILES ${QTUSB_PUBLIC_HEADERS} DESTINATION include/${QTUSB_LIB_NAME})
@@ -99,14 +100,9 @@ endif()
 ## Scopes:
 #####################################################################
 
-if(UNIX)
+if(UNIX AND NOT MACOS)
   find_package(LibUSB1 REQUIRED)
-  if(MACOS)
-    find_package(HIDAPI REQUIRED)
-  else()
-    # NOTE: libusb already found earlier
-    find_package(HIDAPI REQUIRED COMPONENTS libusb)
-  endif()
+  find_package(HIDAPI REQUIRED COMPONENTS libusb)
 endif()
 
 set(QTUSB_EXTRA_WIN32_SOURCES
@@ -137,42 +133,75 @@ set(QTUSB_EXTRA_WIN32_LIBRARIES
   Setupapi.lib
 )
 
+set(QTUSB_EXTRA_MACOS_SOURCES
+  ../../libusb/libusb/core.c
+  ../../libusb/libusb/descriptor.c
+  ../../libusb/libusb/hotplug.c
+  ../../libusb/libusb/io.c
+  ../../libusb/libusb/os/events_posix.c
+  ../../libusb/libusb/os/threads_posix.c
+  ../../libusb/libusb/os/darwin_usb.c
+  ../../libusb/libusb/strerror.c
+  ../../libusb/libusb/sync.c
+)
+
+set(QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES
+  ../../hidapi
+  ../../hidapi/hidapi
+  ../../libusb
+  ../../libusb/libusb
+)
+
+set(QTUSB_EXTRA_MACOS_LIBRARIES)
+
+set(QTUSB_EXTRA_ANDROID_SOURCES
+  ../../hidapi/libusb/hid.c
+  ../../libusb/libusb/core.c
+  ../../libusb/libusb/descriptor.c
+  ../../libusb/libusb/hotplug.c
+  ../../libusb/libusb/io.c
+  ../../libusb/libusb/os/linux_netlink.c
+  ../../libusb/libusb/os/linux_usbfs.c
+  ../../libusb/libusb/os/poll_posix.c
+  ../../libusb/libusb/os/threads_posix.c
+  ../../libusb/libusb/strerror.c
+  ../../libusb/libusb/sync.c
+)
+
+set(QTUSB_EXTRA_ANDROID_INCLUDE_DIRECTORIES
+  ../../hidapi/hidapi
+  ../../libusb/android
+  ../../libusb/libusb
+  ../../libusb/libusb/os
+  libusb-1.0
+)
+
+set(QTUSB_EXTRA_ANDROID_LIBRARIES)
+
 if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
   qt_internal_extend_target(Usb
       CONDITION           WIN32
-      SOURCES             ${QTUSB_WIN32_EXTRA_SOURCES}
+      SOURCES             ${QTUSB_EXTRA_WIN32_SOURCES}
       INCLUDE_DIRECTORIES ${QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES}
       LIBRARIES           ${QTUSB_EXTRA_WIN32_LIBRARIES})
 
   qt_internal_extend_target(Usb
-      CONDITION ANDROID
-      SOURCES
-          ../../hidapi/libusb/hid.c
-          ../../libusb/libusb/core.c
-          ../../libusb/libusb/descriptor.c
-          ../../libusb/libusb/hotplug.c
-          ../../libusb/libusb/io.c
-          ../../libusb/libusb/os/linux_netlink.c
-          ../../libusb/libusb/os/linux_usbfs.c
-          ../../libusb/libusb/os/poll_posix.c
-          ../../libusb/libusb/os/threads_posix.c
-          ../../libusb/libusb/strerror.c
-          ../../libusb/libusb/sync.c
-      INCLUDE_DIRECTORIES
-          ../../hidapi/hidapi
-          ../../libusb/android
-          ../../libusb/libusb
-          ../../libusb/libusb/os
-          libusb-1.0
-  )
+      CONDITION           MACOS
+      SOURCES             ${QTUSB_EXTRA_MACOS_SOURCES}
+      INCLUDE_DIRECTORIES ${QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES}
+      LIBRARIES           ${QTUSB_EXTRA_MACOS_LIBRARIES})
+
+  qt_internal_extend_target(Usb
+      CONDITION           ANDROID
+      SOURCES             ${QTUSB_EXTRA_ANDROID_SOURCES}
+      INCLUDE_DIRECTORIES ${QTUSB_EXTRA_ANDROID_INCLUDE_DIRECTORIES}
+      LIBRARIES           ${QTUSB_EXTRA_ANDROID_LIBRARIES})
 
   # FIXME: files.pri does the following for ANDROID scope:
   #   # We have to copy the header for includes to work in our library
   #   system("mkdir -p $$PWD/libusb-1.0 && cp $$LIBUSB_ROOT_REL/libusb/libusb.h $$PWD/libusb-1.0/")
 
-  qt_internal_extend_target(Usb CONDITION UNIX               LIBRARIES LibUSB1::LibUSB1)
-  qt_internal_extend_target(Usb CONDITION MACOS              LIBRARIES HIDAPI::hidapi)
-  qt_internal_extend_target(Usb CONDITION UNIX AND NOT MACOS LIBRARIES HIDAPI::hidapi-libusb)
+  qt_internal_extend_target(Usb CONDITION UNIX AND NOT MACOS LIBRARIES LibUSB1::LibUSB1 HIDAPI::hidapi-libusb)
 
   qt_internal_add_docs(Usb doc/qtusb.qdocconf)
 else()
@@ -185,16 +214,29 @@ else()
 
   target_link_libraries(
     ${QTUSB_LIB_NAME} PRIVATE
-    $<$<BOOL:${IS_UNIX}>:LibUSB1::LibUSB1>
-    $<$<BOOL:${MACOS}>:HIDAPI::hidapi>
+    $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:LibUSB1::LibUSB1>
     $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:HIDAPI::hidapi-libusb>
   )
 
-  if(WIN32) # Poor man's implementation of qt_internal_extend_target()
+  # What follows is a poor man's implementation of qt_internal_extend_target():
+
+  if(WIN32)
     target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_WIN32_LIBRARIES})
     target_sources(${QTUSB_LIB_NAME}             PRIVATE ${QTUSB_EXTRA_WIN32_SOURCES})
     target_include_directories(${QTUSB_LIB_NAME} PRIVATE ${QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES})
   endif()
 
-  # FIXME: missing ANDROID scope
+  if(MACOS)
+    target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_MACOS_LIBRARIES})
+    target_sources(${QTUSB_LIB_NAME}             PRIVATE ${QTUSB_EXTRA_MACOS_SOURCES})
+    target_include_directories(${QTUSB_LIB_NAME} PRIVATE ${QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES})
+  endif()
+
+  if(ANDROID)
+    target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_ANDROID_LIBRARIES})
+    target_sources(${QTUSB_LIB_NAME}             PRIVATE ${QTUSB_EXTRA_ANDROID_SOURCES})
+    target_include_directories(${QTUSB_LIB_NAME} PRIVATE ${QTUSB_EXTRA_ANDROID_INCLUDE_DIRECTORIES})
+
+    # FIXME: ANDROID scope incomplete (missing copy command)
+  endif()
 endif()
