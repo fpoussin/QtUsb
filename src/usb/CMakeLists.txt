@@ -4,6 +4,7 @@
 ## Usb Module:
 #####################################################################
 
+# User-adjustable options:
 option(QTUSB_MODULE "Build as Qt module rather than a conventional library" ON)
 
 # These variables are determined automatically from the options above:
@@ -12,12 +13,40 @@ set(QTUSB_AS_STATIC_MODULE  OFF)
 set(QTUSB_AS_DYNAMIC_LIB    OFF)
 set(QTUSB_AS_STATIC_LIB     OFF)
 
+# Target name in case library option is selected
 set(QTUSB_LIB_NAME Qt${QT_DEFAULT_MAJOR_VERSION}Usb)
 
+# Auto-generate DLL export header
+set(QUSBGLOBAL_S_CONT "\
+#include <QtCore>\n\
+#define Q_USB_EXPORT")
+
+set(QUSBGLOBAL_M_CONT "\
+#include <QtCore>\n\
+\n\
+#if !defined(QT_STATIC)\n\
+  #if defined(QT_BUILD_USB_LIB)\n\
+    #define Q_USB_EXPORT Q_DECL_EXPORT\n\
+  #else\n\
+    #define Q_USB_EXPORT Q_DECL_IMPORT\n\
+  #endif\n\
+#else\n\
+  #define Q_USB_EXPORT\n\
+#endif")
+
+if(QTUSB_AS_DYNAMIC_MODULE OR QTUSB_AS_DYNAMIC_LIB)
+  set(QUSBGLOBAL_CONT ${QUSBGLOBAL_M_CONT})
+else()
+  set(QUSBGLOBAL_CONT ${QUSBGLOBAL_S_CONT})
+endif()
+configure_file(qusbglobal.h.in ${CMAKE_CURRENT_SOURCE_DIR}/qusbglobal.h)
+
+# These variables hold all files :
 set(QTUSB_SOURCES         qhiddevice.cpp qusb.cpp qusbdevice.cpp qusbendpoint.cpp)
-set(QTUSB_PUBLIC_HEADERS  qhiddevice.h qusb.h qusbdevice.h qusbendpoint.h)
+set(QTUSB_PUBLIC_HEADERS  qhiddevice.h qusb.h qusbdevice.h qusbendpoint.h qusbglobal.h)
 set(QTUSB_PRIVATE_HEADERS qhiddevice_p.h qusb_p.h qusbdevice_p.h qusbendpoint_p.h)
 
+# Define the actual targets for building
 if(NOT QTUSB_MODULE)
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static library")
@@ -35,10 +64,7 @@ if(NOT QTUSB_MODULE)
   target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE Qt::CorePrivate)
   target_link_libraries(${QTUSB_LIB_NAME}      PUBLIC  Qt::Core)
 
-  install(
-    TARGETS ${QTUSB_LIB_NAME}
-    LIBRARY       DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  )
+  install(TARGETS ${QTUSB_LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
   install(FILES ${QTUSB_PUBLIC_HEADERS} DESTINATION include/${QTUSB_LIB_NAME})
 else()
   if(NOT BUILD_SHARED_LIBS)
@@ -67,35 +93,6 @@ else()
   endif()
 endif()
 
-set(QUSBGLOBAL_S_CONT "\
-#include <QtCore>\n\
-#define Q_USB_EXPORT")
-
-set(QUSBGLOBAL_M_CONT "\
-#include <QtCore>\n\
-\n\
-#if !defined(QT_STATIC)\n\
-  #if defined(QT_BUILD_USB_LIB)\n\
-    #define Q_USB_EXPORT Q_DECL_EXPORT\n\
-  #else\n\
-    #define Q_USB_EXPORT Q_DECL_IMPORT\n\
-  #endif\n\
-#else\n\
-  #define Q_USB_EXPORT\n\
-#endif")
-
-if(QTUSB_AS_DYNAMIC_MODULE OR QTUSB_AS_DYNAMIC_LIB)
-  set(QUSBGLOBAL_CONT ${QUSBGLOBAL_M_CONT})
-else()
-  set(QUSBGLOBAL_CONT ${QUSBGLOBAL_S_CONT})
-endif()
-configure_file(qusbglobal.h.in ${CMAKE_CURRENT_SOURCE_DIR}/qusbglobal.h)
-
-if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
-  qt_internal_extend_target(Usb SOURCES qusbglobal.h)
-else()
-  target_sources(${QTUSB_LIB_NAME} PUBLIC qusbglobal.h)
-endif()
 
 ## Scopes:
 #####################################################################
