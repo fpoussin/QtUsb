@@ -48,6 +48,8 @@ set(QTUSB_PRIVATE_HEADERS qhiddevice_p.h qusb_p.h qusbdevice_p.h qusbendpoint_p.
 
 # Define the actual targets for building
 if(NOT QTUSB_MODULE)
+  set(CMAKE_AUTOMOC ON)
+
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static library")
     set(QTUSB_AS_STATIC_LIB ON)
