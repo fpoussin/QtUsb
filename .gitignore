@@ -17,3 +17,4 @@ qtusb*
 libqt5usb*
 src/usb/qusbglobal.h
 
+venv
