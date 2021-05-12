@@ -190,7 +190,7 @@ else()
 
   if(WIN32) # Poor man's implementation of qt_internal_extend_target()
     target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_WIN32_LIBRARIES})
-    target_sources(${QTUSB_LIB_NAME}                     ${QTUSB_EXTRA_WIN32_SOURCES})
+    target_sources(${QTUSB_LIB_NAME}             PRIVATE ${QTUSB_EXTRA_WIN32_SOURCES})
     target_include_directories(${QTUSB_LIB_NAME} PRIVATE ${QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES})
   endif()
 
