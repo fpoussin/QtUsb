@@ -34,14 +34,14 @@ set(QUSBGLOBAL_M_CONT "\
   #define Q_USB_EXPORT\n\
 #endif")
 
-if(QTUSB_AS_DYNAMIC_MODULE OR QTUSB_AS_DYNAMIC_LIB)
+if(BUILD_SHARED_LIBS)
   set(QUSBGLOBAL_CONT ${QUSBGLOBAL_M_CONT})
 else()
   set(QUSBGLOBAL_CONT ${QUSBGLOBAL_S_CONT})
 endif()
 configure_file(qusbglobal.h.in ${CMAKE_CURRENT_SOURCE_DIR}/qusbglobal.h)
 
-# These variables hold all files :
+# These variables hold all files:
 set(QTUSB_SOURCES         qhiddevice.cpp qusb.cpp qusbdevice.cpp qusbendpoint.cpp)
 set(QTUSB_PUBLIC_HEADERS  qhiddevice.h qusb.h qusbdevice.h qusbendpoint.h qusbglobal.h)
 set(QTUSB_PRIVATE_HEADERS qhiddevice_p.h qusb_p.h qusbdevice_p.h qusbendpoint_p.h)
