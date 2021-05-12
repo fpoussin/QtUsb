@@ -14,7 +14,7 @@ set(QTUSB_AS_DYNAMIC_LIB    OFF)
 set(QTUSB_AS_STATIC_LIB     OFF)
 
 # Target name in case library option is selected
-set(QTUSB_LIB_NAME Qt${QT_DEFAULT_MAJOR_VERSION}Usb)
+set(QTUSB_LIB_NAME ExtUsb)
 
 # Auto-generate DLL export header
 set(QUSBGLOBAL_S_CONT "\
