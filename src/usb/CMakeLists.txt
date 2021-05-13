@@ -154,6 +154,7 @@ set(QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES
 
 set(QTUSB_EXTRA_MACOS_LIBRARIES
   "-framework CoreFoundation"
+  "-framework IOKit"
 )
 
 set(QTUSB_EXTRA_ANDROID_SOURCES
