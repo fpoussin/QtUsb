@@ -149,6 +149,7 @@ set(QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES
   ../../hidapi/hidapi
   ../../libusb
   ../../libusb/libusb
+  ../../libusb/Xcode
 )
 
 set(QTUSB_EXTRA_MACOS_LIBRARIES)
