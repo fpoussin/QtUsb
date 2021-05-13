@@ -152,7 +152,9 @@ set(QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES
   ../../libusb/Xcode
 )
 
-set(QTUSB_EXTRA_MACOS_LIBRARIES)
+set(QTUSB_EXTRA_MACOS_LIBRARIES
+  "-framework CoreFoundation"
+)
 
 set(QTUSB_EXTRA_ANDROID_SOURCES
   ../../hidapi/libusb/hid.c
