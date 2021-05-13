@@ -134,6 +134,7 @@ set(QTUSB_EXTRA_WIN32_LIBRARIES
 )
 
 set(QTUSB_EXTRA_MACOS_SOURCES
+  ../../hidapi/mac/hid.c
   ../../libusb/libusb/core.c
   ../../libusb/libusb/descriptor.c
   ../../libusb/libusb/hotplug.c
@@ -155,6 +156,7 @@ set(QTUSB_EXTRA_MACOS_INCLUDE_DIRECTORIES
 set(QTUSB_EXTRA_MACOS_LIBRARIES
   "-framework CoreFoundation"
   "-framework IOKit"
+  "-framework AppKit"
 )
 
 set(QTUSB_EXTRA_ANDROID_SOURCES
