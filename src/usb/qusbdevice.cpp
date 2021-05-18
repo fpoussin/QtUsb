@@ -7,6 +7,12 @@
     if (m_log_level >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
+#if LIBUSB_API_VERSION >= 0x01000106
+    LIBUSB_SET_LOGLEVEL(ctx, loglevel) libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, loglevel)
+#else
+    LIBUSB_SET_LOGLEVEL(ctx, loglevel) libusb_set_debug(ctx, loglevel)
+#endif
+
 static libusb_hotplug_callback_handle callback_handle;
 
 static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
@@ -381,9 +387,9 @@ void QUsbDevice::setLogLevel(QUsb::LogLevel level)
     Q_D(QUsbDevice);
     m_log_level = level;
     if (level >= QUsb::logDebugAll)
-        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
+        LIBUSB_SET_LOGLEVEL(d->m_ctx, LIBUSB_LOG_LEVEL_DEBUG);
     else
-        libusb_set_option(d->m_ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE);
+        LIBUSB_SET_LOGLEVEL(d->m_ctx, LIBUSB_LOG_LEVEL_NONE);
 }
 
 /*!
