@@ -21,8 +21,11 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
     DbgPrintCB(endpoint);
 
     libusb_transfer_status s = transfer->status;
-    const int sent = transfer->actual_length;
+    int sent = transfer->actual_length;
     const int total = transfer->length;
+    if (transfer->type == LIBUSB_TRANSFER_TYPE_CONTROL) {
+        sent += LIBUSB_CONTROL_SETUP_SIZE;
+    }
     endpoint->setStatus(static_cast<QUsbEndpoint::Status>(s));
 
     if (endpoint->logLevel() >= QUsb::logDebug)
