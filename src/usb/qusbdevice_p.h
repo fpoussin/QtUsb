@@ -37,12 +37,17 @@ class QUsbDevicePrivate : public QObjectPrivate
 
 public:
     QUsbDevicePrivate();
+    void registerDisconnectCallback(int vid, int pid);
+    void deregisterDisconnectCallback();
     ~QUsbDevicePrivate();
 
     libusb_device **m_devs;
     libusb_device_handle *m_devHandle;
     libusb_context *m_ctx;
+    libusb_hotplug_callback_handle m_callbackHandle;
     qusbdevice_classes_t m_classes;
+
+    bool m_hasHotplug;
 
     QUsbEventsThread *m_events;
 };

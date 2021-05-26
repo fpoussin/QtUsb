@@ -7,8 +7,6 @@
     if (m_log_level >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
-static libusb_hotplug_callback_handle callback_handle;
-
 static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
                                           libusb_device *device,
                                           libusb_hotplug_event event,
@@ -38,36 +36,47 @@ QUsbDevicePrivate::QUsbDevicePrivate()
     Q_Q(QUsbDevice);
     m_devHandle = Q_NULLPTR;
     m_classes = { this, q };
-
-    if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
-
-        int rc;
-        rc = libusb_hotplug_register_callback(m_ctx,
-                                              static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
-                                              LIBUSB_HOTPLUG_ENUMERATE,
-                                              q->m_id.vid,
-                                              q->m_id.pid,
-                                              LIBUSB_HOTPLUG_MATCH_ANY,
-                                              reinterpret_cast<libusb_hotplug_callback_fn>(DeviceLeftCallback),
-                                              reinterpret_cast<void *>(&m_classes),
-                                              &callback_handle);
-        if (LIBUSB_SUCCESS != rc) {
-            libusb_exit(m_ctx);
-            qWarning("Error creating hotplug callback");
-            return;
-        }
-    }
+    m_callbackHandle = 0;
+    m_hasHotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
 
     m_events = new QUsbEventsThread();
     m_events->m_ctx = m_ctx;
     m_events->start();
 }
 
+void QUsbDevicePrivate::registerDisconnectCallback(int vid, int pid)
+{
+    if (m_hasHotplug) {
+
+        int rc;
+        rc = libusb_hotplug_register_callback(m_ctx,
+                                              static_cast<libusb_hotplug_event>(LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
+                                              LIBUSB_HOTPLUG_ENUMERATE,
+                                              vid,
+                                              pid,
+                                              LIBUSB_HOTPLUG_MATCH_ANY,
+                                              reinterpret_cast<libusb_hotplug_callback_fn>(DeviceLeftCallback),
+                                              reinterpret_cast<void *>(&m_classes),
+                                              &m_callbackHandle);
+        if (LIBUSB_SUCCESS != rc) {
+            libusb_exit(m_ctx);
+            qWarning("Error creating hotplug callback");
+            return;
+        }
+    }
+}
+
+void QUsbDevicePrivate::deregisterDisconnectCallback()
+{
+    libusb_hotplug_deregister_callback(m_ctx, m_callbackHandle);
+    m_callbackHandle = 0;
+}
+
 QUsbDevicePrivate::~QUsbDevicePrivate()
 {
     Q_Q(QUsbDevice);
-    if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
-        libusb_hotplug_deregister_callback(m_ctx, callback_handle);
+    if (m_hasHotplug) {
+        deregisterDisconnectCallback();
     }
     m_events->requestInterruption();
     m_events->wait();
@@ -340,6 +349,8 @@ qint32 QUsbDevice::open()
         break;
     }
 
+    d->registerDisconnectCallback(m_id.vid, m_id.pid);
+
     if (!d->m_events->isRunning()) // if event handling thread is not running start it. The thread was stopped upon closing the device.
         d->m_events->start();
 
@@ -361,6 +372,8 @@ void QUsbDevice::close()
         // stop any further write attempts whilst we close down
         if (m_log_level >= QUsb::logInfo)
             qInfo("Closing USB connection");
+
+        d->deregisterDisconnectCallback();
 
         libusb_release_interface(d->m_devHandle, 0); // release the claimed interface
         libusb_close(d->m_devHandle); // close the device we opened
@@ -478,7 +491,6 @@ QUsbDevice::DeviceSpeed QUsbDevice::speed() const
 
 void QUsbEventsThread::run()
 {
-
     timeval t = { 0, 100000 };
     while (!this->isInterruptionRequested()) {
         if (libusb_event_handling_ok(m_ctx) == 0) {
