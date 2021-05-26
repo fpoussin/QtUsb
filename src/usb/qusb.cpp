@@ -266,7 +266,12 @@ QUsb::~QUsb()
 {
     Q_D(QUsb);
     DbgPrintFuncName();
-    libusb_hotplug_deregister_callback(d->m_ctx, callback_handle);
+    // Process any remaining events, then deregister hotplug callback
+    if (d->m_has_hotplug) {
+        timeval t = { 0, 0 };
+        libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);
+        libusb_hotplug_deregister_callback(d->m_ctx, callback_handle);
+    }
     libusb_exit(d->m_ctx);
 }
 
