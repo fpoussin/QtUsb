@@ -3,6 +3,9 @@
 #include <QElapsedTimer>
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define DbgPrintPrivFuncName()       \
+    if (m_classes.pub->m_log_level >= QUsb::logDebug) \
+    qDebug() << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrintFuncName()       \
     if (m_log_level >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
@@ -33,9 +36,7 @@ QUsbDevicePrivate::QUsbDevicePrivate()
     if (rc < 0) {
         qCritical("LibUsb Init Error %d", rc);
     }
-    Q_Q(QUsbDevice);
     m_devHandle = Q_NULLPTR;
-    m_classes = { this, q };
     m_callbackHandle = 0;
     m_hasHotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
 
@@ -46,6 +47,7 @@ QUsbDevicePrivate::QUsbDevicePrivate()
 
 void QUsbDevicePrivate::registerDisconnectCallback(int vid, int pid)
 {
+    DbgPrintPrivFuncName();
     if (m_hasHotplug) {
 
         int rc;
@@ -68,13 +70,14 @@ void QUsbDevicePrivate::registerDisconnectCallback(int vid, int pid)
 
 void QUsbDevicePrivate::deregisterDisconnectCallback()
 {
+    DbgPrintPrivFuncName();
     libusb_hotplug_deregister_callback(m_ctx, m_callbackHandle);
     m_callbackHandle = 0;
 }
 
 QUsbDevicePrivate::~QUsbDevicePrivate()
 {
-    Q_Q(QUsbDevice);
+    DbgPrintPrivFuncName();
     if (m_hasHotplug) {
         deregisterDisconnectCallback();
     }
@@ -82,7 +85,7 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
     m_events->wait();
     m_events->deleteLater();
 
-    q->close();
+    m_classes.pub->close();
     libusb_exit(m_ctx);
 }
 
@@ -129,6 +132,10 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
+    DbgPrintFuncName();
+    Q_D(QUsbDevice);
+    d->m_classes = { d, this };
+
     m_spd = unknownSpeed;
     m_connected = false;
     m_log_level = QUsb::logInfo;
@@ -147,6 +154,7 @@ QUsbDevice::QUsbDevice(QObject *parent)
  */
 QUsbDevice::~QUsbDevice()
 {
+    DbgPrintFuncName();
     this->close();
 }
 
@@ -393,6 +401,7 @@ void QUsbDevice::close()
  */
 void QUsbDevice::setLogLevel(QUsb::LogLevel level)
 {
+    DbgPrintFuncName();
     Q_D(QUsbDevice);
     m_log_level = level;
     if (level >= QUsb::logDebugAll)
@@ -461,7 +470,7 @@ quint16 QUsbDevice::pid() const
     \brief Return the device \c vid. (Vendor id)
  */
 quint16 QUsbDevice::vid() const
-{
+{DbgPrintFuncName();
     return m_id.vid;
 }
 
