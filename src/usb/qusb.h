@@ -2,6 +2,7 @@
 #define QUSB_H
 
 #include "qusbglobal.h"
+#include <QObject>
 #include <QList>
 
 // Stupid windows conflict
@@ -30,20 +31,65 @@ public:
         logDebug = 4,
         logDebugAll = 5
     };
+    Q_ENUM(LogLevel);
+
+    enum DeviceSpeed : qint8 {
+        unknownSpeed = -1,
+        lowSpeed = 0,
+        fullSpeed,
+        highSpeed,
+        superSpeed,
+        superSpeedPlus
+    };
+    Q_ENUM(DeviceSpeed);
+
+    enum DeviceStatus : qint8 {
+        statusOK = 0,
+        statusIoError = -1,
+        statusInvalidParam = -2,
+        statusAccessDenied = -3,
+        statusNoSuchDevice = -4,
+        statusNotFound = -5,
+        statusBusy = -6,
+        statusTimeout = -7,
+        statusOverflow = -8,
+        statusPipeError = -9,
+        statusInterrupted = -10,
+        statusNoMemory = -11,
+        statusNotSupported = -12,
+        statusUnknownError = -99,
+    };
+    Q_ENUM(DeviceStatus);
 
     class Q_USB_EXPORT Config
     {
     public:
-        Config(quint8 _config = 1, quint8 _interface = 0, quint8 _alternate = 0);
+        Config(quint8 _config = 1, qint8 _interface = -1, quint8 _alternate = 0);
         Config(const QUsb::Config &other);
         bool operator==(const QUsb::Config &other) const;
         QUsb::Config &operator=(QUsb::Config other);
         operator QString() const;
 
         quint8 config;
+        qint8  interface;
+        quint8 alternate;
+    };
+    typedef QList<Config> DeviceConfigurations;
+    class Q_USB_EXPORT EndpointDescription // build out ability to describe endpoint
+    {
+    public:
+        EndpointDescription(quint8 address = 0, quint8 attributes = 0, quint8 config = 0, quint8 interface = 0, quint8 alternate = 0);
+        EndpointDescription(const QUsb::EndpointDescription &other);
+        bool operator==(const QUsb::EndpointDescription &other) const;
+        QUsb::EndpointDescription &operator=(QUsb::EndpointDescription other);
+        operator QString() const;
+        quint8 address;
+        quint8 attributes;
+        quint8 config;
         quint8 interface;
         quint8 alternate;
     };
+    typedef QList<EndpointDescription> EndpointDescriptionList;
 
     class Q_USB_EXPORT Id
     {
@@ -60,7 +106,13 @@ public:
         quint8 port;
         quint8 dClass;
         quint8 dSubClass;
+        quint8 configCount;
+        QString description;
+        DeviceConfigurations configurations;
+        QUsb::EndpointDescriptionList endpoints;
     };
+
+
 
     typedef QList<Id> IdList;
     typedef QList<Config> ConfigList;
@@ -77,6 +129,7 @@ public:
     ~QUsb(void);
 
     static IdList devices();
+    static int xusb(const Id &id, const Config &config);
     bool isPresent(const Id &id) const;
     int findDevice(const Id &id,
                    const IdList &list) const;
@@ -105,6 +158,7 @@ private:
     Q_DISABLE_COPY(QUsb)
 };
 
+Q_DECLARE_METATYPE(QUsb::EndpointDescription);
 Q_DECLARE_METATYPE(QUsb::Config);
 Q_DECLARE_METATYPE(QUsb::Id);
 

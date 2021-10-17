@@ -98,17 +98,17 @@ QUsbDevicePrivate::~QUsbDevicePrivate()
 QUsbDevice::QUsbDevice(QObject *parent)
     : QObject(*(new QUsbDevicePrivate), parent), d_dummy(Q_NULLPTR)
 {
-    m_spd = unknownSpeed;
+    m_spd = QUsb::unknownSpeed;
     m_connected = false;
     m_log_level = QUsb::logInfo;
     m_timeout = DefaultTimeout;
     m_config.config = 0x01;
     m_config.interface = 0x00;
     m_config.alternate = 0x00;
-    m_status = statusOK;
+    m_status = QUsb::statusOK;
     this->setLogLevel(m_log_level); // Apply log level to libusb
 
-    qRegisterMetaType<QUsbDevice::DeviceStatus>("QUsbDevice::DeviceStatus");
+    qRegisterMetaType<QUsb::DeviceStatus>("QUsbDevice::DeviceStatus");
 
     Q_D(QUsbDevice);
     if (libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0) {
@@ -145,24 +145,24 @@ QUsbDevice::~QUsbDevice()
 QByteArray QUsbDevice::speedString() const
 {
     switch (m_spd) {
-    case unknownSpeed:
+    case QUsb::unknownSpeed:
         return "Unknown speed";
-    case lowSpeed:
+    case QUsb::lowSpeed:
         return "Low speed";
-    case fullSpeed:
+    case QUsb::fullSpeed:
         return "Full speed";
-    case highSpeed:
+    case QUsb::highSpeed:
         return "High speed";
-    case superSpeed:
+    case QUsb::superSpeed:
         return "Super speed";
-    case superSpeedPlus:
+    case QUsb::superSpeedPlus:
         return "Super speed plus";
     }
 
     return "Error";
 }
 
-QUsbDevice::DeviceStatus QUsbDevice::status() const
+QUsb::DeviceStatus QUsbDevice::status() const
 {
     return m_status;
 }
@@ -170,33 +170,33 @@ QUsbDevice::DeviceStatus QUsbDevice::status() const
 QByteArray QUsbDevice::statusString() const
 {
     switch (m_status) {
-    case statusOK:
+    case QUsb::statusOK:
         return "Success (no error)";
-    case statusIoError:
+    case QUsb::statusIoError:
         return "Input/output error";
-    case statusInvalidParam:
+    case QUsb::statusInvalidParam:
         return "Invalid parameter";
-    case statusAccessDenied:
+    case QUsb::statusAccessDenied:
         return "Access denied (insufficient permissions)";
-    case statusNoSuchDevice:
+    case QUsb::statusNoSuchDevice:
         return "No such device (it may have been disconnected)";
-    case statusNotFound:
+    case QUsb::statusNotFound:
         return "Entity not found";
-    case statusBusy:
+    case QUsb::statusBusy:
         return "Resource busy";
-    case statusTimeout:
+    case QUsb::statusTimeout:
         return "Operation timed out";
-    case statusOverflow:
+    case QUsb::statusOverflow:
         return "Overflow";
-    case statusPipeError:
+    case QUsb::statusPipeError:
         return "Pipe error";
-    case statusInterrupted:
+    case QUsb::statusInterrupted:
         return "System call interrupted (perhaps due to signal)";
-    case statusNoMemory:
+    case QUsb::statusNoMemory:
         return "Insufficient memory";
-    case statusNotSupported:
+    case QUsb::statusNotSupported:
         return "Operation not supported or unimplemented on this platform";
-    case statusUnknownError:
+    case QUsb::statusUnknownError:
         break;
     }
 
@@ -206,7 +206,7 @@ QByteArray QUsbDevice::statusString() const
 void QUsbDevice::handleUsbError(int error_code)
 {
     DbgPrintFuncName();
-    DeviceStatus status = static_cast<QUsbDevice::DeviceStatus>(error_code);
+    QUsb::DeviceStatus status = static_cast<QUsb::DeviceStatus>(error_code);
     if (status != m_status) {
         m_status = status;
         qWarning("Usb device status changed: %s", statusString().constData());
@@ -262,21 +262,58 @@ qint32 QUsbDevice::open()
                 tmp_id.dClass = desc.bDeviceClass;
             if (tmp_id.dSubClass == 0)
                 tmp_id.dSubClass = desc.bDeviceSubClass;
-
             // Check all properties match. Defaults have been assigned above.
             if (desc.idProduct == tmp_id.pid && desc.idVendor == tmp_id.vid
                 && bus == tmp_id.bus && port == tmp_id.port
                 && desc.bDeviceClass == tmp_id.dClass && desc.bDeviceSubClass == tmp_id.dSubClass) {
                 if (m_log_level >= QUsb::logInfo)
                     qInfo("Found device");
-
+                libusb_config_descriptor* deviceConfiguration;
+                QUsb::Config cg(m_config.config);
+                if(libusb_get_config_descriptor(dev, m_config.config-1, &deviceConfiguration) == 0)
+                {
+                    if(deviceConfiguration)
+                    {
+                        auto interfaceCount = deviceConfiguration->bNumInterfaces;
+                        auto interfaces = deviceConfiguration->interface;
+                        for(quint8 i(0); i < interfaceCount; ++i )
+                        {
+                            auto interface = interfaces[i];
+                            for(quint8 j(0); j < interface.num_altsetting; ++j){
+                                auto interface_descriptor = interface.altsetting[j];
+                                auto endpointCount = interface_descriptor.bNumEndpoints;
+//                                    qDebug() << "Found "<< endpointCount << " endpoints";
+                                for(quint8 m(0); m < endpointCount; ++m)
+                                {
+                                    cg.interface = i;
+                                    cg.alternate = j;
+                                    auto endpoint_descriptor = interface_descriptor.endpoint[m];
+                                    QByteArray addr_hex;
+                                    addr_hex.append(endpoint_descriptor.bEndpointAddress);
+                                    QUsb::EndpointDescription desc(endpoint_descriptor.bEndpointAddress, endpoint_descriptor.bmAttributes, cg.config, cg.interface, cg.alternate);
+                                    m_endpoint_descriptions.append(desc);
+                                }
+//                                    qDebug() << "Interface Details-> ConfigValue:" << deviceConfiguration->bConfigurationValue
+//                                             << " interface:" << i << " alternate:" << j;
+                            }
+                        }
+                    }
+                }
                 rc = libusb_open(dev, &d->m_devHandle);
                 if (rc == 0) {
                     m_id = tmp_id;
+                    auto buffer = new unsigned char[512];
+                    auto size = libusb_get_string_descriptor(d->m_devHandle, desc.iProduct, 0, buffer, 512);
+                    if(size > 0) {
+                        m_id.description = QString::fromUtf8(reinterpret_cast<char*>(buffer),size);
+                        m_id.description.resize(size);
+                    }
+                    delete []buffer;
                     break;
                 }
                 else if (m_log_level >= QUsb::logWarning) {
                     qWarning("Failed to open device: %s", libusb_strerror(static_cast<enum libusb_error>(rc)));
+
                 }
             }
         }
@@ -304,7 +341,7 @@ qint32 QUsbDevice::open()
     if (conf != m_config.config) {
         if (m_log_level >= QUsb::logInfo)
             qInfo("Configuration needs to be changed");
-        rc = libusb_set_configuration(d->m_devHandle, m_config.config);
+        rc = libusb_set_configuration(d->m_devHandle, m_config.config-1);
         if (rc != 0) {
             if (m_log_level >= QUsb::logWarning)
                 qWarning("Cannot Set Configuration");
@@ -312,29 +349,52 @@ qint32 QUsbDevice::open()
             return -3;
         }
     }
-    rc = libusb_claim_interface(d->m_devHandle, m_config.interface);
-    if (rc != 0) {
-        if (m_log_level >= QUsb::logWarning)
-            qWarning("Cannot Claim Interface");
-        handleUsbError(rc);
-        return -4;
+    if(m_config.interface < 0){// initialize entire composite device
+        QList<int> interfacesClaimed;
+        for(const auto& endpoint: m_endpoint_descriptions){
+            if(!interfacesClaimed.contains(endpoint.interface)){
+                rc = libusb_claim_interface(d->m_devHandle, endpoint.interface);
+                if (rc != 0) {
+                    if (m_log_level >= QUsb::logWarning) {
+                        qWarning() << "Cannot Claim Interface: " << m_config.interface;
+                        qWarning() << "alternate: " << m_config.alternate;
+                        qWarning() << "config: " << m_config.config;
+                    }
+                    handleUsbError(rc);
+                    return -4;
+                }
+                interfacesClaimed.append(endpoint.interface);
+            }
+        }
+
+    }else{
+        rc = libusb_claim_interface(d->m_devHandle, m_config.interface);
+        if (rc != 0) {
+            if (m_log_level >= QUsb::logWarning) {
+                qWarning() << "Cannot Claim Interface: " << m_config.interface;
+                qWarning() << "alternate: " << m_config.alternate;
+                qWarning() << "config: " << m_config.config;
+            }
+            handleUsbError(rc);
+            return -4;
+        }
     }
 
     switch (libusb_get_device_speed(dev)) {
     case LIBUSB_SPEED_LOW:
-        this->m_spd = lowSpeed;
+        this->m_spd = QUsb::lowSpeed;
         break;
     case LIBUSB_SPEED_FULL:
-        this->m_spd = fullSpeed;
+        this->m_spd = QUsb::fullSpeed;
         break;
     case LIBUSB_SPEED_HIGH:
-        this->m_spd = highSpeed;
+        this->m_spd = QUsb::highSpeed;
         break;
     case LIBUSB_SPEED_SUPER:
-        this->m_spd = superSpeed;
+        this->m_spd = QUsb::superSpeed;
         break;
     default:
-        this->m_spd = unknownSpeed;
+        this->m_spd = QUsb::unknownSpeed;
         break;
     }
 
@@ -426,6 +486,17 @@ QUsb::Config QUsbDevice::config() const
     return m_config;
 }
 
+
+const QUsb::EndpointDescriptionList& QUsbDevice::endpointDescriptions() const
+{
+    return m_endpoint_descriptions;
+}
+
+quint16 QUsbDevice::endpointCount() const
+{
+    return m_endpoint_descriptions.size();
+}
+
 /*!
     \brief Returns \c true if connected.
  */
@@ -469,7 +540,7 @@ QUsb::LogLevel QUsbDevice::logLevel() const
 /*!
     \brief Returns the device \c speed.
  */
-QUsbDevice::DeviceSpeed QUsbDevice::speed() const
+QUsb::DeviceSpeed QUsbDevice::speed() const
 {
     return m_spd;
 }

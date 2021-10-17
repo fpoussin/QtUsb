@@ -475,7 +475,7 @@ bool QUsbEndpoint::open(QIODevice::OpenMode mode)
     // Set polling size to max packet size
     switch (m_type) {
     case bulkEndpoint:
-        if (m_dev->speed() >= QUsbDevice::highSpeed)
+        if (m_dev->speed() >= QUsb::highSpeed)
             d->m_poll_size = 512;
         break;
     default:
