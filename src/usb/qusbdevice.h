@@ -25,7 +25,7 @@ public:
     static const quint16 DefaultTimeout = 250;
 
     Q_PROPERTY(QUsb::LogLevel logLevel READ logLevel WRITE setLogLevel)
-    Q_PROPERTY(QUsb::Id id READ id WRITE setId)
+    Q_PROPERTY(QUsb::Id id READ id WRITE setId NOTIFY idChanged MEMBER m_id)
     Q_PROPERTY(QUsb::Config config READ config WRITE setConfig)
     Q_PROPERTY(quint16 pid READ pid)
     Q_PROPERTY(quint16 vid READ vid)
@@ -60,9 +60,10 @@ public:
 private:
     void handleUsbError(int error_code);
 
-Q_SIGNALS:
+signals:
     void statusChanged(QUsb::DeviceStatus status);
     void connectionChanged(bool connected);
+    void idChanged(QUsb::Id id);
 
 public Q_SLOTS:
     qint32 open();
