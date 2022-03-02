@@ -240,7 +240,7 @@ qint32 QUsbDevice::open()
         libusb_free_device_list(d->m_devs, 1);
         return -1;
     }
-
+    QList<int> interfaces;
     for (int i = 0; i < cnt; i++) {
         dev = d->m_devs[i];
         quint8 bus = libusb_get_bus_number(dev);
@@ -267,7 +267,7 @@ qint32 QUsbDevice::open()
                 && bus == tmp_id.bus && port == tmp_id.port
                 && desc.bDeviceClass == tmp_id.dClass && desc.bDeviceSubClass == tmp_id.dSubClass) {
                 if (m_log_level >= QUsb::logInfo)
-                    qInfo("Found device");
+                    qInfo() << "Found device:" << desc.iProduct << " @ " << tmp_id.vid << ":" << tmp_id.pid;
                 libusb_config_descriptor* deviceConfiguration;
                 QUsb::Config cg(m_config.config);
                 if(libusb_get_config_descriptor(dev, m_config.config-1, &deviceConfiguration) == 0)
@@ -282,19 +282,16 @@ qint32 QUsbDevice::open()
                             for(quint8 j(0); j < interface.num_altsetting; ++j){
                                 auto interface_descriptor = interface.altsetting[j];
                                 auto endpointCount = interface_descriptor.bNumEndpoints;
-//                                    qDebug() << "Found "<< endpointCount << " endpoints";
                                 for(quint8 m(0); m < endpointCount; ++m)
                                 {
                                     cg.interface = i;
                                     cg.alternate = j;
                                     auto endpoint_descriptor = interface_descriptor.endpoint[m];
-                                    QByteArray addr_hex;
-                                    addr_hex.append(endpoint_descriptor.bEndpointAddress);
                                     QUsb::EndpointDescription desc(endpoint_descriptor.bEndpointAddress, endpoint_descriptor.bmAttributes, cg.config, cg.interface, cg.alternate);
                                     m_endpoint_descriptions.append(desc);
                                 }
-//                                    qDebug() << "Interface Details-> ConfigValue:" << deviceConfiguration->bConfigurationValue
-//                                             << " interface:" << i << " alternate:" << j;
+                                    qDebug() << "Interface Details-> ConfigValue:" << deviceConfiguration->bConfigurationValue
+                                             << " interface:" << i << " alternate:" << j;
                             }
                         }
                     }
@@ -326,13 +323,14 @@ qint32 QUsbDevice::open()
 
     if (m_log_level >= QUsb::logInfo)
         qInfo("Device Open");
-
-    if (libusb_kernel_driver_active(d->m_devHandle, m_config.interface) == 1) { // find out if kernel driver is attached
-        if (m_log_level >= QUsb::logDebug)
-            qDebug("Kernel Driver Active");
-        if (libusb_detach_kernel_driver(d->m_devHandle, m_config.interface) == 0) // detach it
+    for( const auto &endpoint : qAsConst(m_endpoint_descriptions)){
+        if (libusb_kernel_driver_active(d->m_devHandle, endpoint.interface) == 1) { // find out if kernel driver is attached
             if (m_log_level >= QUsb::logDebug)
-                qDebug("Kernel Driver Detached!");
+                qDebug("Kernel Driver Active");
+            if (libusb_detach_kernel_driver(d->m_devHandle, endpoint.interface) == 0) // detach it
+                if (m_log_level >= QUsb::logDebug)
+                    qDebug("Kernel Driver Detached!");
+        }
     }
 
     int conf;
@@ -351,12 +349,13 @@ qint32 QUsbDevice::open()
     }
     if(m_config.interface < 0){// initialize entire composite device
         QList<int> interfacesClaimed;
-        for(const auto& endpoint: m_endpoint_descriptions){
+        for(const auto& endpoint: qAsConst(m_endpoint_descriptions)){
             if(!interfacesClaimed.contains(endpoint.interface)){
+                m_config.interface = endpoint.interface;
                 rc = libusb_claim_interface(d->m_devHandle, endpoint.interface);
                 if (rc != 0) {
                     if (m_log_level >= QUsb::logWarning) {
-                        qWarning() << "Cannot Claim Interface: " << m_config.interface;
+                        qWarning() << "Cannot Claim Interface: " << endpoint.interface;
                         qWarning() << "alternate: " << m_config.alternate;
                         qWarning() << "config: " << m_config.config;
                     }
@@ -366,6 +365,7 @@ qint32 QUsbDevice::open()
                 interfacesClaimed.append(endpoint.interface);
             }
         }
+        m_config.interface = interfacesClaimed.size();
 
     }else{
         rc = libusb_claim_interface(d->m_devHandle, m_config.interface);
@@ -451,7 +451,11 @@ void QUsbDevice::setLogLevel(QUsb::LogLevel level)
  */
 void QUsbDevice::setId(const QUsb::Id &id)
 {
-    m_id = id;
+    if(!(m_id == id)){
+        m_id = id;
+        emit idChanged(m_id);
+    }
+
 }
 
 /*!

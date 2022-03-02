@@ -595,12 +595,10 @@ int QUsb::xusb(const Id &id, const Config &config)
     struct libusb_config_descriptor *conf_desc;
     const struct libusb_endpoint_descriptor *endpoint;
     int  k;
-    int iface, nb_ifaces, first_iface = -1;
+    int iface, nb_ifaces = -1;
     struct libusb_device_descriptor dev_desc;
     const char* const speed_name[6] = { "Unknown", "1.5 Mbit/s (USB LowSpeed)", "12 Mbit/s (USB FullSpeed)",
         "480 Mbit/s (USB HighSpeed)", "5000 Mbit/s (USB SuperSpeed)", "10000 Mbit/s (USB SuperSpeedPlus)" };
-    char string[128];
-    uint8_t string_index[3];	// indexes of the string descriptors
     uint8_t endpoint_in = 0, endpoint_out = 0;	// default IN and OUT endpoints
 
     qDebug("Opening device %04X:%04X...\n", id.vid, id.pid);
@@ -639,9 +637,7 @@ int QUsb::xusb(const Id &id, const Config &config)
     qDebug("   iMan:iProd:iSer: %d:%d:%d\n", dev_desc.iManufacturer, dev_desc.iProduct, dev_desc.iSerialNumber);
     qDebug("          nb confs: %d\n", dev_desc.bNumConfigurations);
     // Copy the string descriptors for easier parsing
-    string_index[0] = dev_desc.iManufacturer;
-    string_index[1] = dev_desc.iProduct;
-    string_index[2] = dev_desc.iSerialNumber;
+
 
     qDebug("\nReading BOS descriptor: ");
     if (libusb_get_bos_descriptor(handle, &bos_desc) == LIBUSB_SUCCESS) {
@@ -657,8 +653,6 @@ int QUsb::xusb(const Id &id, const Config &config)
     CALL_CHECK_CLOSE(libusb_get_config_descriptor(dev, 0, &conf_desc), handle);
     nb_ifaces = conf_desc->bNumInterfaces;
     qDebug("             nb interfaces: %d\n", nb_ifaces);
-    if (nb_ifaces > 0)
-        first_iface = conf_desc->usb_interface[0].altsetting[0].bInterfaceNumber;
     for (i=0; i<nb_ifaces; i++) {
         qDebug("              interface[%d]: id = %d\n", i,
             conf_desc->usb_interface[i].altsetting[0].bInterfaceNumber);
@@ -705,8 +699,10 @@ int QUsb::xusb(const Id &id, const Config &config)
     if(libusb_set_auto_detach_kernel_driver(handle, 1)) {
         for (iface = 0; iface < nb_ifaces; iface++)
         {
-            int ret = libusb_kernel_driver_active(handle, iface);
-            qDebug("\nKernel driver attached for interface %d: %d\n", iface, ret);
+            if(libusb_kernel_driver_active(handle, iface)){
+                qDebug("\nKernel driver attached for interface %d\n", iface);
+                libusb_detach_kernel_driver(handle, iface); // detach it
+            }
             qDebug("\nClaiming interface %d...\n", iface);
             r = libusb_claim_interface(handle, iface);
             if (r != LIBUSB_SUCCESS) {
@@ -715,17 +711,26 @@ int QUsb::xusb(const Id &id, const Config &config)
         }
     }
 
+#ifdef QUSB_READ_DESCRIPTORS
+    char string[128];
     qDebug("\nReading string descriptors:\n");
-    for (i=0; i<5; i++) {
-        if (string_index[i] == 0) {
-            continue;
-        }
-        if (libusb_get_string_descriptor_ascii(handle, string_index[i], (unsigned char*)string, sizeof(string)) > 0) {
-            qDebug("   String (0x%02X): \"%s\"\n", string_index[i], string);
-        }
+    if (libusb_get_string_descriptor_ascii(handle, dev_desc.iManufacturer, (unsigned char*)string, sizeof(string)) > 0) {
+        qDebug("   String (0x%02X): \"%s\"\n", dev_desc.iManufacturer, string);
     }
+    if (libusb_get_string_descriptor_ascii(handle, dev_desc.iProduct, (unsigned char*)string, sizeof(string)) > 0) {
+        qDebug("   String (0x%02X): \"%s\"\n", dev_desc.iProduct, string);
+    }
+    if (libusb_get_string_descriptor_ascii(handle, dev_desc.iSerialNumber, (unsigned char*)string, sizeof(string)) > 0) {
+        qDebug("   String (0x%02X): \"%s\"\n", dev_desc.iSerialNumber, string);
+    }
+#endif
+
+#ifdef Q_OS_WIN
     // Read the OS String Descriptor
     r = libusb_get_string_descriptor(handle, MS_OS_DESC_STRING_INDEX, 0, (unsigned char*)string, MS_OS_DESC_STRING_LENGTH);
+    int first_iface = -1;
+    if (nb_ifaces > 0)
+        first_iface = conf_desc->usb_interface[0].altsetting[0].bInterfaceNumber;
     if (r == MS_OS_DESC_STRING_LENGTH && memcmp(ms_os_desc_string, string, sizeof(ms_os_desc_string)) == 0) {
         // If this is a Microsoft OS String Descriptor,
         // attempt to read the WinUSB extended Feature Descriptors
@@ -757,7 +762,7 @@ int QUsb::xusb(const Id &id, const Config &config)
         }
         libusb_free_interface_association_descriptors(iad_array);
     }
-
+#endif
     qDebug("\n");
     for (iface = 0; iface<nb_ifaces; iface++) {
         qDebug("Releasing interface %d...\n", iface);
@@ -814,7 +819,6 @@ QUsb::IdList QUsb::devices()
                             auto interfaceCount = deviceConfiguration->bNumInterfaces;
                             auto interfaces = deviceConfiguration->interface;
 //                            qDebug() << "Found " << interfaceCount << " interfaces";
-
                             cg.config = count+1;
                             for(qint8 i(0); i < interfaceCount; ++i )
                             {
@@ -822,28 +826,21 @@ QUsb::IdList QUsb::devices()
                                 for(quint8 j(0); j < interface.num_altsetting; ++j){
                                     auto interface_descriptor = interface.altsetting[j];
                                     auto endpointCount = interface_descriptor.bNumEndpoints;
-//                                    qDebug() << "Found "<< endpointCount << " endpoints";
                                     for(quint8 m(0); m < endpointCount; ++m)
                                     {
                                         cg.interface = i;
                                         cg.alternate = j;
                                         id.configurations.append(cg);
                                         auto endpoint_descriptor = interface_descriptor.endpoint[m];
-                                        QByteArray addr_hex;
-                                        addr_hex.append(endpoint_descriptor.bEndpointAddress);
-                                        //qDebug() << "Found endpoint @0x" << addr_hex.toHex();
-                                        //qDebug() << "Endpoint atrributes: " << endpoint_descriptor.bmAttributes;
                                         EndpointDescription desc(endpoint_descriptor.bEndpointAddress, endpoint_descriptor.bmAttributes, cg.config, cg.interface, cg.alternate);
                                         id.endpoints.append(desc);
                                     }
-//                                    qDebug() << "Interface Details-> ConfigValue:" << deviceConfiguration->bConfigurationValue
-//                                             << " interface:" << i << " alternate:" << j;
                                 }
                             }
                             libusb_free_config_descriptor(deviceConfiguration);
                         }
                     } else {
-//                        qDebug() << "Failed to get config #" << count;
+                        qDebug() << "Failed to get config #" << count;
                     }
                 }
             }            
