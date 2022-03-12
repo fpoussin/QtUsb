@@ -711,7 +711,10 @@ int QUsb::xusb(const Id &id, const Config &config)
         }
     }
 
-#ifdef QUSB_READ_DESCRIPTORS
+
+
+#ifdef Q_OS_WIN
+    // Read the OS String Descriptor
     char string[128];
     qDebug("\nReading string descriptors:\n");
     if (libusb_get_string_descriptor_ascii(handle, dev_desc.iManufacturer, (unsigned char*)string, sizeof(string)) > 0) {
@@ -723,10 +726,6 @@ int QUsb::xusb(const Id &id, const Config &config)
     if (libusb_get_string_descriptor_ascii(handle, dev_desc.iSerialNumber, (unsigned char*)string, sizeof(string)) > 0) {
         qDebug("   String (0x%02X): \"%s\"\n", dev_desc.iSerialNumber, string);
     }
-#endif
-
-#ifdef Q_OS_WIN
-    // Read the OS String Descriptor
     r = libusb_get_string_descriptor(handle, MS_OS_DESC_STRING_INDEX, 0, (unsigned char*)string, MS_OS_DESC_STRING_LENGTH);
     int first_iface = -1;
     if (nb_ifaces > 0)
