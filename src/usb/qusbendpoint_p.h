@@ -45,6 +45,7 @@ public:
 
     int readUsb(qint64 maxSize);
     int writeUsb(const char *data, qint64 maxSize);
+    int writeUsbSynchronous(const char *data, qint64 maxSize);
 
     void setPolling(bool enable);
     bool polling() { return m_poll; }

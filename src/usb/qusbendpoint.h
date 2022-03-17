@@ -93,6 +93,7 @@ public:
     void setPolling(bool enable);
     bool polling();
     bool poll();
+    qint64 writeDataSynchronous(const char *data, qint64 maxSize);
 
 public Q_SLOTS:
     void cancelTransfer();
