@@ -296,6 +296,43 @@ int QUsbEndpointPrivate::writeUsb(const char *data, qint64 maxSize)
     return rc;
 }
 
+int QUsbEndpointPrivate::writeUsbSynchronous(const char *data, qint64 maxSize)
+{
+    Q_Q(QUsbEndpoint);
+    DbgPrivPrintFuncName();
+    int rc = -1;
+    m_buf_mutex.lock();
+    m_buf.resize(static_cast<int>(maxSize));
+    memcpy(m_buf.data(), data, static_cast<ulong>(maxSize));
+    int transferred = 0;
+    auto buf = reinterpret_cast<uchar *>(m_buf.data());
+    auto sizeInt = static_cast<int>(maxSize);
+    auto handle = q->m_dev->d_func()->m_devHandle;
+    auto timeout = q->m_dev->timeout();
+
+    // perform synchronous transfer
+    rc = libusb_bulk_transfer(handle, q->m_ep, buf, sizeInt, &transferred, timeout);
+
+    if (rc == LIBUSB_ERROR_TIMEOUT)
+    {
+      qDebug() << "timeout (%d)\n" << transferred << " on bulk syncrhonous transfer";
+    }
+    else if (rc < 0)
+    {
+      qDebug() << "Error while waiting for char: %d\n" <<  rc;
+    }
+    if (rc != LIBUSB_SUCCESS) {
+        setStatus(QUsbEndpoint::transferError);
+        error(QUsbEndpoint::transferError);
+        // TODO: Check if QUsbEndpoint::QUsbDevice must be const...
+        QUsbDevice *dev = const_cast<QUsbDevice *>(q->m_dev);
+        dev->handleUsbError(rc);
+    }
+    m_buf_mutex.unlock();
+    return rc;
+
+}
+
 void QUsbEndpointPrivate::setPolling(bool enable)
 {
     Q_Q(QUsbEndpoint);
@@ -718,6 +755,24 @@ qint64 QUsbEndpoint::writeData(const char *data, qint64 maxSize)
         return -1;
 
     if (d->writeUsb(data, maxSize) != 0)
+        return -1;
+
+    return maxSize;
+}
+
+qint64 QUsbEndpoint::writeDataSynchronous(const char *data, qint64 maxSize)
+{
+    if (this->openMode() != WriteOnly)
+        return -1;
+
+    Q_D(QUsbEndpoint);
+    DbgPrintFuncName();
+    Q_CHECK_PTR(data);
+
+    if (!d->isValid())
+        return -1;
+
+    if (d->writeUsbSynchronous(data, maxSize) != 0)
         return -1;
 
     return maxSize;
