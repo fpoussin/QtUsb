@@ -14,7 +14,7 @@ IF "%2"=="" (
 )
 
 IF "%3"=="" (
-  echo "Missing lib type [module|static]"
+  echo "Missing lib type [static|shared]"
   pause
   exit /b 1c
 )
@@ -48,8 +48,8 @@ IF NOT "%6"=="" (
   SET INSTALLPATH=%6
 )
 
-SET STATIC=""
-IF "%LIBTYPE%" == "static" SET STATIC="CONFIG+=qtusb-static"
+SET STATIC="-DBUILD_STATIC_LIBS"
+IF "%LIBTYPE%" == "shared" SET STATIC="-DBUILD_SHARED_LIBS"
 
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxiliary\Build\vcvarsall.bat" %vcarch%
 
@@ -65,7 +65,8 @@ echo %BUILDDIR% %PROJDIR%
 RMDIR /S /Q %BUILDDIR%
 MKDIR %BUILDDIR%
 CD %BUILDDIR%
-%QTDIR%\bin\qmake.exe %STATIC% %PROJDIR%
+cmake %PROJDIR%
+
 
 IF NOT "%INSTALLPATH%"=="" (
   %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install
