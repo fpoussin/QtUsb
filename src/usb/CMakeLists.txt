@@ -101,7 +101,7 @@ endif()
 #####################################################################
 
 if(UNIX AND NOT MACOS)
-  find_package(LibUSB1 REQUIRED)
+  find_package(Libusb1 REQUIRED)
   find_package(HIDAPI REQUIRED COMPONENTS libusb)
 endif()
 
