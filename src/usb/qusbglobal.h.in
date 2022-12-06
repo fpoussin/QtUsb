@@ -1,0 +1,7 @@
+#ifndef Q_USB_GLOBAL_H
+#define Q_USB_GLOBAL_H
+
+@QUSBGLOBAL_CONT@
+
+#endif
+

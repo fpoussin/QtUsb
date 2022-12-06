@@ -92,7 +92,7 @@ public:
     bool polling();
     bool poll();
 
-public slots:
+public Q_SLOTS:
     void cancelTransfer();
 
 Q_SIGNALS:

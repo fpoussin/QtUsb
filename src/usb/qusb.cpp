@@ -2,16 +2,19 @@
 #include "qusb_p.h"
 #include <QDebug>
 #include <QThread>
+#include <QMutexLocker>
+#include <QMutex>
 
 #define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
-#define DbgPrintFuncName()                 \
+#define DbgPrintFuncName()             \
     if (m_log_level >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
-#define DbgPrintCB()                            \
+#define DbgPrintCB()                        \
     if (info->logLevel() >= QUsb::logDebug) \
     qDebug() << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
+static QMutex g_mtx_hid_enumerate; // protects calls to `hid_enumerate` and `hid_free_enumeration`
 
 static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
                                        libusb_device *device,
@@ -335,21 +338,26 @@ QUsb::IdList QUsb::devices()
     libusb_free_device_list(devs, 1);
     libusb_exit(ctx);
 
-    hid_devs = hid_enumerate(0x0, 0x0);
-    cur_hid_dev = hid_devs;
-    while (cur_hid_dev) {
+    {
+        // NOTE: on some platforms hid_enumerate is not thread-safe, so we need an application-wide mutex
+        QMutexLocker lock(&g_mtx_hid_enumerate);
 
-        QUsb::Id id;
-        id.pid = cur_hid_dev->product_id;
-        id.vid = cur_hid_dev->vendor_id;
-        id.bus = 0;
-        id.port = 0;
+        hid_devs = hid_enumerate(0x0, 0x0);
+        cur_hid_dev = hid_devs;
+        while (cur_hid_dev) {
 
-        list.append(id);
+            QUsb::Id id;
+            id.pid = cur_hid_dev->product_id;
+            id.vid = cur_hid_dev->vendor_id;
+            id.bus = 0;
+            id.port = 0;
 
-        cur_hid_dev = cur_hid_dev->next;
+            list.append(id);
+
+            cur_hid_dev = cur_hid_dev->next;
+        }
+        hid_free_enumeration(hid_devs);
     }
-    hid_free_enumeration(hid_devs);
 
     return list;
 }
@@ -404,7 +412,7 @@ bool QUsb::removeDevice(const QUsb::Id &id)
       Return index of the filter, returns -1 if not found.
  */
 int QUsb::findDevice(const QUsb::Id &id,
-                         const QUsb::IdList &list) const
+                     const QUsb::IdList &list) const
 {
     DbgPrintFuncName();
     for (int i = 0; i < list.length(); i++) {
