@@ -69,9 +69,11 @@ cmake %PROJDIR%
 
 
 IF NOT "%INSTALLPATH%"=="" (
+  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH%
   %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install
   %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% docs install_docs
 ) ELSE (
+  %BUILDTOOL%
   %BUILDTOOL% install docs install_docs
 )
 if %errorlevel% NEQ 0 EXIT /b %errorlevel%
