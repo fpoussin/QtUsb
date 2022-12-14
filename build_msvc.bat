@@ -2,7 +2,7 @@
 setlocal
 
 IF "%1"=="" (
-  echo "Missing MSVC version [2017|2019]"
+  echo "Missing MSVC version [2017|2019|2022]"
   pause
   exit /b 1c
 )
@@ -31,7 +31,6 @@ SET ARCH=%2
 SET LIBTYPE=%3
 SET QTDIR=%4
 
-SET BUILDTOOL=jom
 SET vcarch=%ARCH%
 SET usbarch=%ARCH%
 IF "%ARCH%" == "x64" SET vcarch=amd64
@@ -55,9 +54,6 @@ CALL "C:\Program Files (x86)\Microsoft Visual Studio\%MSVC%\Community\VC\Auxilia
 
 SET PATH=%QTDIR%\bin;C:\Qt\Tools\QtCreator\bin;%PATH%
 
-WHERE /Q jom
-IF %errorlevel% NEQ 0 SET BUILDTOOL=nmake
-
 git submodule update --init --recursive
 
 echo %BUILDDIR% %PROJDIR%
@@ -69,18 +65,18 @@ cmake %PROJDIR%
 
 
 IF NOT "%INSTALLPATH%"=="" (
-  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH%
-  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% install
-  %BUILDTOOL% INSTALL_ROOT=%INSTALLPATH% docs install_docs
+  cmake --build %BUILDDIR% --target install
+  cmake --build %BUILDDIR% --target docs install_docs
 ) ELSE (
   %BUILDTOOL%
-  %BUILDTOOL% install docs install_docs
+  cmake --build %BUILDDIR% --target install docs install_docs
 )
 if %errorlevel% NEQ 0 EXIT /b %errorlevel%
 
-%BUILDTOOL% sub-tests
-cd tests
-%BUILDTOOL% /I check TESTARGS="-o xunit.xml,xunitxml"
-if %errorlevel% NEQ 0 EXIT /b %errorlevel%
+REM cmake --build %BUILDDIR% --target sub-tests
+REM cd tests
+REM SET ExternalCompilerOptions=/DTESTARGS="-o xunit.xml,xunitxml"
+REM cmake --build %BUILDDIR% --target check
+REM if %errorlevel% NEQ 0 EXIT /b %errorlevel%
 
 endlocal
