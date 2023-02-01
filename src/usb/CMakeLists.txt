@@ -74,6 +74,8 @@ else()
     message(STATUS "Build as static Qt module")
     set(QTUSB_AS_STATIC_MODULE ON)
     qt_internal_add_module(Usb
+        EXCEPTIONS
+        NO_HEADERSCLEAN_CHECK
         STATIC
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB QTUSB_STATIC
@@ -86,6 +88,8 @@ else()
     message(STATUS "Build as dynamic Qt module")
     set(QTUSB_AS_DYNAMIC_MODULE ON)
     qt_internal_add_module(Usb
+        EXCEPTIONS
+        NO_HEADERSCLEAN_CHECK
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB
         INCLUDE_DIRECTORIES      ${CMAKE_CURRENT_SOURCE_DIR}
