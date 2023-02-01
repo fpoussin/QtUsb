@@ -70,12 +70,19 @@ if(NOT QTUSB_MODULE)
   install(TARGETS ${QTUSB_LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
   install(FILES ${QTUSB_PUBLIC_HEADERS} DESTINATION include/${QTUSB_LIB_NAME})
 else()
+  # Determine whether to disable header check -- available since Qt v6.5
+  if (Qt6Core_VERSION VERSION_LESS 6.5.0)
+    set(QTUSB_DISABLE_HEADER_CHECK "")
+  else()
+    set(QTUSB_DISABLE_HEADER_CHECK NO_HEADERSCLEAN_CHECK)
+  endif()
+
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static Qt module")
     set(QTUSB_AS_STATIC_MODULE ON)
     qt_internal_add_module(Usb
         EXCEPTIONS
-        NO_HEADERSCLEAN_CHECK
+        ${QTUSB_DISABLE_HEADER_CHECK}
         STATIC
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB QTUSB_STATIC
@@ -89,7 +96,7 @@ else()
     set(QTUSB_AS_DYNAMIC_MODULE ON)
     qt_internal_add_module(Usb
         EXCEPTIONS
-        NO_HEADERSCLEAN_CHECK
+        ${QTUSB_DISABLE_HEADER_CHECK}
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB
         INCLUDE_DIRECTORIES      ${CMAKE_CURRENT_SOURCE_DIR}
