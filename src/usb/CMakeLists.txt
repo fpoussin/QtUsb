@@ -70,19 +70,11 @@ if(NOT QTUSB_MODULE)
   install(TARGETS ${QTUSB_LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
   install(FILES ${QTUSB_PUBLIC_HEADERS} DESTINATION include/${QTUSB_LIB_NAME})
 else()
-  # Determine whether to disable header check -- available since Qt v6.5
-  if (Qt6Core_VERSION VERSION_LESS 6.5.0)
-    set(QTUSB_DISABLE_HEADER_CHECK "")
-  else()
-    set(QTUSB_DISABLE_HEADER_CHECK NO_HEADERSCLEAN_CHECK)
-  endif()
-
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static Qt module")
     set(QTUSB_AS_STATIC_MODULE ON)
     qt_internal_add_module(Usb
         EXCEPTIONS
-        ${QTUSB_DISABLE_HEADER_CHECK}
         STATIC
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB QTUSB_STATIC
@@ -96,7 +88,6 @@ else()
     set(QTUSB_AS_DYNAMIC_MODULE ON)
     qt_internal_add_module(Usb
         EXCEPTIONS
-        ${QTUSB_DISABLE_HEADER_CHECK}
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB
         INCLUDE_DIRECTORIES      ${CMAKE_CURRENT_SOURCE_DIR}
@@ -131,13 +122,40 @@ set(QTUSB_EXTRA_WIN32_SOURCES
   ../../libusb/libusb/sync.c
 )
 
+set(QTUSB_WIN32_DEPS_DIR ${CMAKE_CURRENT_BINARY_DIR}/libinclude)
 set(QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES
-  ../../hidapi
-  ../../hidapi/hidapi
-  ../../libusb
-  ../../libusb/libusb
+  ${QTUSB_WIN32_DEPS_DIR}/hidapi
+  ${QTUSB_WIN32_DEPS_DIR}/hidapi/hidapi
+  ${QTUSB_WIN32_DEPS_DIR}/libusb
+  ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb
   ../deps/msvc
 )
+
+if(WIN32)
+  # On Windows, the compiler attempts to check every single file present in the include directory (not just headers).
+  # This causes unnecessary build errors. For that reason, we copy all headers into an auxiliary directory, which
+  # we fully control, and can guarantee will be devoid of any non-header files. We then use this directory in the include path.
+  
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR})
+
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/hidapi)
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/hidapi/hidapi)
+  configure_file(../../hidapi/hidapi/hidapi.h               ${QTUSB_WIN32_DEPS_DIR}/hidapi/hidapi/hidapi.h                COPYONLY)
+
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/libusb)
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb)
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os)
+  configure_file(../../libusb/libusb/hotplug.h              ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/hotplug.h               COPYONLY)
+  configure_file(../../libusb/libusb/libusb.h               ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/libusb.h                COPYONLY)
+  configure_file(../../libusb/libusb/libusbi.h              ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/libusbi.h               COPYONLY)
+  configure_file(../../libusb/libusb/version_nano.h         ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/version_nano.h          COPYONLY)
+  configure_file(../../libusb/libusb/version.h              ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/version.h               COPYONLY)
+  configure_file(../../libusb/libusb/os/events_windows.h    ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/events_windows.h     COPYONLY)
+  configure_file(../../libusb/libusb/os/threads_windows.h   ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/threads_windows.h    COPYONLY)
+  configure_file(../../libusb/libusb/os/windows_common.h    ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/windows_common.h     COPYONLY)
+  configure_file(../../libusb/libusb/os/windows_usbdk.h     ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/windows_usbdk.h      COPYONLY)
+  configure_file(../../libusb/libusb/os/windows_winusb.h    ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/windows_winusb.h     COPYONLY)
+endif()
 
 set(QTUSB_EXTRA_WIN32_LIBRARIES
   Advapi32.lib
