@@ -503,7 +503,6 @@ void QUsbEventsThread::run()
     timeval t = { 0, 100000 };
     while (!this->isInterruptionRequested()) {
         if (libusb_event_handling_ok(m_ctx) == 0) {
-            libusb_unlock_events(m_ctx);
             break;
         }
         if (libusb_handle_events_timeout_completed(m_ctx, &t, Q_NULLPTR) != 0) {

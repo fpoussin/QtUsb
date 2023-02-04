@@ -45,22 +45,24 @@ configure_file(qusbglobal.h.in ${CMAKE_CURRENT_SOURCE_DIR}/qusbglobal.h)
 set(QTUSB_SOURCES         qhiddevice.cpp qusb.cpp qusbdevice.cpp qusbendpoint.cpp)
 set(QTUSB_PUBLIC_HEADERS  qhiddevice.h qusb.h qusbdevice.h qusbendpoint.h qusbglobal.h)
 set(QTUSB_PRIVATE_HEADERS qhiddevice_p.h qusb_p.h qusbdevice_p.h qusbendpoint_p.h)
+set(QTUSB_PROXY_HEADERS   extusb/QHidDevice extusb/QUsb extusb/QUsbDevice extusb/QUsbEndpoint extusb/QUsbGlobal)
 
 # Define the actual targets for building
 if(NOT QTUSB_MODULE)
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static library")
     set(QTUSB_AS_STATIC_LIB ON)
-    add_library(${QTUSB_LIB_NAME} STATIC ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS})
+    add_library(${QTUSB_LIB_NAME} STATIC ${QTUSB_SOURCES} ${QTUSB_PROXY_HEADERS} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS})
     target_compile_definitions(${QTUSB_LIB_NAME} PRIVATE QTUSB_STATIC)
   else()
     message(STATUS "Build as dynamic library")
     set(QTUSB_AS_DYNAMIC_LIB ON)
-    add_library(${QTUSB_LIB_NAME} SHARED ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS})
+    add_library(${QTUSB_LIB_NAME} SHARED ${QTUSB_SOURCES} ${QTUSB_PROXY_HEADERS} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS})
   endif()
 
   target_compile_definitions(${QTUSB_LIB_NAME} PRIVATE QT_BUILD_USB_LIB)
   target_include_directories(${QTUSB_LIB_NAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR})
+  target_include_directories(${QTUSB_LIB_NAME} PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/extusb)
   target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE Qt::CorePrivate)
   target_link_libraries(${QTUSB_LIB_NAME}      PUBLIC  Qt::Core)
 
@@ -69,11 +71,13 @@ if(NOT QTUSB_MODULE)
 
   install(TARGETS ${QTUSB_LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
   install(FILES ${QTUSB_PUBLIC_HEADERS} DESTINATION include/${QTUSB_LIB_NAME})
+  install(FILES ${QTUSB_PROXY_HEADERS} DESTINATION include/${QTUSB_LIB_NAME})
 else()
   if(NOT BUILD_SHARED_LIBS)
     message(STATUS "Build as static Qt module")
     set(QTUSB_AS_STATIC_MODULE ON)
     qt_internal_add_module(Usb
+        EXCEPTIONS
         STATIC
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB QTUSB_STATIC
@@ -86,6 +90,7 @@ else()
     message(STATUS "Build as dynamic Qt module")
     set(QTUSB_AS_DYNAMIC_MODULE ON)
     qt_internal_add_module(Usb
+        EXCEPTIONS
         SOURCES                  ${QTUSB_SOURCES} ${QTUSB_PUBLIC_HEADERS} ${QTUSB_PRIVATE_HEADERS}
         DEFINES                  QT_BUILD_USB_LIB
         INCLUDE_DIRECTORIES      ${CMAKE_CURRENT_SOURCE_DIR}
@@ -120,13 +125,40 @@ set(QTUSB_EXTRA_WIN32_SOURCES
   ../../libusb/libusb/sync.c
 )
 
+set(QTUSB_WIN32_DEPS_DIR ${CMAKE_CURRENT_BINARY_DIR}/libinclude)
 set(QTUSB_EXTRA_WIN32_INCLUDE_DIRECTORIES
-  ../../hidapi
-  ../../hidapi/hidapi
-  ../../libusb
-  ../../libusb/libusb
+  ${QTUSB_WIN32_DEPS_DIR}/hidapi
+  ${QTUSB_WIN32_DEPS_DIR}/hidapi/hidapi
+  ${QTUSB_WIN32_DEPS_DIR}/libusb
+  ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb
   ../deps/msvc
 )
+
+if(WIN32)
+  # On Windows, the compiler attempts to check every single file present in the include directory (not just headers).
+  # This causes unnecessary build errors. For that reason, we copy all headers into an auxiliary directory, which
+  # we fully control, and can guarantee will be devoid of any non-header files. We then use this directory in the include path.
+  
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR})
+
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/hidapi)
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/hidapi/hidapi)
+  configure_file(../../hidapi/hidapi/hidapi.h               ${QTUSB_WIN32_DEPS_DIR}/hidapi/hidapi/hidapi.h                COPYONLY)
+
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/libusb)
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb)
+  file(MAKE_DIRECTORY ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os)
+  configure_file(../../libusb/libusb/hotplug.h              ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/hotplug.h               COPYONLY)
+  configure_file(../../libusb/libusb/libusb.h               ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/libusb.h                COPYONLY)
+  configure_file(../../libusb/libusb/libusbi.h              ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/libusbi.h               COPYONLY)
+  configure_file(../../libusb/libusb/version_nano.h         ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/version_nano.h          COPYONLY)
+  configure_file(../../libusb/libusb/version.h              ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/version.h               COPYONLY)
+  configure_file(../../libusb/libusb/os/events_windows.h    ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/events_windows.h     COPYONLY)
+  configure_file(../../libusb/libusb/os/threads_windows.h   ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/threads_windows.h    COPYONLY)
+  configure_file(../../libusb/libusb/os/windows_common.h    ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/windows_common.h     COPYONLY)
+  configure_file(../../libusb/libusb/os/windows_usbdk.h     ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/windows_usbdk.h      COPYONLY)
+  configure_file(../../libusb/libusb/os/windows_winusb.h    ${QTUSB_WIN32_DEPS_DIR}/libusb/libusb/os/windows_winusb.h     COPYONLY)
+endif()
 
 set(QTUSB_EXTRA_WIN32_LIBRARIES
   Advapi32.lib
@@ -210,20 +242,10 @@ if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
 
   qt_internal_add_docs(Usb doc/qtusb.qdocconf)
 else()
-  # We need to translate the UNIX macro, which is defined/undefined into a 0/1 variable for the generator expressions below.
-  # Stupid but works.
-  set(IS_UNIX 0)
-  if(UNIX)
-    set(IS_UNIX 1)
-  endif()
-
-  target_link_libraries(
-    ${QTUSB_LIB_NAME} PRIVATE
-    $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:LibUSB1::LibUSB1>
-    $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:HIDAPI::hidapi-libusb>
-  )
-
   # What follows is a poor man's implementation of qt_internal_extend_target():
+  if(UNIX AND NOT MACOS)
+    target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE LibUSB1::LibUSB1 HIDAPI::hidapi-libusb)
+  endif()
 
   if(WIN32)
     target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_WIN32_LIBRARIES})
