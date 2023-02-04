@@ -242,20 +242,10 @@ if(QTUSB_AS_STATIC_MODULE OR QTUSB_AS_DYNAMIC_MODULE)
 
   qt_internal_add_docs(Usb doc/qtusb.qdocconf)
 else()
-  # We need to translate the UNIX macro, which is defined/undefined into a 0/1 variable for the generator expressions below.
-  # Stupid but works.
-  set(IS_UNIX 0)
-  if(UNIX)
-    set(IS_UNIX 1)
-  endif()
-
-  target_link_libraries(
-    ${QTUSB_LIB_NAME} PRIVATE
-    $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:LibUSB1::LibUSB1>
-    $<$<AND:${IS_UNIX},$<NOT:${MACOS}>>:HIDAPI::hidapi-libusb>
-  )
-
   # What follows is a poor man's implementation of qt_internal_extend_target():
+  if(UNIX AND NOT MACOS)
+    target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE LibUSB1::LibUSB1 HIDAPI::hidapi-libusb)
+  endif()
 
   if(WIN32)
     target_link_libraries(${QTUSB_LIB_NAME}      PRIVATE ${QTUSB_EXTRA_WIN32_LIBRARIES})
