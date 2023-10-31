@@ -1,10 +1,12 @@
 #ifndef QUSBENDPOINT_H
 #define QUSBENDPOINT_H
 
-#include "qusbdevice.h"
-#include "qusb.h"
+#include "QtUsb/qusbdevice.h"
+#include "QtUsb/qusb.h"
 #include <QIODevice>
 #include <QObject>
+
+QT_BEGIN_NAMESPACE
 
 class QUsbEndpointPrivate;
 
@@ -111,5 +113,7 @@ private:
     const Type m_type;
     const quint8 m_ep;
 };
+
+QT_END_NAMESPACE
 
 #endif // QUSBENDPOINT_H

@@ -2,7 +2,7 @@
 #define QHIDDEVICE_H
 
 #include <QObject>
-#include "qusbdevice.h"
+#include "QtUsb/qusbdevice.h"
 
 QT_BEGIN_NAMESPACE
 

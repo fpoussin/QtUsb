@@ -1,8 +1,8 @@
 #ifndef QUSBDEVICE_H
 #define QUSBDEVICE_H
 
-#include "qusbglobal.h"
-#include "qusb.h"
+#include "QtUsb/qusbglobal.h"
+#include "QtUsb/qusb.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QString>

@@ -1,7 +1,7 @@
 #ifndef QUSB_H
 #define QUSB_H
 
-#include "qusbglobal.h"
+#include "QtUsb/qusbglobal.h"
 #include <QList>
 
 // Stupid windows conflict
@@ -105,8 +105,8 @@ private:
     Q_DISABLE_COPY(QUsb)
 };
 
-Q_DECLARE_METATYPE(QUsb::Config);
-Q_DECLARE_METATYPE(QUsb::Id);
+Q_DECLARE_METATYPE(QUsb::Config)
+Q_DECLARE_METATYPE(QUsb::Id)
 
 QT_END_NAMESPACE
 
