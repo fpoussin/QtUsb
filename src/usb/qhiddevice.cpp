@@ -115,7 +115,7 @@ qint32 QHidDevice::getFeatureReport(QByteArray *data, int len)
     if (len == -1)
         len = data->size();
     // Allocate max read size
-    data->fill(0, len);
+    data->resize(len);
 
     return hid_get_feature_report(d->m_devHandle, reinterpret_cast<unsigned char *>(data->data()), static_cast<size_t>(len));
 }
