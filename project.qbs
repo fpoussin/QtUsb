@@ -3,20 +3,27 @@ import qbs.Probes
 
 Project {
 	property string installContentsPath
-	property string installFrameworksDir
+	property string installLibraryDir
+
+	property bool withExternalDeps: true
 
 	qbsSearchPaths: ['qbs']
 
 	references: [
 		'examples/examples.qbs',
 		'src/src.qbs',
-		'tests/tests.qbs',
-		FileInfo.joinPaths(conan.generatedFilesPath, 'conanbuildinfo.qbs'),
+		'tests/tests.qbs'
 	]
+
+	SubProject {
+		condition: conan.found
+		filePath: FileInfo.joinPaths(conan.generatedFilesPath, 'conanbuildinfo.qbs')
+	}
 
 	Probes.ConanfileProbe {
 		id: conan
-		conanfilePath: FileInfo.joinPaths(project.sourceDirectory, 'conanfile.txt')
+		condition: withExternalDeps
+		conanfilePath: FileInfo.joinPaths(path, 'conanfile.txt')
 		additionalArguments: ['--build=missing']
 
 		settings: ({

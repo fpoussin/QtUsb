@@ -40,7 +40,7 @@ Project {
 			qbs.install: true
 			qbs.installSourceBase: product.buildDirectory
 			qbs.installPrefix: project.installContentsPath
-			qbs.installDir: project.installFrameworksDir
+			qbs.installDir: project.installLibraryDir
 		}
 	}
 }
