@@ -9,7 +9,6 @@ doc/
 .qmake.stash
 Makefile
 version
-include
 lib
 mkspecs
 bin
