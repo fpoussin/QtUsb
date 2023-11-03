@@ -1,6 +1,0 @@
-[submodule "libusb"]
-	path = libusb
-	url = https://github.com/fpoussin/libusb.git
-[submodule "hidapi"]
-	path = hidapi
-	url = https://github.com/libusb/hidapi.git
