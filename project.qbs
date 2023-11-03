@@ -2,6 +2,8 @@ import qbs.FileInfo
 import qbs.Probes
 
 Project {
+	qbsSearchPaths: ['qbs']
+
 	references: [
 		'examples/examples.qbs',
 		'src/src.qbs',
