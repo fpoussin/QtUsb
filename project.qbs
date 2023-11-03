@@ -2,6 +2,9 @@ import qbs.FileInfo
 import qbs.Probes
 
 Project {
+	property string installContentsPath
+	property string installFrameworksDir
+
 	qbsSearchPaths: ['qbs']
 
 	references: [

@@ -34,5 +34,13 @@ Project {
 			cpp.frameworkPaths: [exportingProduct.buildDirectory]
 			cpp.libraryPaths: [exportingProduct.buildDirectory]
 		}
+
+		Group {
+			fileTagsFilter: 'bundle.content'
+			qbs.install: true
+			qbs.installSourceBase: product.buildDirectory
+			qbs.installPrefix: project.installContentsPath
+			qbs.installDir: project.installFrameworksDir
+		}
 	}
 }
