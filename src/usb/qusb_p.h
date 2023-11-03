@@ -16,16 +16,8 @@
 #include <private/qobject_p.h>
 #include <QTimer>
 
-#if defined(Q_OS_MACOS)
-  #include <libusb.h>
-  #include <hidapi.h>
-#elif defined(Q_OS_UNIX)
-  #include <libusb-1.0/libusb.h>
-  #include <hidapi.h>
-#else
-  #include <libusb/libusb.h>
-  #include <hidapi/hidapi.h>
-#endif
+#include <libusb-1.0/libusb.h>
+#include <hidapi/hidapi.h>
 
 QT_BEGIN_NAMESPACE
 

@@ -1,0 +1,8 @@
+[requires]
+libusb/1.0.26
+hidapi/0.14.0
+
+[options]
+
+[generators]
+qbs

@@ -14,7 +14,7 @@
 
 #include "qhiddevice.h"
 #include <private/qobject_p.h>
-#include <hidapi.h>
+#include <hidapi/hidapi.h>
 
 QT_BEGIN_NAMESPACE
 

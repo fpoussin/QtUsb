@@ -1,9 +1,9 @@
 #ifndef USBEXAMPLE_H
 #define USBEXAMPLE_H
 
-#include <QObject>
-#include <QUsbDevice>
-#include <QUsb>
+#include <QtCore/QObject>
+#include <QtUsb/QUsbDevice>
+#include <QtUsb/QUsb>
 
 class UsbExample : public QObject
 {
