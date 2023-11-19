@@ -16,6 +16,9 @@ Project {
 			'include',
 			'include/QtUsb',
 		]
+		cpp.defines: [
+			'QT_BUILD_USB_LIB=1'
+		]
 
 		files: ['usb/**']  /**/
 

@@ -16,13 +16,7 @@
 #include <private/qobject_p.h>
 #include <QThread>
 
-#if defined(Q_OS_MACOS)
-  #include <libusb.h>
-#elif defined(Q_OS_UNIX)
-  #include <libusb-1.0/libusb.h>
-#else
-  #include <libusb/libusb.h>
-#endif
+#include <libusb-1.0/libusb.h>
 
 QT_BEGIN_NAMESPACE
 
