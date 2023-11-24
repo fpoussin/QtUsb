@@ -19,6 +19,8 @@ Project {
 		cpp.defines: [
 			'QT_BUILD_USB_LIB=1'
 		]
+		cpp.sonamePrefix: qbs.targetOS.contains('macos')? '@rpath' : undefined
+		cpp.rpaths: cpp.rpathOrigin
 
 		files: ['usb/**']  /**/
 
