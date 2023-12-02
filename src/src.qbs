@@ -41,7 +41,7 @@ Project {
 		}
 
 		Group {
-			fileTagsFilter: 'bundle.content'
+			fileTagsFilter: qbs.targetOS.contains('macos')? 'bundle.content' : 'dynamiclibrary'
 			qbs.install: true
 			qbs.installSourceBase: product.buildDirectory
 			qbs.installPrefix: project.installContentsPath
