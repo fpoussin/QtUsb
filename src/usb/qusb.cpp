@@ -403,7 +403,7 @@ bool QUsb::removeDevice(const QUsb::Id &id)
         m_list.removeAt(pos);
         return true;
     }
-    return true;
+    return false;
 }
 
 /*!
