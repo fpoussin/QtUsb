@@ -405,6 +405,19 @@ bool QUsb::removeDevice(const QUsb::Id &id)
     }
     return false;
 }
+/*!
+    \brief Check if \a id device is in the list.
+
+    \param id The device ID to check.
+    \return bool True if the device is in the list, else false.
+*/
+bool QUsb::isDeviceInList(const QUsb::Id &id) const
+{
+    DbgPrintFuncName();
+
+    return this->findDevice(id, m_list) >= 0;
+}
+
 
 /*!
       Search an \a id device in a device \a list.
