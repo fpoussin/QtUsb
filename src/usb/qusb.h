@@ -90,6 +90,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     bool addDevice(const Id &id);
     bool removeDevice(const Id &id);
+    bool isDeviceInList(const Id &id) const;
 
 protected Q_SLOTS:
     void monitorDevices(const IdList &list);
