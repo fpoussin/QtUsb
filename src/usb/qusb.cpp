@@ -5,13 +5,15 @@
 #include <QMutexLocker>
 #include <QMutex>
 
-#define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+Q_LOGGING_CATEGORY(qUsb, "qusb")
+
+#define DbgPrintError() qCWarning(qUsb, "In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define DbgPrintFuncName()             \
     if (m_log_level >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb) << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrintCB()                        \
     if (info->logLevel() >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb) << "***[" << Q_FUNC_INFO << "]***"
 
 static libusb_hotplug_callback_handle callback_handle;
 static QMutex g_mtx_hid_enumerate; // protects calls to `hid_enumerate` and `hid_free_enumeration`
@@ -31,8 +33,7 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     uint8_t bus = libusb_get_bus_number(device);
     uint8_t port = libusb_get_port_number(device);
 
-    if (info->logLevel() >= QUsb::logDebug)
-        qDebug("hotplugCallback");
+    qCDebug(qUsb) << "hotplugCallback";
 
     libusb_get_device_descriptor(device, &desc);
     id.vid = desc.idVendor;
@@ -43,18 +44,18 @@ static int LIBUSB_CALL hotplugCallback(libusb_context *ctx,
     id.dSubClass = desc.bDeviceSubClass;
 
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
-
+        qCDebug(qUsb) << "Hotplug - device inserted: " << id;
         // Add to list
         emit info->deviceInserted(id);
 
     } else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
-
+        qCDebug(qUsb) << "Hotplug - device removed: " << id;
         // Remove from list
         emit info->deviceRemoved(id);
 
     } else {
         if (info->logLevel() >= QUsb::logWarning)
-            qWarning("Unhandled hotplug event %d", event);
+            qCWarning(qUsb, "Unhandled hotplug event %d", event);
         return -1;
     }
     return 0;
@@ -228,10 +229,11 @@ QUsb::QUsb(QObject *parent)
     qRegisterMetaType<QUsb::IdList>("QUsb::IdList");
     qRegisterMetaType<QUsb::ConfigList>("QUsb::ConfigList");
 
+    qCDebug(qUsb) << "libusb_init";
     rc = libusb_init(&d->m_ctx);
     if (rc < 0) {
         libusb_exit(d->m_ctx);
-        qCritical("LibUsb Init Error %d", rc);
+        qCCritical(qUsb, "LibUsb Init Error %d", rc);
         return;
     }
 
@@ -241,6 +243,7 @@ QUsb::QUsb(QObject *parent)
     m_system_list = devices();
 
     // Try hotplug first
+    qCDebug(qUsb) << "Try hotplug first";
     d->m_has_hotplug = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG) != 0;
     if (d->m_has_hotplug) {
 
@@ -255,12 +258,13 @@ QUsb::QUsb(QObject *parent)
                                               &callback_handle);
         if (LIBUSB_SUCCESS != rc) {
             libusb_exit(d->m_ctx);
-            qWarning("Error creating hotplug callback");
+            qCWarning(qUsb, "Error creating hotplug callback");
             return;
         }
     }
 
     connect(d->m_refresh_timer, SIGNAL(timeout()), this, SLOT(checkDevices()));
+    qCDebug(qUsb) << "QUsb created";
 }
 
 /*!
@@ -276,7 +280,10 @@ QUsb::~QUsb()
         libusb_handle_events_timeout_completed(d->m_ctx, &t, Q_NULLPTR);
         libusb_hotplug_deregister_callback(d->m_ctx, callback_handle);
     }
+    qCDebug(qUsb) << "libusb exit";
     libusb_exit(d->m_ctx);
+
+    qCDebug(qUsb) << "QUsb destroyed";
 }
 
 /*!
@@ -311,14 +318,17 @@ QUsb::IdList QUsb::devices()
     libusb_context *ctx;
     struct hid_device_info *hid_devs, *cur_hid_dev;
 
+    qCDebug(qUsb) << "QUsb devices";
+
     libusb_init(&ctx);
     libusb_set_option(ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_NONE);
     cnt = libusb_get_device_list(ctx, &devs); // get the list of devices
     if (cnt < 0) {
-        qCritical("libusb_get_device_list Error");
+        qCCritical(qUsb, "libusb_get_device_list Error");
         libusb_free_device_list(devs, 1);
         return list;
     }
+    qCDebug(qUsb) << "QUsb devices cnt " << cnt;
 
     for (int i = 0; i < cnt; i++) {
         libusb_device *dev = devs[i];
@@ -338,9 +348,12 @@ QUsb::IdList QUsb::devices()
     libusb_free_device_list(devs, 1);
     libusb_exit(ctx);
 
+    qCDebug(qUsb) << "QUsb devices libusb_exit";
+
     {
         // NOTE: on some platforms hid_enumerate is not thread-safe, so we need an application-wide mutex
         QMutexLocker lock(&g_mtx_hid_enumerate);
+        qCDebug(qUsb) << "QUsb devices mutex lock";
 
         hid_devs = hid_enumerate(0x0, 0x0);
         cur_hid_dev = hid_devs;
@@ -357,6 +370,8 @@ QUsb::IdList QUsb::devices()
             cur_hid_dev = cur_hid_dev->next;
         }
         hid_free_enumeration(hid_devs);
+
+        qCDebug(qUsb) << "QUsb devices mutex unlock";
     }
 
     return list;
@@ -386,6 +401,7 @@ bool QUsb::addDevice(const QUsb::Id &id)
         m_list.append(id);
         return true;
     }
+    qCDebug(qUsb) << "Could not add device id=" << id;
     return false;
 }
 
@@ -399,10 +415,12 @@ bool QUsb::removeDevice(const QUsb::Id &id)
 
     DbgPrintFuncName();
     const int pos = this->findDevice(id, m_list);
+    // TODO: Seems bug in condition and returned value: pos = -1 if not found, else pos = index
     if (pos > 0) {
         m_list.removeAt(pos);
         return true;
     }
+    qCDebug(qUsb) << "Could not removeDevice id=" << id;
     return true;
 }
 
@@ -425,6 +443,7 @@ int QUsb::findDevice(const QUsb::Id &id,
                 return i;
         }
     }
+    qCWarning(qUsb) << "Device with id=" << id << "was not found";
     return -1;
 }
 
@@ -479,10 +498,12 @@ void QUsb::monitorDevices(const QUsb::IdList &list)
     }
 
     for (int i = 0; i < inserted.length(); i++) {
+        qCDebug(qUsb) << "device inserted: " << inserted.at(i);
         emit deviceInserted(inserted.at(i));
     }
 
     for (int i = 0; i < removed.length(); i++) {
+        qCDebug(qUsb) << "device removed: " << removed.at(i);
         emit deviceRemoved(removed.at(i));
     }
 

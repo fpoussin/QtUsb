@@ -2,13 +2,13 @@
 #include "qusbdevice_p.h"
 #include <QElapsedTimer>
 
-#define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define DbgPrintError() qCWarning(qUsb, "In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define DbgPrintPrivFuncName()       \
     if (m_classes.pub->m_log_level >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb) << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrintFuncName()       \
     if (m_log_level >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb) << "***[" << Q_FUNC_INFO << "]***"
 
 static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
                                           libusb_device *device,
@@ -21,7 +21,7 @@ static int LIBUSB_CALL DeviceLeftCallback(libusb_context *ctx,
     qusbdevice_classes_t *dev = reinterpret_cast<qusbdevice_classes_t *>(user_data);
 
     if (dev->pub->logLevel() >= QUsb::logDebug)
-        qDebug("DeviceLeftCallback");
+        qCDebug(qUsb, "DeviceLeftCallback");
 
     if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
         if (dev->priv->m_ctx == ctx && *dev->priv->m_devs == device)
@@ -34,7 +34,7 @@ QUsbDevicePrivate::QUsbDevicePrivate()
 {
     int rc = libusb_init(&m_ctx);
     if (rc < 0) {
-        qCritical("LibUsb Init Error %d", rc);
+        qCCritical(qUsb, "LibUsb Init Error %d", rc);
     }
     m_devHandle = Q_NULLPTR;
     m_callbackHandle = 0;
@@ -62,7 +62,7 @@ void QUsbDevicePrivate::registerDisconnectCallback(int vid, int pid)
                                               &m_callbackHandle);
         if (LIBUSB_SUCCESS != rc) {
             libusb_exit(m_ctx);
-            qWarning("Error creating hotplug callback");
+            qCWarning(qUsb, "Error creating hotplug callback");
             return;
         }
     }
@@ -228,7 +228,7 @@ void QUsbDevice::handleUsbError(int error_code)
     DeviceStatus status = static_cast<QUsbDevice::DeviceStatus>(error_code);
     if (status != m_status) {
         m_status = status;
-        qWarning("Usb device status changed: %s", statusString().constData());
+        qCWarning(qUsb, "Usb device status changed: %s", statusString().constData());
         emit statusChanged(m_status);
     }
 }
@@ -249,13 +249,13 @@ qint32 QUsbDevice::open()
         return -1;
 
     if ((m_id.pid == 0 || m_id.vid == 0) && (m_id.dClass == 0 || m_id.dSubClass == 0) && (m_id.bus == QUsb::busAny || m_id.port == QUsb::portAny)) {
-        qWarning("No device IDs or classes are defined. Aborting.");
+        qCWarning(qUsb, "No device IDs or classes are defined. Aborting.");
         return -1;
     }
 
     cnt = libusb_get_device_list(d->m_ctx, &d->m_devs); // get the list of devices
     if (cnt < 0) {
-        qCritical("libusb_get_device_list error");
+        qCCritical(qUsb, "libusb_get_device_list error");
         libusb_free_device_list(d->m_devs, 1);
         return -1;
     }
@@ -287,7 +287,7 @@ qint32 QUsbDevice::open()
                 && bus == tmp_id.bus && port == tmp_id.port
                 && desc.bDeviceClass == tmp_id.dClass && desc.bDeviceSubClass == tmp_id.dSubClass) {
                 if (m_log_level >= QUsb::logInfo)
-                    qInfo("Found device");
+                    qCInfo(qUsb, "Found device");
 
                 rc = libusb_open(dev, &d->m_devHandle);
                 if (rc == 0) {
@@ -295,7 +295,7 @@ qint32 QUsbDevice::open()
                     break;
                 }
                 else if (m_log_level >= QUsb::logWarning) {
-                    qWarning("Failed to open device: %s", libusb_strerror(static_cast<enum libusb_error>(rc)));
+                    qCWarning(qUsb, "Failed to open device: %s", libusb_strerror(static_cast<enum libusb_error>(rc)));
                 }
             }
         }
@@ -307,14 +307,14 @@ qint32 QUsbDevice::open()
     }
 
     if (m_log_level >= QUsb::logInfo)
-        qInfo("Device Open");
+        qCInfo(qUsb, "Device Open");
 
     if (libusb_kernel_driver_active(d->m_devHandle, m_config.interface) == 1) { // find out if kernel driver is attached
         if (m_log_level >= QUsb::logDebug)
-            qDebug("Kernel Driver Active");
+            qCDebug(qUsb, "Kernel Driver Active");
         if (libusb_detach_kernel_driver(d->m_devHandle, m_config.interface) == 0) // detach it
             if (m_log_level >= QUsb::logDebug)
-                qDebug("Kernel Driver Detached!");
+                qCDebug(qUsb, "Kernel Driver Detached!");
     }
 
     int conf;
@@ -322,11 +322,11 @@ qint32 QUsbDevice::open()
 
     if (conf != m_config.config) {
         if (m_log_level >= QUsb::logInfo)
-            qInfo("Configuration needs to be changed");
+            qCInfo(qUsb, "Configuration needs to be changed");
         rc = libusb_set_configuration(d->m_devHandle, m_config.config);
         if (rc != 0) {
             if (m_log_level >= QUsb::logWarning)
-                qWarning("Cannot Set Configuration");
+                qCWarning(qUsb, "Cannot Set Configuration");
             handleUsbError(rc);
             return -3;
         }
@@ -334,7 +334,7 @@ qint32 QUsbDevice::open()
     rc = libusb_claim_interface(d->m_devHandle, m_config.interface);
     if (rc != 0) {
         if (m_log_level >= QUsb::logWarning)
-            qWarning("Cannot Claim Interface");
+            qCWarning(qUsb, "Cannot Claim Interface");
         handleUsbError(rc);
         return -4;
     }
@@ -379,7 +379,7 @@ void QUsbDevice::close()
     if (d->m_devHandle && m_connected) {
         // stop any further write attempts whilst we close down
         if (m_log_level >= QUsb::logInfo)
-            qInfo("Closing USB connection");
+            qCInfo(qUsb, "Closing USB connection");
 
         d->deregisterDisconnectCallback();
 
@@ -392,7 +392,7 @@ void QUsbDevice::close()
         emit connectionChanged(m_connected);
     } else { // do not emit signal if device is already closed.
         if (m_log_level >= QUsb::logInfo)
-            qInfo("USB connection already closed");
+            qCInfo(qUsb, "USB connection already closed");
     }
 }
 

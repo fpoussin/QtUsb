@@ -3,16 +3,16 @@
 
 #include <QElapsedTimer>
 
-#define DbgPrintError() qWarning("In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
+#define DbgPrintError() qCWarning(qUsb, "In %s, at %s:%d", Q_FUNC_INFO, __FILE__, __LINE__)
 #define DbgPrintFuncName()                     \
     if (d->logLevel() >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb, ) << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrivPrintFuncName()                    \
     if (this->logLevel() >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb, ) << "***[" << Q_FUNC_INFO << "]***"
 #define DbgPrintCB(e)                          \
     if (e->logLevel() >= QUsb::logDebug) \
-    qDebug() << "***[" << Q_FUNC_INFO << "]***"
+    qCDebug(qUsb, ) << "***[" << Q_FUNC_INFO << "]***"
 
 /* Write callback */
 static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
@@ -29,7 +29,7 @@ static void LIBUSB_CALL cb_out(struct libusb_transfer *transfer)
     endpoint->setStatus(static_cast<QUsbEndpoint::Status>(s));
 
     if (endpoint->logLevel() >= QUsb::logDebug)
-        qDebug("OUT: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
+        qCDebug(qUsb, "OUT: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
                transfer->status,
                transfer->timeout,
                transfer->endpoint,
@@ -71,7 +71,7 @@ static void LIBUSB_CALL cb_in(struct libusb_transfer *transfer)
     const int received = transfer->actual_length;
 
     if (endpoint->logLevel() >= QUsb::logDebug)
-        qDebug("IN: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
+        qCDebug(qUsb, "IN: status = %d, timeout = %d, endpoint = %x, actual_length = %d, length = %d",
                transfer->status,
                transfer->timeout,
                transfer->endpoint,
@@ -220,7 +220,7 @@ bool QUsbEndpointPrivate::prepareTransfer(libusb_transfer **tr, libusb_transfer_
 
     if (tr == Q_NULLPTR) {
         if (this->logLevel() >= QUsb::logWarning)
-            qWarning("QUsbEndpoint: Transfer buffer allocation failed");
+            qCWarning(qUsb, "QUsbEndpoint: Transfer buffer allocation failed");
         return false;
     }
 
@@ -460,7 +460,7 @@ bool QUsbEndpoint::open(QIODevice::OpenMode mode)
         break;
 
     default: {
-        qWarning("QUsbEndpoint::open Invalid mode");
+        qCWarning(qUsb, "QUsbEndpoint::open Invalid mode");
         return false;
     }
     }
@@ -639,19 +639,19 @@ bool QUsbEndpoint::poll()
 
     if (!isOpen()) {
         if (d->logLevel() >= QUsb::logWarning)
-            qWarning("QUsbEndpoint: Handle not open. Ignoring.");
+            qCWarning(qUsb, "QUsbEndpoint: Handle not open. Ignoring.");
         return false;
     }
 
     if (!(openMode() & ReadOnly)) {
         if (d->logLevel() >= QUsb::logWarning)
-            qWarning("QUsbEndpoint: Trying to poll without read mode. Ignoring.");
+            qCWarning(qUsb, "QUsbEndpoint: Trying to poll without read mode. Ignoring.");
         return false;
     }
 
     if (polling()) {
         if (d->logLevel() >= QUsb::logWarning)
-            qWarning("QUsbEndpoint: Trying to poll with automatic polling enabled. Ignoring.");
+            qCWarning(qUsb, "QUsbEndpoint: Trying to poll with automatic polling enabled. Ignoring.");
         return false;
     }
 

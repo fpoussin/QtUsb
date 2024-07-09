@@ -2,7 +2,10 @@
 #define QHIDDEVICE_H
 
 #include <QObject>
-#include "QtUsb/qusbdevice.h"
+#include <QLoggingCategory>
+#include "QtUsb/qusbglobal.h"
+
+Q_DECLARE_LOGGING_CATEGORY(qHidDevice)
 
 QT_BEGIN_NAMESPACE
 

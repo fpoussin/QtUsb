@@ -9,6 +9,8 @@
   #undef interface
 #endif
 
+Q_DECLARE_LOGGING_CATEGORY(qUsb)
+
 QT_BEGIN_NAMESPACE
 
 class QUsbPrivate;
