@@ -32,14 +32,14 @@ Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appvey
 You need libusb-1.0-0-dev, libhidapi-dev and pkg-config packages installed  
 ```shell
 mkdir build && cd build
-qmake ..
+cmake ..
 make install
 ```
 
 Alternatively build as static module (best for portability)  
 ```shell
 mkdir build && cd build
-qmake CONFIG+=qtusb-static ..
+cmake -DQTUSB_AS_STATIC_MODULE=ON ..
 make install
 ```
 
@@ -54,14 +54,14 @@ ie: build_msvc.bat 2017 x64 static C:\Qt\5.14.1\msvc2017_64
 
 **Qt Creator**  
 The module can also be built normally within QT creator regardless of the platform.  
-All dependencies are built with qmake.  
+All dependencies are built with cmake.  
 
 ## Using  
 
 **Option 1: Using the module (static or dynamic)**  
-You'll need to add the module to your project file:  
+You'll need to add the module to into CMakeLists.txt:
 ```
-qt += usb
+find_package(Qt6 REQUIRED COMPONENTS QtUsb)
 ```
 Include headers:  
 ```
@@ -71,9 +71,9 @@ Include headers:
 
 **Option 2: Importing the code in your project**  
 This will tie your app to a specific Qt version as it uses private headers  
-You need to include the pri file into your qmake file:
+You need to add the QtUsb subdirectoty into CMakeLists.txt:
 ```
-include(QtUsb/src/usb/files.pri)
+add_subdirectory(QtUsb)
 ```
 Include headers:  
 ```
@@ -89,5 +89,5 @@ Online documentation can be found [here](https://fpoussin.github.io/doxygen/qtus
 
 ## Downloads
 
-[Ubuntu PPA](https://launchpad.net/~fpoussin/+archive/ubuntu/ppa)
+[Ubuntu PPA](https://launchpad.net/~fpoussin/+archive/ubuntu/ppa)  
 Windows binaries are [in the releases section](https://github.com/fpoussin/QtUsb/releases).  
