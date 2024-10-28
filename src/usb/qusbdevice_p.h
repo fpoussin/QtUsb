@@ -29,7 +29,7 @@ QT_BEGIN_NAMESPACE
 class QUsbEventsThread : public QThread
 {
 public:
-    void run();
+    void run() override;
 
     libusb_context *m_ctx;
 };

@@ -72,18 +72,18 @@ public:
     explicit QUsbEndpoint(QUsbDevice *dev, Type type, quint8 ep);
     ~QUsbEndpoint();
 
-    bool open(QIODevice::OpenMode mode);
-    void close();
+    bool open(QIODevice::OpenMode mode) override;
+    void close() override;
     Type type() const;
 
     quint8 endpoint() const;
     Status status() const;
-    bool isSequential() const;
+    bool isSequential() const override;
 
-    qint64 bytesAvailable() const;
-    qint64 bytesToWrite() const;
-    bool waitForBytesWritten(int msecs);
-    bool waitForReadyRead(int msecs);
+    qint64 bytesAvailable() const override;
+    qint64 bytesToWrite() const override;
+    bool waitForBytesWritten(int msecs) override;
+    bool waitForReadyRead(int msecs) override;
 
     void makeControlPacket(char *buffer,
                            QUsbEndpoint::bmRequestType bmRequestType,
@@ -101,8 +101,8 @@ Q_SIGNALS:
     void error(QUsbEndpoint::Status error);
 
 protected:
-    qint64 readData(char *data, qint64 maxSize);
-    qint64 writeData(const char *data, qint64 maxSize);
+    qint64 readData(char *data, qint64 maxSize) override;
+    qint64 writeData(const char *data, qint64 maxSize) override;
 
 private:
     QUsbEndpointPrivate *const d_dummy;
