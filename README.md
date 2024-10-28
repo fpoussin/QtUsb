@@ -1,6 +1,6 @@
 # QtUsb [![GitHub version](https://badge.fury.io/gh/fpoussin%2Fqtusb.svg)](https://badge.fury.io/gh/fpoussin%2Fqtusb)  
 
-GCC: ![Build Status]((https://github.com/fpoussin/QtUsb/actions/workflows/build.yml/badge.svg))](https://github.com/fpoussin/QtUsb/actions/)  
+GCC: ![Build Status](https://github.com/fpoussin/QtUsb/actions/workflows/build.yml/badge.svg)](https://github.com/fpoussin/QtUsb/actions/)  
 MSVC: ![Build status](https://ci.appveyor.com/api/projects/status/4ns2jbdoveyj8n0y?svg=true)](https://ci.appveyor.com/project/fpoussin/qtusb)  
 
 A Cross-platform USB Module for Qt built around libusb-1.0 and libhidapi  
