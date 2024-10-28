@@ -1,0 +1,143 @@
+name: QMake Build Matrix
+
+on: [push]
+
+env:
+  QT_VERSION: 6.8.0
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - name: "Linux Latest x64"
+            artifact: "Linux-x64.zip"
+            arch: ""
+            os: ubuntu-latest
+          # - name: "macOS Latest x64"
+          #   artifact: "macOS-x64.zip"
+          #   arch: ""
+          #   os: macos-latest
+          # - name: "Windows Latest x64"
+          #   artifact: "Windows-x64.zip"
+          #   arch: win64_msvc2022_64
+          #   os: windows-latest
+          #   environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Installing system libs on Linux
+      if: runner.os == 'Linux'
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(
+            COMMAND sudo apt install libusb-1.0-0-dev libhidapi-dev
+          )
+        endif()
+
+    - name: Installing system libs on Windows
+      if: runner.os == 'Windows'
+      run: ""
+
+    - name: Installing system libs on MacOS
+      if: runner.os == 'macOS'
+      run: ""
+
+    - name: Download Qt
+      id: qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: "${{ env.QT_VERSION }}"
+        arch: "${{ matrix.config.arch }}"
+
+    - name: Configure
+      run: |
+        cmake -S . -B build
+
+    - name: Build
+      run: |
+        cd build
+        make -j $(nproc)
+        
+    - uses: actions/upload-artifact@v4
+      id: upload_artifact
+      with:
+        path: ./qtusb-${{ matrix.config.artifact }}
+        name: qtusb-${{ matrix.config.artifact }}
+
+  release:
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Store Release url
+      run: |
+        echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ./upload_url
+        name: upload_url
+
+  publish:
+    if: contains(github.ref, 'tags/v')
+
+    name: "Publish ${{ matrix.config.name }}"
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - name: "Linux Latest x64"
+            artifact: "Linux-x64.zip"
+            os: ubuntu-latest
+          # - name: "macOS Latest x64"
+          #   artifact: "macOS-x64.zip"
+          #   os: macos-latest
+          # - name: "Windows Latest x64"
+          #   artifact: "Windows-x64.zip"
+          #   os: windows-latest
+    needs: release
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
+        path: ./
+
+    - name: Download URL
+      uses: actions/download-artifact@v1
+      with:
+        name: upload_url
+        path: ./
+    - id: set_upload_url
+      run: |
+        upload_url=`cat ./upload_url`
+        echo ::set-output name=upload_url::$upload_url
+
+    - name: Upload to Release
+      id: upload_to_release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
+        asset_path: ./qtusb-${{ matrix.config.artifact }}
+        asset_name: qtusb}-${{ matrix.config.artifact }}
+        asset_content_type: application/zip
