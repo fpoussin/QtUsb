@@ -29,7 +29,8 @@ Check the [releases](https://github.com/fpoussin/QtUsb/releases) page or [appvey
 ## Build  
 
 **Unix**  
-You need libusb-1.0-0-dev, libhidapi-dev and pkg-config packages installed  
+You need `libusb-1.0-0-dev`, `libhidapi-dev` and `pkg-config` packages installed  
+If using system packages on Ubuntu, you'll need `qt6-base-private-dev` as well.  
 ```shell
 mkdir build && cd build
 cmake ..

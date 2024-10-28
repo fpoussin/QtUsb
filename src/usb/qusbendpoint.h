@@ -6,6 +6,8 @@
 #include <QIODevice>
 #include <QObject>
 
+QT_BEGIN_NAMESPACE
+
 class QUsbEndpointPrivate;
 
 class Q_USB_EXPORT QUsbEndpoint : public QIODevice
@@ -111,5 +113,7 @@ private:
     const Type m_type;
     const quint8 m_ep;
 };
+
+QT_END_NAMESPACE
 
 #endif // QUSBENDPOINT_H
