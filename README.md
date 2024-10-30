@@ -62,7 +62,7 @@ All dependencies are built with cmake.
 **Option 1: Using the module (static or dynamic)**  
 You'll need to add the module to into CMakeLists.txt:
 ```
-find_package(Qt6 REQUIRED COMPONENTS QtUsb)
+find_package(Qt6 REQUIRED COMPONENTS Core Usb)
 ```
 Include headers:  
 ```
@@ -74,12 +74,18 @@ Include headers:
 This will tie your app to a specific Qt version as it uses private headers  
 You need to add the QtUsb subdirectoty into CMakeLists.txt:
 ```
-add_subdirectory(QtUsb)
+set(QTUSB_MODULE OFF CACHE BOOL "" FORCE)
+add_subdirectory(qtusb) # this assumes that QtUsb is cloned into ./qtusb
+add_library(Qt::Usb ALIAS ExtUsb)
+
+add_executable(my_program main.cpp)
+# (omitting linking with Qt and other libraries)
+target_link_libraries(my_program PUBLIC Qt::Usb)
 ```
 Include headers:  
 ```
-#include "qusbdevice.h"
-#include "qusbendpoint.h"
+#include <QUsbDevice>
+#include <QUsbEndpoint>
 ```
 
 ## Documentation
